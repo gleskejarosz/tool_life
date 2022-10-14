@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block content %}
+    {% if request.user.is_staff %}
+    <p><a href="{% url 'tools_app:operation-update-create-view' %}">CHANGE TOOL</a></p>
+    <p><a href="{% url 'tools_app:completed-job' %}">Save meters</a></p>
+    <p><a href="{% url 'tools_app:update-meters' %}">Filtered</a></p>
+    {% endif %}
+    <form method="get">
+    <div class="well">
+      <h4 style="margin-top: 0">Tool change</h4>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.tool.label_tag }}
+          {% render_field filter.form.tool class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.start_date.label_tag }}
+          {% render_field filter.form.start_date class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.finish_date.label_tag }}
+          {% render_field filter.form.finish_date class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.status.label_tag }}
+          {% render_field filter.form.status class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.meters.label_tag }}
+          {% render_field filter.form.meters class="form-control" %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+  </form>
+    <div>
+        <div class="alert alert-info">Operations / Returning</div>
+        <table id="table" class="table table-stripped">
+            <thead class="alert-success">
+            <tr>
+                <th>Machine</th>
+                <th>Station</th>
+                <th>Tool</th>
+                <th>Start Date</th>
+                <th>Finish Date</th>
+                <th>Status</th>
+                <th>Meters</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for borrow in filter %}
+                <tr>
+                    <td>{{ borrow.machine }}</td>
+                    <td>{{ borrow.station }}</td>
+                    <td>{{ borrow.tool }}</td>
+                    <td>{{ borrow.start_date|date:"d M, Y" }}</td>
+                    <td>{% if borrow.finish_date %}{{ borrow.finish_date|date:"d M, Y" }}{% endif %}</td>
+                    <td>
+                        {% if borrow.status is True %}
+                            <button disabled="disabled" class="btn btn-primary" type="button" href="#">
+                                <span class="glyphicon glyphicon-check"></span> Used
+                            </button>
+                        {% else %}
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="tool_id" value="{{ borrow.id }}"/>
+                                <button class="btn btn-danger">
+                                    <span class="glyphicon glyphicon-unchecked"></span> In use
+                                </button>
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

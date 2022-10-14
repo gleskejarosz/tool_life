@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+  {% if request.user.is_staff %}
+    <p><a href="{% url 'tools_app:job-update-create-view' %}">ADD JOB</a></p>
+  {% endif %}
+  <form method="get">
+    <div class="well">
+      <h4 style="margin-top: 0">Filter Jobs</h4>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.date.label_tag }}
+          {% render_field filter.form.date class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.job.label_tag }}
+          {% render_field filter.form.job class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.meters.label_tag }}
+          {% render_field filter.form.meters class="form-control" %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+  </form>
+
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Job</th>
+        <th>Meters</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in filter.qs %}
+        <tr>
+          <td>{{ item.date|date:"d M, Y" }}</td>
+          <td>{{ item.job }}</td>
+          <td>{{ item.meters }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5">No data</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
