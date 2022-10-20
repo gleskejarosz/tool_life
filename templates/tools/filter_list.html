@@ -4,6 +4,7 @@
 {% block content %}
   {% if request.user.is_staff %}
     <p><a href="{% url 'tools_app:job-update-create-view' %}">ADD JOB</a></p>
+    <p><a href="{% url 'tools_app:job-add-form' %}">FORM ADD JOB</a></p>
   {% endif %}
   <form method="get">
     <div class="well">
@@ -39,7 +40,7 @@
     <tbody>
       {% for item in filter.qs %}
         <tr>
-          <td>{{ item.date|date:"d M, Y" }}</td>
+          <td>{{ item.date|date:"Y-m-d" }}</td>
           <td>{{ item.job }}</td>
           <td>{{ item.meters }}</td>
         </tr>

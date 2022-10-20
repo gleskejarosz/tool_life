@@ -55,7 +55,7 @@
           <td>{{ item.tool.station }}</td>
           <td>{{ item.tool.machine }}</td>
           <td>{{ item.start_date|date:"d M, Y" }}</td>
-          <td>{% if item.finish_date %}{{ item.finish_date|date:"d M, Y" }}{% endif %}</td>
+          <td>{% if item.finish_date %}{{ item.finish_date|date:"Y-m-d" }}{% endif %}</td>
           <td>{% if item.status is False %} In use {% else %} Used {% endif %} </td>
           <td>{{ item.meters }}</td>
         </tr>

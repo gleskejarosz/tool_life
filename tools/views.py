@@ -1,13 +1,13 @@
 from datetime import datetime
 
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView
 
 from tools.filters import JobFilter, OperationFilter
-from tools.models import JobUpdate, OperationModel, ToolModel, RelationModel, JobModel
+from tools.forms import OperationUpdateForm, JobAddForm
+from tools.models import JobUpdate, OperationModel, JobModel, JobStationModel
 
 
 def index(request):
@@ -24,27 +24,35 @@ class JobUpdateCreateView(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy("tools_app:search-form")
 
 
-def completed_job(request):
-    if request.method == "POST":
-        job = JobModel.objects.get(id=int(request.POST['job']))
-        meters = request.POST['meters']
+class JobFormView(LoginRequiredMixin, FormView):
+    template_name = 'form.html'
+    form_class = JobAddForm
+    success_url = reverse_lazy("tools_app:search-form")
 
-        finished_job = JobUpdate(job=job, meters=meters)
-        finished_job.save()
+    def form_valid(self, form):
+        date = form.cleaned_data["date"]
+        job = form.cleaned_data["job"]
+        meters = form.cleaned_data["meters"]
+        JobUpdate.objects.create(date=date, job=job, meters=meters)
 
-    finished_job = JobUpdate.objects.all()
-    return render(request, "form.html", {"finished_job": finished_job})
+        operations = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date).values("id",
+                                                                                                              "meters",
+                                                                                                              "station",
+                                                                                                              "machine")
 
-
-def update_meters(request):
-    done = 1000
-    start = '2022-10-13'
-    tools = OperationModel.objects.exclude(start_date__lt=start)
-
-    for tool in tools:
-        tool.meters += done
-
-    return render(request, "tools/update.html", {"tools": tools})
+        for operation in operations:
+            station = operation["station"]
+            machine = operation["machine"]
+            new_id = operation["id"]
+            jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
+            for j_dict in jobs:
+                job_num = j_dict["job"]
+                job_name = JobModel.objects.get(id=job_num)
+                if job == job_name:
+                    updated_object = OperationModel.objects.get(id=new_id)
+                    updated_object.meters += meters
+                    updated_object.save()
+        return super().form_valid(form)
 
 
 def search(request):
@@ -63,6 +71,20 @@ class OperationUpdateCreateView(LoginRequiredMixin, CreateView):
         "start_date",
     )
     success_url = reverse_lazy("tools_app:returning")
+
+
+class OperationFormView(FormView):
+    template_name = 'form.html'
+    form_class = OperationUpdateForm
+    success_url = reverse_lazy("tools_app:returning")
+
+    def form_valid(self, form):
+        tool = form.cleaned_data["tool"]
+        machine = form.cleaned_data["machine"]
+        station = form.cleaned_data["station"]
+        start_date = form.cleaned_data["start_date"]
+        OperationModel.objects.create(tool=tool, machine=machine, station=station, start_date=start_date)
+        return super().form_valid(form)
 
 
 def search2(request):
