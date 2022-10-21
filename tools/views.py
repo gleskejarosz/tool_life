@@ -1,6 +1,8 @@
+import csv
 from datetime import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, FormView
@@ -17,11 +19,11 @@ def index(request):
     )
 
 
-class JobUpdateCreateView(LoginRequiredMixin, CreateView):
-    model = JobUpdate
-    template_name = "form.html"
-    fields = "__all__"
-    success_url = reverse_lazy("tools_app:search-form")
+# class JobUpdateCreateView(LoginRequiredMixin, CreateView):
+#     model = JobUpdate
+#     template_name = "form.html"
+#     fields = "__all__"
+#     success_url = reverse_lazy("tools_app:search-form")
 
 
 class JobFormView(LoginRequiredMixin, FormView):
@@ -61,16 +63,16 @@ def search(request):
     return render(request, "tools/filter_list.html", {"filter": items_filter})
 
 
-class OperationUpdateCreateView(LoginRequiredMixin, CreateView):
-    model = OperationModel
-    template_name = "form.html"
-    fields = (
-        "machine",
-        "station",
-        "tool",
-        "start_date",
-    )
-    success_url = reverse_lazy("tools_app:returning")
+# class OperationUpdateCreateView(LoginRequiredMixin, CreateView):
+#     model = OperationModel
+#     template_name = "form.html"
+#     fields = (
+#         "machine",
+#         "station",
+#         "tool",
+#         "start_date",
+#     )
+#     success_url = reverse_lazy("tools_app:returning")
 
 
 class OperationFormView(FormView):
@@ -84,13 +86,32 @@ class OperationFormView(FormView):
         station = form.cleaned_data["station"]
         start_date = form.cleaned_data["start_date"]
         OperationModel.objects.create(tool=tool, machine=machine, station=station, start_date=start_date)
+
+        tools = OperationModel.objects.filter(
+            machine=machine).filter(station=station).filter(status=False).values("id", "tool", "status", "finish_date")
+
+        max_id = 0
+        if len(tools) > 1:
+            for tool_dict in tools:
+                tool_id = tool_dict["id"]
+                if tool_id > max_id:
+                    max_id = tool_id
+
+            for tool_dict in tools:
+                tool_id = tool_dict["id"]
+                if tool_id != max_id:
+                    tool = OperationModel.objects.get(id=tool_id)
+                    tool.status = True
+                    tool.finish_date = datetime.now()
+                    tool.save()
+
         return super().form_valid(form)
 
 
-def search2(request):
-    operations_list = OperationModel.objects.all().order_by("-start_date")
-    operations_filter = OperationFilter(request.GET, queryset=operations_list)
-    return render(request, "tools/filter_list2.html", {"filter": operations_filter})
+# def search2(request):
+#     operations_list = OperationModel.objects.all().order_by("-start_date")
+#     operations_filter = OperationFilter(request.GET, queryset=operations_list)
+#     return render(request, "tools/filter_list2.html", {"filter": operations_filter})
 
 
 def returning(request):
@@ -104,3 +125,21 @@ def returning(request):
     borrows = OperationModel.objects.all().order_by("-start_date")
     operations_filter = OperationFilter(request.GET, queryset=borrows)
     return render(request, "tools/return.html", {"filter": operations_filter})
+
+
+def export_csv(request):
+    operations = OperationModel.objects.all()
+    search_result = OperationFilter(request.GET, queryset=operations).qs
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="file.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Machine', 'Station', 'Tool', 'Start Date', 'Finish Date', 'Status', 'Meters'])
+    for e in search_result.values_list('machine_id__name',
+                                       'station_id__name',
+                                       'tool_id__name',
+                                       'start_date',
+                                       'finish_date',
+                                       'status',
+                                       'meters'):
+        writer.writerow(e)
+    return response

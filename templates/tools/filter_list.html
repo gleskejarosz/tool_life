@@ -3,8 +3,7 @@
 
 {% block content %}
   {% if request.user.is_staff %}
-    <p><a href="{% url 'tools_app:job-update-create-view' %}">ADD JOB</a></p>
-    <p><a href="{% url 'tools_app:job-add-form' %}">FORM ADD JOB</a></p>
+    <p><a href="{% url 'tools_app:job-add-form' %}">ADD JOB</a></p>
   {% endif %}
   <form method="get">
     <div class="well">

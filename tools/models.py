@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from django.db import models
 
@@ -34,10 +34,6 @@ class JobModel(models.Model):
 
 
 class ToolModel(models.Model):
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines",
-                                blank=True, null=True)
-    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations1",
-                                blank=True, null=True)
     name = models.CharField(max_length=64)
 
     def __str__(self):
@@ -48,11 +44,11 @@ class ToolModel(models.Model):
 
 
 class JobStationModel(models.Model):
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines1",
-                                blank=True, null=True)
-    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations2",
-                                blank=True, null=True)
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs1", blank=True, null=True)
+    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines1", blank=False,
+                                null=False)
+    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations2", blank=False,
+                                null=False)
+    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs1", blank=False, null=False)
 
     def __str__(self):
         return f"{self.job}"
@@ -63,9 +59,11 @@ class JobStationModel(models.Model):
 
 class OperationModel(models.Model):
     tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=True, null=True)
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines2", blank=True, null=True)
-    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=True, null=True)
-    start_date = models.DateTimeField(default=datetime.now)
+    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines2", blank=False,
+                                null=False)
+    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=False,
+                                null=False)
+    start_date = models.DateTimeField(default=datetime.date)
     finish_date = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(default=False)
     meters = models.PositiveSmallIntegerField(default=0)
@@ -78,8 +76,8 @@ class OperationModel(models.Model):
 
 
 class JobUpdate(models.Model):
-    date = models.DateTimeField(default=datetime.now)
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs2", blank=True, null=True)
+    date = models.DateTimeField(default=datetime.date)
+    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
     meters = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
