@@ -90,13 +90,14 @@ class ToolModelAdmin(admin.ModelAdmin):
 
 class OperationModelAdmin(admin.ModelAdmin):
     ordering = ("-start_date", )
-    list_display = ("tool", "station", "machine", "start_date", "finish_date", "status", "meters", )
+    list_display = ("tool", "tool_type", "station", "machine", "start_date", "finish_date", "status", "meters", )
     list_display_links = ("tool", )
     list_per_page = 20
-    list_filter = ("machine", "station", "status", "tool", )
+    list_filter = ("machine", "station", "status", "tool", "tool_type", )
     fieldsets = [
         ("General", {
-            "fields": ["id", "tool", "machine", "station", "start_date", "finish_date", "status", "meters"],
+            "fields": ["id", "tool", "tool_type", "machine", "station", "start_date", "finish_date", "status",
+                       "meters"],
         }),
     ]
     readonly_fields = ["id"]

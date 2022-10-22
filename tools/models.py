@@ -58,7 +58,15 @@ class JobStationModel(models.Model):
 
 
 class OperationModel(models.Model):
+    TOOL = "Tool"
+    RUBBER = "Rubber"
+    TOOL_CHOICES = (
+        (TOOL, "Tool"),
+        (RUBBER, "Rubber"),
+    )
+
     tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=True, null=True)
+    tool_type = models.CharField(max_length=64, choices=TOOL_CHOICES, default=TOOL)
     machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines2", blank=False,
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=False,

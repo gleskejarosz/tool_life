@@ -1,14 +1,16 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
-
 {% block content %}
     {% if request.user.is_staff %}
-    <p><a href="{% url 'tools_app:operation-update-view' %}">CHANGE TOOL</a></p>
+    <div><a href="{% url 'tools_app:operation-update-view' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Change tool
+    </button></a></div>
+    <br/>
     {% endif %}
-{{ listed }}
     <form method="get">
     <div class="well">
       <h4 style="margin-top: 0">Tool change</h4>
+        <p><a href="{% url 'tools_app:returning' %}">Clear all filters</a></p>
       <div class="row">
     <div class="form-group col-sm-4 col-md-3">
           {{ filter.form.machine.label_tag }}
@@ -21,6 +23,10 @@
           <div class="form-group col-sm-4 col-md-3">
           {{ filter.form.tool.label_tag }}
           {% render_field filter.form.tool class="form-control" %}
+        </div>
+          <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.tool_type.label_tag }}
+          {% render_field filter.form.tool_type class="form-control" %}
         </div>
         <div class="form-group col-sm-4 col-md-3">
           {{ filter.form.start_date_lte.label_tag }}
@@ -58,12 +64,13 @@
     </div>
   </form>
     <div>
-        <table id="table" class="table table-stripped">
+        <table id="table" class="table table-hover">
             <thead class="alert-success">
             <tr>
                 <th>Machine</th>
                 <th>Station</th>
                 <th>Tool</th>
+                <th>Tool Type</th>
                 <th>Start Date</th>
                 <th>Finish Date</th>
                 <th>Status</th>
@@ -71,29 +78,18 @@
             </tr>
             </thead>
             <tbody>
-            {% for borrow in filter.qs %}
+            {% for operation in filter.qs %}
                 <tr>
-                    <td>{{ borrow.machine }}</td>
-                    <td>{{ borrow.station }}</td>
-                    <td>{{ borrow.tool }}</td>
-                    <td>{{ borrow.start_date|date:"Y-m-d" }}</td>
-                    <td>{% if borrow.finish_date %}{{ borrow.finish_date|date:"Y-m-d" }}{% endif %}</td>
+                    <td>{{ operation.machine }}</td>
+                    <td>{{ operation.station }}</td>
+                    <td>{{ operation.tool }}</td>
+                    <td>{{ operation.tool_type }}</td>
+                    <td>{{ operation.start_date|date:"Y-m-d" }}</td>
+                    <td>{% if operation.finish_date %}{{ operation.finish_date|date:"Y-m-d" }}{% endif %}</td>
                     <td>
-                        {% if borrow.status is True %}
-                            <button disabled="disabled" class="btn btn-primary" type="button" href="#">
-                                <span class="glyphicon glyphicon-check"></span> Used
-                            </button>
-                        {% else %}
-                            <form method="POST" action="">
-                                {% csrf_token %}
-                                <input type="hidden" name="tool_id" value="{{ borrow.id }}"/>
-                                <button class="btn btn-danger">
-                                    <span class="glyphicon glyphicon-unchecked"></span> In use
-                                </button>
-                            </form>
-                        {% endif %}
+                        {% if operation.status is True %} Used {% else %} In use {% endif %}
                     </td>
-                    <td>{{ borrow.meters }}</td>
+                    <td>{{ operation.meters }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -101,5 +97,6 @@
     </div>
 
 <div><a href="{% url 'tools_app:export_csv' %}?{{request.GET.urlencode}}">
-<button type="button" class="button">Export to CSV</button></a></div>
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export to CSV
+</button></a></div>
 {% endblock %}

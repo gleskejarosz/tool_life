@@ -3,9 +3,9 @@ from datetime import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView
+from django.views.generic import FormView
 
 from tools.filters import JobFilter, OperationFilter
 from tools.forms import OperationUpdateForm, JobAddForm
@@ -17,13 +17,6 @@ def index(request):
         request,
         template_name="tools/index.html"
     )
-
-
-# class JobUpdateCreateView(LoginRequiredMixin, CreateView):
-#     model = JobUpdate
-#     template_name = "form.html"
-#     fields = "__all__"
-#     success_url = reverse_lazy("tools_app:search-form")
 
 
 class JobFormView(LoginRequiredMixin, FormView):
@@ -63,18 +56,6 @@ def search(request):
     return render(request, "tools/filter_list.html", {"filter": items_filter})
 
 
-# class OperationUpdateCreateView(LoginRequiredMixin, CreateView):
-#     model = OperationModel
-#     template_name = "form.html"
-#     fields = (
-#         "machine",
-#         "station",
-#         "tool",
-#         "start_date",
-#     )
-#     success_url = reverse_lazy("tools_app:returning")
-
-
 class OperationFormView(FormView):
     template_name = 'form.html'
     form_class = OperationUpdateForm
@@ -82,13 +63,16 @@ class OperationFormView(FormView):
 
     def form_valid(self, form):
         tool = form.cleaned_data["tool"]
+        tool_type = form.cleaned_data["tool_type"]
         machine = form.cleaned_data["machine"]
         station = form.cleaned_data["station"]
         start_date = form.cleaned_data["start_date"]
-        OperationModel.objects.create(tool=tool, machine=machine, station=station, start_date=start_date)
+        OperationModel.objects.create(tool=tool, tool_type=tool_type, machine=machine, station=station,
+                                      start_date=start_date)
 
         tools = OperationModel.objects.filter(
-            machine=machine).filter(station=station).filter(status=False).values("id", "tool", "status", "finish_date")
+            machine=machine).filter(station=station).filter(status=False).values("id", "tool", "tool_type",
+                                                                                 "status", "finish_date")
 
         max_id = 0
         if len(tools) > 1:
@@ -101,29 +85,17 @@ class OperationFormView(FormView):
                 tool_id = tool_dict["id"]
                 if tool_id != max_id:
                     tool = OperationModel.objects.get(id=tool_id)
-                    tool.status = True
-                    tool.finish_date = datetime.now()
-                    tool.save()
+                    if tool.tool_type == tool_type:
+                        tool.status = True
+                        tool.finish_date = datetime.now()
+                        tool.save()
 
         return super().form_valid(form)
 
 
-# def search2(request):
-#     operations_list = OperationModel.objects.all().order_by("-start_date")
-#     operations_filter = OperationFilter(request.GET, queryset=operations_list)
-#     return render(request, "tools/filter_list2.html", {"filter": operations_filter})
-
-
 def returning(request):
-    if request.method == "POST":
-        b_id = int(request.POST["tool_id"])
-        borrow = OperationModel.objects.get(id=b_id)
-        borrow.finish_date = datetime.now()
-        borrow.status = True
-        borrow.save()
-        return redirect('/tools/returning/')
-    borrows = OperationModel.objects.all().order_by("-start_date")
-    operations_filter = OperationFilter(request.GET, queryset=borrows)
+    operations = OperationModel.objects.all().order_by("-start_date")
+    operations_filter = OperationFilter(request.GET, queryset=operations)
     return render(request, "tools/return.html", {"filter": operations_filter})
 
 
@@ -131,7 +103,7 @@ def export_csv(request):
     operations = OperationModel.objects.all()
     search_result = OperationFilter(request.GET, queryset=operations).qs
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="file.csv"'
+    response['Content-Disposition'] = 'attachment; filename="Operations.csv"'
     writer = csv.writer(response)
     writer.writerow(['Machine', 'Station', 'Tool', 'Start Date', 'Finish Date', 'Status', 'Meters'])
     for e in search_result.values_list('machine_id__name',
@@ -140,6 +112,20 @@ def export_csv(request):
                                        'start_date',
                                        'finish_date',
                                        'status',
+                                       'meters'):
+        writer.writerow(e)
+    return response
+
+
+def export_csv2(request):
+    jobs = JobUpdate.objects.all()
+    search_result = JobFilter(request.GET, queryset=jobs).qs
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="Completed_jobs.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'Job', 'Meters'])
+    for e in search_result.values_list('date',
+                                       'job_id__name',
                                        'meters'):
         writer.writerow(e)
     return response

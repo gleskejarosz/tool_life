@@ -7,8 +7,4 @@ db.sqlite3
 /tools/migrations
 accounts/__pycache__
 tool_life/__pycache__
-
-!/accounts/migrations/__init__.py
-!/accounts/__init__.py
-!/tool_life/__init__.py
-!/tools/__init__.py
+/accounts/migrations/

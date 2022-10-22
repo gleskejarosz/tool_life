@@ -3,11 +3,15 @@
 
 {% block content %}
   {% if request.user.is_staff %}
-    <p><a href="{% url 'tools_app:job-add-form' %}">ADD JOB</a></p>
+    <div><a href="{% url 'tools_app:job-add-form' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add job
+    </button></a></div>
+  <br/>
   {% endif %}
   <form method="get">
     <div class="well">
       <h4 style="margin-top: 0">Filter Jobs</h4>
+      <p><a href="{% url 'tools_app:search-form' %}">Clear all filters</a></p>
       <div class="row">
         <div class="form-group col-sm-4 col-md-3">
           {{ filter.form.date.label_tag }}
@@ -29,7 +33,7 @@
   </form>
 
   <table class="table table-hover">
-    <thead>
+    <thead class="alert-success">
       <tr>
         <th>Date</th>
         <th>Job</th>
@@ -50,4 +54,7 @@
       {% endfor %}
     </tbody>
   </table>
+<div><a href="{% url 'tools_app:export_csv2' %}?{{request.GET.urlencode}}">
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export to CSV
+</button></a></div>
 {% endblock %}
