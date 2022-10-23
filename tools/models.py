@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from django.db import models
 
@@ -71,7 +71,7 @@ class OperationModel(models.Model):
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=False,
                                 null=False)
-    start_date = models.DateTimeField(default=datetime.date)
+    start_date = models.DateTimeField(default=datetime.today)
     finish_date = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(default=False)
     meters = models.PositiveSmallIntegerField(default=0)
@@ -84,7 +84,7 @@ class OperationModel(models.Model):
 
 
 class JobUpdate(models.Model):
-    date = models.DateTimeField(default=datetime.date)
+    date = models.DateTimeField(default=datetime.today)
     job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
     meters = models.PositiveSmallIntegerField(default=0)
 

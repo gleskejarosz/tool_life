@@ -1,6 +1,11 @@
+from datetime import datetime
+
 from django import forms
+from django.forms import DateInput
 
 from tools.models import ToolModel, MachineModel, StationModel, JobModel
+
+TODAY = datetime.today().strftime('%d-%m-%Y')
 
 
 class OperationUpdateForm(forms.Form):
@@ -15,10 +20,47 @@ class OperationUpdateForm(forms.Form):
     station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
     tool = forms.ModelChoiceField(queryset=ToolModel.objects.all().order_by("name"))
     tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
-    start_date = forms.DateField()
+    start_date = forms.DateField(
+        required=True,
+        initial=TODAY,
+        widget=DateInput(attrs={"type": "date"}),
+    )
+
+
+class OperationBarcodeForm(forms.Form):
+    TOOL = "Tool"
+    RUBBER = "Rubber"
+    TOOL_CHOICES = (
+        (TOOL, "Tool"),
+        (RUBBER, "Rubber"),
+    )
+
+    machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
+    station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
+    tool = forms.CharField()
+    tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
+    start_date = forms.DateField(
+        required=True,
+        initial=TODAY,
+        widget=DateInput(attrs={"type": "date"}, format='%Y-%m-%d'),
+    )
 
 
 class JobAddForm(forms.Form):
-    date = forms.DateField()
+    date = forms.DateField(
+        required=True,
+        initial=TODAY,
+        widget=DateInput(format='%d/%m/%Y', attrs={"type": "date"}),
+    )
     job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
+    meters = forms.IntegerField()
+
+
+class JobAddBarcodeForm(forms.Form):
+    date = forms.DateField(
+        required=True,
+        initial=TODAY,
+        widget=DateInput(attrs={"type": "date"}),
+    )
+    job = forms.CharField()
     meters = forms.IntegerField()

@@ -4,12 +4,15 @@
     {% if request.user.is_staff %}
     <div><a href="{% url 'tools_app:operation-update-view' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Change tool
+    </button></a>
+    <a href="{% url 'tools_app:operation-barcode-view' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Change tool(barcode)
     </button></a></div>
     <br/>
     {% endif %}
     <form method="get">
     <div class="well">
-      <h4 style="margin-top: 0">Tool change</h4>
+      <h4 style="margin-top: 0">Tool change operation</h4>
         <p><a href="{% url 'tools_app:returning' %}">Clear all filters</a></p>
       <div class="row">
     <div class="form-group col-sm-4 col-md-3">

@@ -5,12 +5,15 @@
   {% if request.user.is_staff %}
     <div><a href="{% url 'tools_app:job-add-form' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add job
+    </button></a>
+    <a href="{% url 'tools_app:job-add-barcode-form' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add job (Barcode)
     </button></a></div>
   <br/>
   {% endif %}
   <form method="get">
     <div class="well">
-      <h4 style="margin-top: 0">Filter Jobs</h4>
+      <h4 style="margin-top: 0">Completed JOBS</h4>
       <p><a href="{% url 'tools_app:search-form' %}">Clear all filters</a></p>
       <div class="row">
         <div class="form-group col-sm-4 col-md-3">
