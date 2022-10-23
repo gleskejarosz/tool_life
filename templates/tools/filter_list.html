@@ -14,8 +14,12 @@
       <p><a href="{% url 'tools_app:search-form' %}">Clear all filters</a></p>
       <div class="row">
         <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.date.label_tag }}
-          {% render_field filter.form.date class="form-control" %}
+          {{ filter.form.date_gte.label_tag }}
+          {% render_field filter.form.date_gte class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.date_lte.label_tag }}
+          {% render_field filter.form.date_lte class="form-control" %}
         </div>
         <div class="form-group col-sm-4 col-md-3">
           {{ filter.form.job.label_tag }}

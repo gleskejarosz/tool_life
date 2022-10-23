@@ -4,7 +4,11 @@ from tools.models import JobUpdate, OperationModel
 
 
 class JobFilter(django_filters.FilterSet):
-    date = django_filters.DateFilter(lookup_expr="contains", label="Date")
+    date = django_filters.DateFilter()
+    date_gte = django_filters.DateFilter(label="Date after...", field_name='date',
+                                               lookup_expr='gte')
+    date_lte = django_filters.DateFilter(label="Date before...", field_name='date',
+                                               lookup_expr='lte')
     job = django_filters.CharFilter(field_name='job_id__name', label="Job", lookup_expr="contains")
     meters = django_filters.CharFilter(lookup_expr="contains", label="Meters")
 
@@ -20,6 +24,7 @@ class OperationFilter(django_filters.FilterSet):
     )
 
     station = django_filters.CharFilter(field_name='station_id__name', label="Station", lookup_expr="contains")
+    tool = django_filters.CharFilter(field_name='tool_id__name', label="Tool", lookup_expr="contains")
     start_date = django_filters.DateFilter()
     start_date_gte = django_filters.DateFilter(label="Start Date after...", field_name='start_date',
                                                lookup_expr='gte')

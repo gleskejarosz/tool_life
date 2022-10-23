@@ -11,14 +11,14 @@ class OperationUpdateForm(forms.Form):
         (RUBBER, "Rubber"),
     )
 
-    machine = forms.ModelChoiceField(queryset=MachineModel.objects.all())
-    station = forms.ModelChoiceField(queryset=StationModel.objects.all())
-    tool = forms.ModelChoiceField(queryset=ToolModel.objects.all())
+    machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
+    station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
+    tool = forms.ModelChoiceField(queryset=ToolModel.objects.all().order_by("name"))
     tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
     start_date = forms.DateField()
 
 
 class JobAddForm(forms.Form):
     date = forms.DateField()
-    job = forms.ModelChoiceField(queryset=JobModel.objects.all())
+    job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
     meters = forms.IntegerField()
