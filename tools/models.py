@@ -15,6 +15,7 @@ class MachineModel(models.Model):
 
 class StationModel(models.Model):
     name = models.CharField(max_length=64)
+    num = models.DecimalField(default=100, max_digits=3, decimal_places=0, blank=False, null=False)
 
     def __str__(self):
         return f"{self.name}"

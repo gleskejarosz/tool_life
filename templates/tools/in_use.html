@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>TOOLS IN USE ON THE MACHINE</h4>
+    <div>
+        <table id="table" class="table table-hover">
+            <thead class="alert-success">
+            <tr>
+                <th>Machine</th>
+                <th>Station</th>
+                <th>Tool</th>
+                <th>Tool Type</th>
+                <th>Start Date</th>
+                <th>Meters</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for operation in tools_in_use %}
+                <tr>
+                    <td>{{ operation.machine}}</td>
+                    <td>{{ operation.station }}</td>
+                    <td>{{ operation.tool }}</td>
+                    <td>{{ operation.tool_type }}</td>
+                    <td>{{ operation.start_date|date:"Y-m-d" }}</td>
+                    <td>{{ operation.meters }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

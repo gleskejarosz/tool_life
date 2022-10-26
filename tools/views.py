@@ -197,3 +197,8 @@ def export_csv2(request):
                                        'meters'):
         writer.writerow(e)
     return response
+
+
+def tool_in_use(request):
+    tools_in_use = OperationModel.objects.filter(status=False).order_by("machine").order_by("station__num")
+    return render(request, template_name="tools/in_use.html", context={"tools_in_use": tools_in_use})

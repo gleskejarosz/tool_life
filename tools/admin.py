@@ -63,13 +63,13 @@ class MachineModelAdmin(admin.ModelAdmin):
 
 
 class StationModelAdmin(admin.ModelAdmin):
-    ordering = ("name", )
-    list_display = ("name", )
+    ordering = ("name", "num", )
+    list_display = ("name", "num", )
     list_display_links = ("name", )
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "name"],
+            "fields": ["id", "name", "num"],
         }),
     ]
     readonly_fields = ["id"]
