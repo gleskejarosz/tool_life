@@ -1,6 +1,6 @@
-from datetime import datetime
-
 from django.db import models
+
+from tools.utils import hours_recalculate
 
 
 class MachineModel(models.Model):
@@ -26,6 +26,8 @@ class StationModel(models.Model):
 
 class JobModel(models.Model):
     name = models.CharField(max_length=64)
+    target = models.IntegerField(default=1615)
+    inner_size = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"{self.name}"
@@ -35,7 +37,16 @@ class JobModel(models.Model):
 
 
 class ToolModel(models.Model):
+    SPARE = "Spare"
+    USE = "In use"
+    SCRAPPED = "Scrapped"
+    TOOL_STATUS = (
+        (SPARE, "Spare"),
+        (USE, "In use"),
+        (SCRAPPED, "Scrapped"),
+    )
     name = models.CharField(max_length=64)
+    tool_status = models.CharField(max_length=64, choices=TOOL_STATUS, default=SPARE)
 
     def __str__(self):
         return f"{self.name}"
@@ -72,10 +83,10 @@ class OperationModel(models.Model):
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=False,
                                 null=False)
-    start_date = models.DateTimeField(default=datetime.today)
-    finish_date = models.DateTimeField(blank=True, null=True)
+    start_date = models.DateField(blank=False, null=False)
+    finish_date = models.DateField(blank=True, null=True)
     status = models.BooleanField(default=False)
-    meters = models.PositiveSmallIntegerField(default=0)
+    hours = models.DecimalField(decimal_places=2, max_digits=10, default=0)
 
     def __str__(self):
         return f"{self.tool}"
@@ -85,12 +96,18 @@ class OperationModel(models.Model):
 
 
 class JobUpdate(models.Model):
-    date = models.DateTimeField(default=datetime.today)
+    date = models.DateField(blank=False, null=False)
     job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
-    meters = models.PositiveSmallIntegerField(default=0)
+    parts = models.PositiveSmallIntegerField(default=0)
+    hours = models.DecimalField(decimal_places=2, max_digits=10)
 
     def __str__(self):
-        return f"{self.date} - {self.job} - {self.meters}"
+        return f"{self.date} - {self.job} - {self.parts}"
 
     class Meta:
         verbose_name = "Job update"
+
+    def save(self, *args, **kwargs):
+        self.hours = hours_recalculate(self.parts, self.job)
+        super().save(*args, **kwargs)
+

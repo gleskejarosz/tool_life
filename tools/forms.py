@@ -15,10 +15,11 @@ class OperationUpdateForm(forms.Form):
         (TOOL, "Tool"),
         (RUBBER, "Rubber"),
     )
+    SPARE = "Spare"
 
     machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
     station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
-    tool = forms.ModelChoiceField(queryset=ToolModel.objects.all().order_by("name"))
+    tool = forms.ModelChoiceField(queryset=ToolModel.objects.filter(tool_status=SPARE).order_by("name"))
     tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
     start_date = forms.DateField(
         required=True,
@@ -37,7 +38,7 @@ class OperationBarcodeForm(forms.Form):
 
     machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
     station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
-    tool = forms.CharField()
+    tool = forms.CharField(label='Barcode data (tool, rubber)', max_length=64, required=True)
     tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
     start_date = forms.DateField(
         required=True,
@@ -53,14 +54,14 @@ class JobAddForm(forms.Form):
         widget=DateInput(format='%d/%m/%Y', attrs={"type": "date"}),
     )
     job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
-    meters = forms.IntegerField()
+    parts = forms.IntegerField()
 
 
 class JobAddBarcodeForm(forms.Form):
     date = forms.DateField(
         required=True,
         initial=TODAY,
-        widget=DateInput(attrs={"type": "date"}),
+        widget=DateInput(format='%d/%m/%Y', attrs={"type": "date"}),
     )
     job = forms.CharField()
-    meters = forms.IntegerField()
+    parts = forms.IntegerField()

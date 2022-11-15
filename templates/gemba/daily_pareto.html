@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Daily PARETO:</h1>
+    {% if request.user.is_staff %}
+    <div><a href="{% url 'gemba_app:pareto-details-create-view' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add Pareto line
+    </button></a>
+    </div>
+  <br/>
+  {% endif %}
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Downtime reasons</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in object_list %}
+            <tr>
+                <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.pk %}">{{ item.code }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Scrap reasons</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for scrap in scrap_list %}
+            <tr>
+                <td><a href="{% url 'gemba_app:scrap-detail-create' pk=scrap.pk %}">{{ scrap.code }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -24,4 +24,5 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/', include('accounts.urls')),
     path('tools/', include('tools.urls')),
+    path('gemba/', include('gemba.urls')),
 ]

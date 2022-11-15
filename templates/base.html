@@ -40,6 +40,10 @@
           </li>
           {% endif %}
           </ul>
+          <span class="navbar-nav"><a class="nav-item nav-link active" href="{% url 'gemba_app:daily-pareto' %}">
+            Pareto Details</a></span>
+          <span class="navbar-nav"><a class="nav-item nav-link active" href="{% url 'gemba_app:pareto-summary' %}">
+            Pareto Summary</a></span>
           {% if not request.user.is_authenticated %}
           <span class="navbar-nav">
             <a class="nav-item nav-link active" href="{% url 'accounts:register' %}">Register</a>

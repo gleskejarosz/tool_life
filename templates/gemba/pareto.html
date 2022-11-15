@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+<h1>PARETO:</h1>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Jobs</th>
+            <th scope="col">Output</th>
+            <th scope="col">Takt time</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if pareto_list.jobs.count.all == 0 %}
+              <tr>
+                <td colspan='5'>No added hourly updates</td>
+              </tr>
+        {% endif %}
+        <tr>
+        {% for pareto_item in pareto_list.jobs.all %}
+            <td>{{ pareto_item.job.name }}</td>
+            <td>{{ pareto_item.qty }}</td>
+            <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+
+        <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Downtime</th>
+            <th scope="col">Minutes</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if pareto_list.downtimes.count.all == 0 %}
+              <tr>
+                <td colspan='5'>No downtimes recorded</td>
+              </tr>
+        {% endif %}
+             <tr>{% for pareto_item in pareto_list.downtimes.all %}
+            <td>{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</td>
+            <td>{{ pareto_item.minutes }}</td>
+             </tr>
+        {% endfor %}
+        </tbody>
+
+            <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Job</th>
+            <th scope="col">Scrap</th>
+            <th scope="col">Quantity</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if pareto_list.scrap.count.all == 0 %}
+              <tr>
+                <td colspan='5'>No scrap reasons recorded</td>
+              </tr>
+        {% endif %}
+             <tr>{% for item in scrap_list %}
+                 <td>{{ item.job }}</td>
+            <td>{{ item.scrap }}</td>
+            <td>{{ item.qty }}</td>
+             </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

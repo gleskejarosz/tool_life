@@ -8,7 +8,8 @@
     </button></a>
     <a href="{% url 'tools_app:job-add-barcode-form' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add job (Barcode)
-    </button></a></div>
+    </button></a>
+    </div>
   <br/>
   {% endif %}
   <form method="get">
@@ -29,8 +30,8 @@
           {% render_field filter.form.job class="form-control" %}
         </div>
         <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.meters.label_tag }}
-          {% render_field filter.form.meters class="form-control" %}
+          {{ filter.form.parts.label_tag }}
+          {% render_field filter.form.parts class="form-control" %}
         </div>
       </div>
       <button type="submit" class="btn btn-primary">
@@ -44,15 +45,17 @@
       <tr>
         <th>Date</th>
         <th>Job</th>
-        <th>Meters</th>
+        <th>Parts</th>
+        <th>Hours</th>
       </tr>
     </thead>
     <tbody>
       {% for item in filter.qs %}
         <tr>
           <td>{{ item.date|date:"Y-m-d" }}</td>
-          <td>{{ item.job }}</td>
-          <td>{{ item.meters }}</td>
+          <td><a href="{% url 'tools_app:job-detail-view' pk=item.pk %}">{{ item.job }}</a></td>
+          <td>{{ item.parts }}</td>
+          <td>{{ item.hours }}</td>
         </tr>
       {% empty %}
         <tr>

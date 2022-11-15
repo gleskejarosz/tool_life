@@ -10,7 +10,7 @@ class JobFilter(django_filters.FilterSet):
     date_lte = django_filters.DateFilter(label="Date before...", field_name='date',
                                                lookup_expr='lte')
     job = django_filters.CharFilter(field_name='job_id__name', label="Job", lookup_expr="contains")
-    meters = django_filters.CharFilter(lookup_expr="contains", label="Meters")
+    parts = django_filters.CharFilter(lookup_expr="contains", label="Parts")
 
     class Meta:
         model = JobUpdate
@@ -36,9 +36,9 @@ class OperationFilter(django_filters.FilterSet):
     finish_date_lte = django_filters.DateFilter(label="Finish Date before...", field_name='finish_date',
                                                 lookup_expr='lte')
     status = django_filters.ChoiceFilter(choices=STATUS_CHOICES, label="Status")
-    meters = django_filters.NumberFilter()
-    meters_lte = django_filters.NumberFilter(label="Meters less than...", field_name="meters", lookup_expr="lte")
-    meters_gte = django_filters.NumberFilter(label="Meters greater than...", field_name="meters", lookup_expr="gte")
+    hours = django_filters.NumberFilter()
+    hours_lte = django_filters.NumberFilter(label="Hours less than...", field_name="hours", lookup_expr="lte")
+    hours_gte = django_filters.NumberFilter(label="Hours greater than...", field_name="hours", lookup_expr="gte")
 
     class Meta:
         model = OperationModel

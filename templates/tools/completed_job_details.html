@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>JOB DETAILS</h3>
+{% if request.user.is_staff %}
+    <div><a href="{% url 'tools_app:job-update-view' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update job
+    </button></a>
+    <a href="{% url 'tools_app:job-delete-view' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Delete job
+    </button></a>
+    </div>
+  <br/>
+  {% endif %}
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Job</th>
+            <th scope="col">Date</th>
+            <th scope="col">Parts</th>
+        </tr>
+        <tr>
+            <td>{{ object.job }}</td>
+            <td>{{ object.date|date:"Y-m-d" }}</td>
+            <td>{{ object.parts }}</td>
+        </tr>
+        </thead>
+</table>
+  <a href="{% url 'tools_app:search-form' %}">GO BACK</a>
+{% endblock %}
