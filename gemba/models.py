@@ -18,7 +18,8 @@ class Pareto(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, blank=True, null=True)
     pareto_date = models.DateField()
-    shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default=AM)
+    # shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default=AM)
+    time_stamp = models.DateTimeField()
     completed = models.BooleanField(default=False)
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
@@ -34,6 +35,7 @@ class Pareto(models.Model):
 class ParetoDetail(models.Model):
     job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs", blank=False, null=False)
     qty = models.PositiveIntegerField(default=0)
+    good = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)
 
@@ -57,6 +59,7 @@ class DowntimeModel(models.Model):
 
 class DowntimeDetail(models.Model):
     downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime", blank=False, null=False)
+    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs5", blank=False, null=False)
     minutes = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)

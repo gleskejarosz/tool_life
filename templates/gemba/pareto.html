@@ -1,51 +1,65 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
-<h1>PARETO:</h1>
+
+<h1>PARETO</h1>
+    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }}  | | | |  Available time: {{ available_time }}  | | | |
+Availability: {{ availability }}%   | | | | Performance: {{ performance }}%  | | | |  Quality: {{ quality }}%
+  | | | |  OEE: {{ oee }}%
+    <br>
+    Total Output: {{ total_output }} ||| Total good: {{ total_good }} ||| Total scrap: {{ total_scrap_cal }}
     <table class="table table-hover">
         <thead>
         <tr>
             <th scope="col">Jobs</th>
             <th scope="col">Output</th>
+            <th scope="col">Good</th>
+            <th scope="col">Scrap</th>
             <th scope="col">Takt time</th>
         </tr>
         </thead>
         <tbody>
-        {% if pareto_list.jobs.count.all == 0 %}
+        {% if pareto_list.jobs.all|length == 0 %}
               <tr>
-                <td colspan='5'>No added hourly updates</td>
+                <td colspan='5'>No records</td>
               </tr>
         {% endif %}
         <tr>
         {% for pareto_item in pareto_list.jobs.all %}
             <td>{{ pareto_item.job.name }}</td>
             <td>{{ pareto_item.qty }}</td>
+            <td>{{ pareto_item.good }}</td>
+            <td>{{ pareto_item.qty|sub:pareto_item.good }}</td>
             <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
         </tr>
         {% endfor %}
         </tbody>
-        </table>
-
-        <table class="table table-hover">
+    </table>
+Total downtime:  {{ total_down }}
+    <table class="table table-hover">
         <thead>
         <tr>
             <th scope="col">Downtime</th>
             <th scope="col">Minutes</th>
+            <th scope="col">Job</th>
         </tr>
         </thead>
         <tbody>
-        {% if pareto_list.downtimes.count.all == 0 %}
+        {% if pareto_list.downtimes.all|length == 0 %}
               <tr>
-                <td colspan='5'>No downtimes recorded</td>
+                <td colspan='5'>0 downtimes recorded</td>
               </tr>
         {% endif %}
              <tr>{% for pareto_item in pareto_list.downtimes.all %}
             <td>{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</td>
             <td>{{ pareto_item.minutes }}</td>
+                 <td>{{ pareto_item.job }}</td>
              </tr>
         {% endfor %}
         </tbody>
-
+    </table>
+        Total scrap: {{ total_scrap }}  {% if total_scrap_cal|sub:total_scrap < 0 %} Remove scrap qty:
+        {{ total_scrap|sub:total_scrap_cal }} {% else %} Missing qty: {{ total_scrap_cal|sub:total_scrap }} {% endif %}
             <table class="table table-hover">
         <thead>
         <tr>
@@ -55,15 +69,15 @@
         </tr>
         </thead>
         <tbody>
-        {% if pareto_list.scrap.count.all == 0 %}
+        {% if pareto_list.scrap.all|length == 0 %}
               <tr>
-                <td colspan='5'>No scrap reasons recorded</td>
+                <td colspan='5'>0 scrap reasons recorded</td>
               </tr>
         {% endif %}
-             <tr>{% for item in scrap_list %}
-                 <td>{{ item.job }}</td>
-            <td>{{ item.scrap }}</td>
-            <td>{{ item.qty }}</td>
+             <tr>{% for pareto_item in pareto_list.scrap.all %}
+                 <td>{{ pareto_item.job }}</td>
+            <td>{{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</td>
+            <td>{{ pareto_item.qty }}</td>
              </tr>
         {% endfor %}
         </tbody>
