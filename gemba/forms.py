@@ -4,11 +4,6 @@ from tools.models import JobModel
 
 
 class ParetoDetailForm(forms.Form):
-    qty = forms.IntegerField()
-    good = forms.IntegerField()
-
-
-class ParetoDetailFormJob(forms.Form):
     job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
     qty = forms.IntegerField()
     good = forms.IntegerField()

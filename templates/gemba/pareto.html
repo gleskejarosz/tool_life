@@ -1,13 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
-
+<div><a href="{% url 'gemba_app:close-pareto' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
+    </button></a>
+    </div>
 <h1>PARETO</h1>
-    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }}  | | | |  Available time: {{ available_time }}  | | | |
-Availability: {{ availability }}%   | | | | Performance: {{ performance }}%  | | | |  Quality: {{ quality }}%
-  | | | |  OEE: {{ oee }}%
-    <br>
-    Total Output: {{ total_output }} ||| Total good: {{ total_good }} ||| Total scrap: {{ total_scrap_cal }}
+    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }}
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Available time</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Performance</th>
+            <th scope="col">Quality</th>
+            <th scope="col">OEE</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><b>{{ available_time }} min</b></td>
+            <td>{{ availability }}%</td>
+            <td>{{ performance }}%</td>
+            <td>{{ quality }}%</td>
+            <td><b>{{ oee }}%</b></td>
+        </tr>
+        </tbody>
+    </table>
+
+
     <table class="table table-hover">
         <thead>
         <tr>
@@ -33,6 +54,13 @@ Availability: {{ availability }}%   | | | | Performance: {{ performance }}%  | |
             <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td> <b>Total</b> </td>
+            <td> <b>{{ total_output }}</b> </td>
+            <td> <b>{{ total_good }}</b> </td>
+            <td> <b>{{ total_scrap_cal }}</b> </td>
+            <td> </td>
+        </tr>
         </tbody>
     </table>
 Total downtime:  {{ total_down }}
