@@ -6,7 +6,11 @@
     </button></a>
     </div>
 <h1>PARETO</h1>
-    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }}
+    {% if pareto_list.shift == "--" %}
+    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} <b style="color:red">Please choose shift</b>
+    {% else %}
+    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours
+    {% endif %}
     <table class="table table-hover">
         <thead>
         <tr>

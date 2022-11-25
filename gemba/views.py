@@ -4,10 +4,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import DetailView
+from django.views.generic import DetailView, UpdateView
 
-from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob
+from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
+    AssignShift
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail
 from tools.models import JobModel
 
@@ -346,3 +348,23 @@ def close_pareto(request):
     pareto.save()
 
     return redirect("gemba_app:index")
+
+
+@login_required
+def assign_shift(request):
+    pareto = Pareto.objects.filter(user=request.user, completed=False)
+
+    form = AssignShift(request.POST or None)
+    if form.is_valid():
+        shift = form.cleaned_data["shift"]
+        hours = form.cleaned_data["hours"]
+        pareto.shift = shift
+        pareto.hours = hours
+        pareto.save()
+        return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )

@@ -1,5 +1,6 @@
 from django import forms
 
+from gemba.models import SHIFT_CHOICES, HOUR_CHOICES
 from tools.models import JobModel
 
 
@@ -25,3 +26,8 @@ class ScrapQuantity(forms.Form):
 class ScrapQuantityJob(forms.Form):
     qty = forms.IntegerField(min_value=0)
     job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
+
+
+class AssignShift(forms.Form):
+    shift = forms.ChoiceField(choices=SHIFT_CHOICES)
+    hours = forms.ChoiceField(choices=HOUR_CHOICES)

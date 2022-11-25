@@ -1,25 +1,36 @@
 from django.conf import settings
 from django.db import models
 
-from tools.models import JobModel
-
+from tools.models import JobModel, MachineModel
 
 AM = "Morning shift"
 PM = "Afternoon shift"
 NS = "Night shift"
 SHIFT_CHOICES = (
+    ("--", "No choice"),
     (AM, "Morning shift"),
     (PM, "Afternoon shift"),
     (NS, "Night shift"),
-    )
+)
+HOUR_CHOICES = (
+    ("6", "6"),
+    ("7", "7"),
+    ("8", "8"),
+    ("9", "9"),
+    ("10", "10"),
+    ("11", "11"),
+    ("12", "12"),
+)
 
 
 class Pareto(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, blank=True, null=True)
     pareto_date = models.DateField()
-    # shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default=AM)
+    shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default="--")
+    hours = models.CharField(max_length=32, choices=HOUR_CHOICES, default=8)
     time_stamp = models.DateTimeField()
+    #time_stamp = models.ForeignKey("LineHourModel", on_delete=models.CASCADE, related_name="time", blank=False, null=False)
     completed = models.BooleanField(default=False)
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
@@ -58,7 +69,8 @@ class DowntimeModel(models.Model):
 
 
 class DowntimeDetail(models.Model):
-    downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime", blank=False, null=False)
+    downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime", blank=False,
+                                 null=False)
     job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs5", blank=False, null=False)
     minutes = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
@@ -94,3 +106,27 @@ class ScrapDetail(models.Model):
 
     class Meta:
         verbose_name = "Scrap detail"
+
+
+class HourModel(models.Model):
+    start = models.CharField(max_length=10, blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.start}"
+
+    class Meta:
+        verbose_name = "Start hour"
+
+
+class LineHourModel(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=False, null=True)
+    #line = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="lines", blank=False,
+                              #null=False)
+    start = models.ForeignKey(HourModel, on_delete=models.CASCADE, related_name="starts", blank=False,
+                              null=False)
+
+    def __str__(self):
+        return f"{self.start}"
+
+    class Meta:
+        verbose_name = "Line start hour"

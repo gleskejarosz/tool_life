@@ -15,4 +15,5 @@ urlpatterns = [
     path("downtime_detail_add/<pk>/", views.downtime_detail_create, name="downtime-detail-create"),
     path("scrap_detail_add/<pk>/", views.scrap_detail_create, name="scrap-detail-create"),
     path("close_pareto/", views.close_pareto, name="close-pareto"),
+    path("assign_shift/", views.assign_shift, name="assign-shift"),
     ]
