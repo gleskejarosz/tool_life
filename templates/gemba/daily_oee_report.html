@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+
+<h4>Daily OEE Report</h4>
+
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Line / User</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Performance</th>
+            <th scope="col">Quality</th>
+            <th scope="col">OEE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in report_list %}
+        <tr>
+            <td><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.date|date:"d-m-Y" }}</a></td>
+            <td>{{ item.user }}</td>
+            <td>{{ item.shift }}</td>
+            <td>{{ item.availability }}%</td>
+            <td>{{ item.performance }}%</td>
+            <td>{{ item.quality }}%</td>
+            <td>{{ item.oee }}%</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    {% endblock %}

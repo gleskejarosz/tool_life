@@ -1,14 +1,16 @@
-from django import template
+import django_filters
 
-register = template.Library()
+from gemba.models import Pareto
 
 
-@register.filter
-def total_scrap(value):
-    temp_val = value.split(' ')
-    total = 0
+class ParetoFilter(django_filters.FilterSet):
+    pareto_date = django_filters.DateFilter()
+    date_gte = django_filters.DateFilter(label="Pareto Date after...", field_name='pareto_date',
+                                               lookup_expr='gte')
+    date_lte = django_filters.DateFilter(label="Pareto Date before...", field_name='pareto_date',
+                                               lookup_expr='lte')
 
-    for val in temp_val:
-        total += int(val[:-1])
+    class Meta:
+        model = Pareto
+        fields = "__all__"
 
-    return str(total)

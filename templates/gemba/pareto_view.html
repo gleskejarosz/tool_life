@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+{% load widget_tweaks %}
+{% load mathfilters %}
+<h4>Pareto View:</h4>
+<form method="get">
+    <div class="well">
+      <p><a href="{% url 'gemba_app:pareto-view' %}">Clear all filters</a></p>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.date_gte.label_tag }}
+          {% render_field filter.form.date_gte class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.date_lte.label_tag }}
+          {% render_field filter.form.date_lte class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.user.label_tag }}
+          {% render_field filter.form.user class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.shift.label_tag }}
+          {% render_field filter.form.shift class="form-control" %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+  </form>
+
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Date</th>
+            <th scope="col">User / Line</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Hours</th>
+            <th scope="col">C/O </th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in filter.qs %}
+            <tr>
+                <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pk %}">{{ object.pareto_date|date:"d-m-Y" }}</a></td>
+                <td>{{ object.user }}</td>
+                <td>{{ object.shift }}</td>
+                <td>{{ 60|mul:object.hours }}</td>
+                <td>{% if object.completed is True %} C {% else %} O {% endif %}</td>
+           {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+{% endblock %}

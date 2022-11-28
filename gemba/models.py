@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.db import models
 
-from tools.models import JobModel, MachineModel
+from tools.models import JobModel
 
 AM = "Morning shift"
 PM = "Afternoon shift"
@@ -22,7 +22,7 @@ HOUR_CHOICES = (
     ("12", "12"),
 )
 
-
+# auto_now_add=True
 class Pareto(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, blank=True, null=True)
@@ -30,7 +30,6 @@ class Pareto(models.Model):
     shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default="--")
     hours = models.CharField(max_length=32, choices=HOUR_CHOICES, default=8)
     time_stamp = models.DateTimeField()
-    #time_stamp = models.ForeignKey("LineHourModel", on_delete=models.CASCADE, related_name="time", blank=False, null=False)
     completed = models.BooleanField(default=False)
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
@@ -109,7 +108,7 @@ class ScrapDetail(models.Model):
 
 
 class HourModel(models.Model):
-    start = models.CharField(max_length=10, blank=False, null=False)
+    start = models.TimeField()
 
     def __str__(self):
         return f"{self.start}"
@@ -120,8 +119,6 @@ class HourModel(models.Model):
 
 class LineHourModel(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=False, null=True)
-    #line = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="lines", blank=False,
-                              #null=False)
     start = models.ForeignKey(HourModel, on_delete=models.CASCADE, related_name="starts", blank=False,
                               null=False)
 
