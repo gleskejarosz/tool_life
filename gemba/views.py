@@ -1,4 +1,4 @@
-from datetime import timezone, time
+from datetime import timezone
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
@@ -13,7 +13,7 @@ from gemba.filters import ParetoFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
     DowntimeAdd, DowntimeJobAdd, NewPareto
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel
+    DowntimeGroup, ScrapUser, LineHourModel, JobUser
 from tools.models import JobModel
 
 
@@ -28,20 +28,6 @@ def index(request):
 
 class GembaIndex(TemplateView):
     template_name = 'gemba/index.html'
-
-
-def daily_pareto(request):
-    items_list = DowntimeModel.objects.all().order_by("code")
-    scrap_list = ScrapModel.objects.all().order_by("code")
-
-    return render(
-        request,
-        template_name="gemba/daily_pareto.html",
-        context={
-            "object_list": items_list,
-            "scrap_list": scrap_list,
-        },
-    )
 
 
 def pareto_view(request):
@@ -192,7 +178,6 @@ def scrap_detail_create(request, pk):
         context={"form": form}
     )
 
-
 @login_required
 def pareto_detail_form(request):
     form = ParetoDetailForm(request.POST or None)
@@ -327,11 +312,16 @@ def available_time_cal(status, hours, time_stamp):
     if status is True:
         available_time = int(hours) * 60
     else:
-        import time
-        now = time.time()
-        #now = datetime.strptime(str(time_now), "%H:%M:%S")
-        time_start = datetime.strptime(str(time_stamp), "%H:%M:%S")
-        available_time = round((now - time_start).total_seconds() / 60.0)
+        now = datetime.now()
+        sec_now = int(now.strftime('%S'))
+        sec_now += int(now.strftime('%M')) * 60
+        sec_now += int(now.strftime('%H')) * 60 * 60
+
+        sec_start = int(time_stamp.strftime('%S'))
+        sec_start += int(time_stamp.strftime('%M')) * 60
+        sec_start += int(time_stamp.strftime('%H')) * 60 * 60
+
+        available_time = round((sec_now - sec_start) / 60.0)
     return available_time
 
 
@@ -415,26 +405,26 @@ def pareto_detail_view(request, pk):
                   )
 
 
-@login_required
-def add_to_pareto(request, pk):
-    job = get_object_or_404(JobModel, pk=pk)
-    pareto_item, created = ParetoDetail.objects.get_or_create(job=job, user=request.user, completed=False)
-    pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
-    if pareto_qs.exists():
-        pareto = pareto_qs[0]
-        print(pareto_qs)
-        if pareto.jobs.filter(job__pk=job.pk).exists():
-            pareto_item.qty += 1
-            pareto_item.save()
-            return redirect("gemba_app:pareto-summary")
-        else:
-            pareto.jobs.add(pareto_item)
-            return redirect("gemba_app:pareto-summary")
-
-    else:
-        pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today())
-        pareto.jobs.add(pareto_item)
-        return redirect("gemba_app:pareto-summary")
+# @login_required
+# def add_to_pareto(request, pk):
+#     job = get_object_or_404(JobModel, pk=pk)
+#     pareto_item, created = ParetoDetail.objects.get_or_create(job=job, user=request.user, completed=False)
+#     pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+#     if pareto_qs.exists():
+#         pareto = pareto_qs[0]
+#         print(pareto_qs)
+#         if pareto.jobs.filter(job__pk=job.pk).exists():
+#             pareto_item.qty += 1
+#             pareto_item.save()
+#             return redirect("gemba_app:pareto-summary")
+#         else:
+#             pareto.jobs.add(pareto_item)
+#             return redirect("gemba_app:pareto-summary")
+#
+#     else:
+#         pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today())
+#         pareto.jobs.add(pareto_item)
+#         return redirect("gemba_app:pareto-summary")
 
 
 @login_required
@@ -532,7 +522,6 @@ def pareto_create_new(request):
         time_start = LineHourModel.objects.get(user=user, shift=shift)
 
         time_stamp = datetime.strptime(str(time_start), "%H:%M:%S")
-        print(time_stamp)
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
                               time_stamp=time_stamp)
         return redirect("gemba_app:pareto-summary")
@@ -723,3 +712,4 @@ def scrap_user_list(request):
             "items_list": items_list,
         },
     )
+

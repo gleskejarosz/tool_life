@@ -62,7 +62,8 @@
         {% endif %}
         <tr>
         {% for pareto_item in pareto_list.jobs.all %}
-            <td><a href="{% url 'gemba_app:pareto-details-view' pk=pareto_item.pk %}">{{ pareto_item.job.name }}</a></td>
+            <td><a href="{% url 'gemba_app:pareto-details-view' pk=pareto_item.pk %}">
+                {{ pareto_item.job.name }}</a></td>
             <td>{{ pareto_item.qty }}</td>
             <td>{{ pareto_item.good }}</td>
             <td>{{ pareto_item.qty|sub:pareto_item.good }}</td>
@@ -83,9 +84,9 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Downtime</th>
-            <th scope="col">Minutes</th>
-            <th scope="col">Job</th>
+            <th scope="col" width="50%">Downtime Reason</th>
+            <th scope="col" width="25%">Minutes</th>
+            <th scope="col" width="25%">Job</th>
         </tr>
         </thead>
         <tbody>
@@ -95,7 +96,8 @@
               </tr>
         {% endif %}
              <tr>{% for pareto_item in pareto_list.downtimes.all %}
-            <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
+            <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">
+                {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
             <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.job }}</td>
              </tr>
@@ -114,9 +116,9 @@
             <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Scrap</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Job</th>
+            <th scope="col" width="50%">Scrap Reason</th>
+            <th scope="col" width="25%">Quantity</th>
+            <th scope="col" width="25%">Job</th>
         </tr>
         </thead>
         <tbody>
@@ -126,7 +128,8 @@
               </tr>
         {% endif %}
              <tr>{% for pareto_item in pareto_list.scrap.all %}
-                 <td><a href="{% url 'gemba_app:scrap-detail-view' pk=pareto_item.pk %}">{{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
+                 <td><a href="{% url 'gemba_app:scrap-detail-view' pk=pareto_item.pk %}">
+                     {{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
             <td>{{ pareto_item.qty }}</td>
                  <td>{{ pareto_item.job }}</td>
              </tr>

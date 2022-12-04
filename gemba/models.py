@@ -168,3 +168,16 @@ class LineHourModel(models.Model):
 
     class Meta:
         verbose_name = "Line start hour"
+
+
+class JobUser(models.Model):
+    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="job_user", blank=False, null=False)
+    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=False,
+                              null=False)
+    order = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.job}"
+
+    class Meta:
+        verbose_name = "Job vs Group"
