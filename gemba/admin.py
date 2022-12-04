@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, ParetoDetail, ScrapDetail, ScrapModel
+from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, ParetoDetail, ScrapDetail, \
+    ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -49,7 +50,7 @@ class ParetoAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_date", "user", "shift", "hours", "time_stamp", "completed", "jobs", "downtimes",
+            "fields": ["id", "user", "pareto_date", "time_stamp", "shift", "hours", "completed", "jobs", "downtimes",
                        "scrap"],
         }),
     ]
@@ -82,6 +83,44 @@ class DowntimeModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
+class DowntimeGroupModelAdmin(admin.ModelAdmin):
+    ordering = ("id",)
+    list_display = ("name", "description", "user", )
+    list_display_links = ("name",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "name", "description", "user"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
+class DowntimeUserModelAdmin(admin.ModelAdmin):
+    ordering = ("id",)
+    list_display = ("downtime", "group", "order", )
+    list_display_links = ("downtime",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "downtime", "group", "order"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
+class ScrapUserModelAdmin(admin.ModelAdmin):
+    ordering = ("id",)
+    list_display = ("scrap", "group", "order", )
+    list_display_links = ("scrap",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "scrap", "group", "order"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
 admin.site.register(Pareto, ParetoAdmin)
 admin.site.register(ParetoDetail, ParetoDetailAdmin)
 admin.site.register(DowntimeModel, DowntimeModelAdmin)
@@ -90,4 +129,6 @@ admin.site.register(HourModel)
 admin.site.register(LineHourModel)
 admin.site.register(ScrapModel, ScrapModelAdmin)
 admin.site.register(ScrapDetail, ScrapDetailAdmin)
-
+admin.site.register(DowntimeUser, DowntimeUserModelAdmin)
+admin.site.register(DowntimeGroup, DowntimeGroupModelAdmin)
+admin.site.register(ScrapUser, ScrapUserModelAdmin)

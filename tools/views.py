@@ -279,5 +279,5 @@ class JobUpdateView(LoginRequiredMixin, UpdateView):
 
 class JobDeleteView(LoginRequiredMixin, DeleteView):
     model = JobUpdate
-    template_name = "tools/delete.html"
+    template_name = "tools/delete_scrap.html"
     success_url = reverse_lazy("tools_app:search-form")

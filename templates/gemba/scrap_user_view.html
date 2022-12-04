@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Scrap reasons:</h4>
+<div>
+    <br/>
+    <h6>General scrap reasons</h6>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Code & Description</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+    <tr>
+    {% for item in general_list|slice:"0:5" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in general_list|slice:"5:10" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in general_list|slice:"10:15" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    {% endfor %}
+    </tr>
+        </tbody>
+    </table>
+</div>
+<div>
+    <br/>
+    <h6>Bespoke reasons</h6>
+    <table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Code & Description</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if items_list.all|length == 0 %}
+              <tr>
+                <td colspan='5'>0 reasons recorded</td>
+              </tr>
+        {% endif %}
+    <tr>
+    {% for item in items_list|slice:"0:5" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in items_list|slice:"5:10" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in items_list|slice:"10:15" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    {% endfor %}
+    </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

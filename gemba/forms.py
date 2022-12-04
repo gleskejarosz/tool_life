@@ -1,13 +1,24 @@
 from django import forms
 
-from gemba.models import SHIFT_CHOICES, HOUR_CHOICES
+from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel
 from tools.models import JobModel
 
 
 class ParetoDetailForm(forms.Form):
     job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
-    qty = forms.IntegerField()
+    qty = forms.IntegerField(label="Output")
     good = forms.IntegerField()
+
+
+class DowntimeAdd(forms.Form):
+    downtime = forms.ModelChoiceField(queryset=DowntimeModel.objects.all().order_by("code"))
+    minutes = forms.IntegerField()
+
+
+class DowntimeJobAdd(forms.Form):
+    job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
+    downtime = forms.ModelChoiceField(queryset=DowntimeModel.objects.all().order_by("code"))
+    minutes = forms.IntegerField()
 
 
 class DowntimeMinutes(forms.Form):
@@ -28,6 +39,6 @@ class ScrapQuantityJob(forms.Form):
     job = forms.ModelChoiceField(queryset=JobModel.objects.all().order_by("name"))
 
 
-class AssignShift(forms.Form):
+class NewPareto(forms.Form):
     shift = forms.ChoiceField(choices=SHIFT_CHOICES)
     hours = forms.ChoiceField(choices=HOUR_CHOICES)

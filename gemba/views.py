@@ -1,17 +1,19 @@
-from datetime import timezone
+from datetime import timezone, time
 from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView
 
 from gemba.filters import ParetoFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
-    AssignShift
-from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail
+    DowntimeAdd, DowntimeJobAdd, NewPareto
+from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
+    DowntimeGroup, ScrapUser, LineHourModel
 from tools.models import JobModel
 
 
@@ -101,7 +103,7 @@ def downtime_detail_create(request, pk):
                 return redirect("gemba_app:pareto-summary")
 
             else:
-                pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today())
+                pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today(), time_stamp=datetime.today())
                 pareto.downtimes.add(downtime_elem)
                 return redirect("gemba_app:pareto-summary")
 
@@ -223,6 +225,7 @@ class ParetoSummary(LoginRequiredMixin, View):
         try:
             pareto = Pareto.objects.get(user=self.request.user, completed=False)
 
+            pareto_status = ""
             status = pareto.completed
             hours = pareto.hours
             time_stamp = pareto.time_stamp
@@ -290,11 +293,12 @@ class ParetoSummary(LoginRequiredMixin, View):
                           },
                           )
         except ObjectDoesNotExist:
-            # available_time = 0
-            # availability = 0
-            # quality = 0
-            # performance = 0
-            # oee = 0
+            pareto_status = "Not exist"
+            available_time = 0
+            availability = 0
+            quality = 0
+            performance = 0
+            oee = 0
             total_scrap = 0
             total_down = 0
             total_output = 0
@@ -304,11 +308,12 @@ class ParetoSummary(LoginRequiredMixin, View):
             return render(self.request,
                           template_name='gemba/pareto.html',
                           context={
-                              # "available_time": available_time,
-                              # "availability": availability,
-                              # "quality": quality,
-                              # "performance": performance,
-                              # "oee": oee,
+                              "available_time": available_time,
+                              "availability": availability,
+                              "quality": quality,
+                              "performance": performance,
+                              "oee": oee,
+                              "pareto_status": pareto_status,
                               "total_scrap": total_scrap,
                               "total_down": total_down,
                               "total_output": total_output,
@@ -322,8 +327,11 @@ def available_time_cal(status, hours, time_stamp):
     if status is True:
         available_time = int(hours) * 60
     else:
-        now = datetime.now(timezone.utc)
-        available_time = round((now - time_stamp).total_seconds() / 60.0)
+        import time
+        now = time.time()
+        #now = datetime.strptime(str(time_now), "%H:%M:%S")
+        time_start = datetime.strptime(str(time_stamp), "%H:%M:%S")
+        available_time = round((now - time_start).total_seconds() / 60.0)
     return available_time
 
 
@@ -454,27 +462,6 @@ def close_pareto(request):
     return redirect("gemba_app:index")
 
 
-@login_required
-def assign_shift(request):
-    user = request.user
-    pareto = Pareto.objects.get(user=user, completed=False)
-
-    form = AssignShift(request.POST or None)
-    if form.is_valid():
-        shift = form.cleaned_data["shift"]
-        hours = form.cleaned_data["hours"]
-        pareto.shift = shift
-        pareto.hours = hours
-        pareto.save()
-        return redirect("gemba_app:pareto-summary")
-
-    return render(
-        request,
-        template_name="form.html",
-        context={"form": form}
-    )
-
-
 def daily_oee_report(request):
     paretos = Pareto.objects.all().order_by("-pareto_date")
 
@@ -533,3 +520,206 @@ def daily_oee_report(request):
                   },
                   )
 
+
+@login_required
+def pareto_create_new(request):
+    user = request.user
+    pareto_date = datetime.now(timezone.utc).date()
+    form = NewPareto(request.POST or None)
+    if form.is_valid():
+        shift = form.cleaned_data["shift"]
+        hours = form.cleaned_data["hours"]
+        time_start = LineHourModel.objects.get(user=user, shift=shift)
+
+        time_stamp = datetime.strptime(str(time_start), "%H:%M:%S")
+        print(time_stamp)
+        Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
+                              time_stamp=time_stamp)
+        return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
+
+
+class ScrapDetailView(DetailView):
+    model = ScrapDetail
+    template_name = "gemba/scrap_detail_view.html"
+
+
+class ScrapUpdateView(UpdateView):
+    model = ScrapDetail
+    fields = ("qty", )
+    template_name = "form.html"
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+class ScrapDeleteView(DeleteView):
+    model = ScrapDetail
+    template_name = "gemba/delete_scrap.html"
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+class DowntimeDetailView(DetailView):
+    model = DowntimeDetail
+    template_name = "gemba/downtime_detail_view.html"
+
+
+class DowntimeUpdateView(UpdateView):
+    model = DowntimeDetail
+    fields = ("minutes", )
+    template_name = "form.html"
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+class DowntimeDeleteView(DeleteView):
+    model = DowntimeDetail
+    template_name = "gemba/delete_downtime.html"
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+class ParetoDetailView(DetailView):
+    model = ParetoDetail
+    template_name = "gemba/pareto_detail_view.html"
+
+
+class ParetoDetailUpdateView(UpdateView):
+    model = ParetoDetail
+    fields = ("job", "qty", "good", )
+    template_name = "form.html"
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+class ParetoDetailDeleteView(DeleteView):
+    model = ParetoDetail
+    template_name = "gemba/delete_detail.html"
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+@login_required
+def add_scrap_detail(request, pk):
+    scrap = get_object_or_404(ScrapDetail, pk=pk)
+    old_qty = scrap.qty
+    form = ScrapQuantity(request.POST or None)
+    if form.is_valid():
+        qty = form.cleaned_data["qty"]
+        new_qty = qty + old_qty
+
+        scrap.qty = new_qty
+        scrap.save()
+        return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
+
+
+@login_required
+def add_downtime_time(request, pk):
+    downtime = get_object_or_404(DowntimeDetail, pk=pk)
+    old_time = downtime.minutes
+    form = DowntimeMinutes(request.POST or None)
+    if form.is_valid():
+        minutes = form.cleaned_data["minutes"]
+        new_time = minutes + old_time
+
+        downtime.minutes = new_time
+        downtime.save()
+        return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
+
+
+@login_required
+def add_downtime_detail(request):
+    job_qs = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")
+    scrap_created_qs = ScrapDetail.objects.filter(user=request.user, completed=False).order_by("-id")
+    down_created_qs = DowntimeDetail.objects.filter(user=request.user, completed=False).order_by("-id")
+
+    if job_qs.exists() or scrap_created_qs.exists() or down_created_qs.exists():
+        if job_qs.exists():
+            job = job_qs[0]
+        elif scrap_created_qs.exists():
+            scrap_elem_exists = scrap_created_qs[0]
+            job = scrap_elem_exists.job
+        else:
+            down_elem_exists = down_created_qs[0]
+            job = down_elem_exists.job
+        job_id = JobModel.objects.get(name=job)
+
+        form = DowntimeAdd(request.POST or None)
+        if form.is_valid():
+            downtime = form.cleaned_data["downtime"]
+            minutes = form.cleaned_data["minutes"]
+            user = request.user
+            downtime_detail = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id)
+
+            pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+            pareto = pareto_qs[0]
+            pareto.downtimes.add(downtime_detail)
+            return redirect("gemba_app:pareto-summary")
+    else:
+        form = DowntimeJobAdd(request.POST or None)
+        if form.is_valid():
+            job = form.cleaned_data["job"]
+            downtime = form.cleaned_data["downtime"]
+            minutes = form.cleaned_data["minutes"]
+            user = request.user
+            downtime_detail = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job)
+
+            pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+            pareto = pareto_qs[0]
+            pareto.downtimes.add(downtime_detail)
+            return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
+
+
+def downtime_user_list(request):
+    general_list = DowntimeUser.objects.filter(group=1).order_by("order")
+    group_qs = DowntimeGroup.objects.filter(user=request.user)
+    if group_qs.exists():
+        group = group_qs[0]
+        items_list = DowntimeUser.objects.filter(group=group).order_by("order")
+    else:
+        items_list = {}
+
+    return render(
+        request,
+        template_name="gemba/downtime_user_view.html",
+        context={
+            "general_list": general_list,
+            "items_list": items_list,
+        },
+    )
+
+
+def scrap_user_list(request):
+    general_list = ScrapUser.objects.filter(group=1).order_by("order")
+    group_qs = DowntimeGroup.objects.filter(user=request.user)
+    if group_qs.exists():
+        group = group_qs[0]
+        items_list = ScrapUser.objects.filter(group=group).order_by("order")
+    else:
+        items_list = {}
+
+    return render(
+        request,
+        template_name="gemba/scrap_user_view.html",
+        context={
+            "general_list": general_list,
+            "items_list": items_list,
+        },
+    )

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <p>Do you really want to delete downtime reason: {{ object.downtime }} - {{ object.downtime.description }} for job {{ object.job }}</p>
+    <input type="submit" value="Delete">
+</form>
+{% endblock %}

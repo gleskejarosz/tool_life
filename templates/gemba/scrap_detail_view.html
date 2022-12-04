@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Scrap details:</h4>
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Code</th>
+            <th scope="col">Description</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Job</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ object.scrap }}</td>
+                <td>{{ object.scrap.description }}</td>
+                <td>{{ object.qty }}</td>
+                <td>{{ object.job }}</td>
+            </tr>
+        </tbody>
+    </table>
+{% if request.user.is_staff %}
+    <div><a href="{% url 'gemba_app:add-scrap-view' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add
+    </button></a>
+        <a href="{% url 'gemba_app:scrap-update-view' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update
+    </button></a>
+    <a href="{% url 'gemba_app:scrap-delete-view' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Delete
+    </button></a>
+    </div>
+  {% endif %}
+{% endblock %}

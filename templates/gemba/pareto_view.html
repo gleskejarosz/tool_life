@@ -36,14 +36,14 @@
             <th scope="col">Date</th>
             <th scope="col">User / Line</th>
             <th scope="col">Shift</th>
-            <th scope="col">Hours</th>
+            <th scope="col">Minutes</th>
             <th scope="col">C/O </th>
         </tr>
         </thead>
         <tbody>
         {% for object in filter.qs %}
             <tr>
-                <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pk %}">{{ object.pareto_date|date:"d-m-Y" }}</a></td>
+                <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
                 <td>{{ object.user }}</td>
                 <td>{{ object.shift }}</td>
                 <td>{{ 60|mul:object.hours }}</td>

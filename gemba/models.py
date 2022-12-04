@@ -22,21 +22,21 @@ HOUR_CHOICES = (
     ("12", "12"),
 )
 
-# auto_now_add=True
+
 class Pareto(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.SET_NULL, blank=True, null=True)
     pareto_date = models.DateField()
     shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default="--")
     hours = models.CharField(max_length=32, choices=HOUR_CHOICES, default=8)
-    time_stamp = models.DateTimeField()
+    time_stamp = models.TimeField()
     completed = models.BooleanField(default=False)
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
     scrap = models.ManyToManyField("ScrapDetail")
 
     def __str__(self):
-        return f"{self.user.username}"
+        return f"{self.pareto_date}"
 
     class Meta:
         verbose_name = "Pareto"
@@ -82,6 +82,32 @@ class DowntimeDetail(models.Model):
         verbose_name = "Downtime Detail"
 
 
+class DowntimeGroup(models.Model):
+    name = models.CharField(max_length=10, blank=False, null=False)
+    description = models.CharField(max_length=64, blank=False, null=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, unique=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        verbose_name = "User Group Name"
+
+
+class DowntimeUser(models.Model):
+    downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime_user", blank=False,
+                                 null=False)
+    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="downtime_group", blank=False,
+                              null=False)
+    order = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.downtime}"
+
+    class Meta:
+        verbose_name = "Downtime vs Group"
+
+
 class ScrapModel(models.Model):
     code = models.CharField(max_length=10, blank=False, null=False)
     description = models.CharField(max_length=64, blank=False, null=False)
@@ -107,6 +133,20 @@ class ScrapDetail(models.Model):
         verbose_name = "Scrap detail"
 
 
+class ScrapUser(models.Model):
+    scrap = models.ForeignKey(ScrapModel, on_delete=models.CASCADE, related_name="scrap_user", blank=False,
+                              null=False)
+    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="scrap_group", blank=False,
+                              null=False)
+    order = models.PositiveIntegerField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.scrap}"
+
+    class Meta:
+        verbose_name = "Scrap vs Group"
+
+
 class HourModel(models.Model):
     start = models.TimeField()
 
@@ -121,6 +161,7 @@ class LineHourModel(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=False, null=True)
     start = models.ForeignKey(HourModel, on_delete=models.CASCADE, related_name="starts", blank=False,
                               null=False)
+    shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, blank=False, null=False)
 
     def __str__(self):
         return f"{self.start}"
