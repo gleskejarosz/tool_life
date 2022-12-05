@@ -713,3 +713,18 @@ def scrap_user_list(request):
         },
     )
 
+
+def job_user_list(request):
+    group_qs = DowntimeGroup.objects.filter(user=request.user)
+    group = group_qs[0]
+    job_qs = JobUser.objects.filter(group=group)
+
+    return render(
+        request,
+        template_name="gemba/job_user_view.html",
+        context={
+            "job_qs": job_qs,
+            "group": group,
+        },
+    )
+
