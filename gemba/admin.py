@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from gemba.models import DowntimeDetail, DowntimeModel, HourModel, JobUser, LineHourModel, Pareto, ParetoDetail,\
+from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, ParetoDetail,\
     ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser
 
 
@@ -133,4 +133,4 @@ admin.site.register(ScrapDetail, ScrapDetailAdmin)
 admin.site.register(DowntimeUser, DowntimeUserModelAdmin)
 admin.site.register(DowntimeGroup, DowntimeGroupModelAdmin)
 admin.site.register(ScrapUser, ScrapUserModelAdmin)
-admin.site.register(JobUser)
+

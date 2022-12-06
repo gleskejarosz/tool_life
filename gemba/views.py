@@ -13,7 +13,7 @@ from gemba.filters import ParetoFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
     DowntimeAdd, DowntimeJobAdd, NewPareto
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobUser
+    DowntimeGroup, ScrapUser, LineHourModel
 from tools.models import JobModel
 
 
@@ -178,6 +178,7 @@ def scrap_detail_create(request, pk):
         context={"form": form}
     )
 
+
 @login_required
 def pareto_detail_form(request):
     form = ParetoDetailForm(request.POST or None)
@@ -265,6 +266,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                           template_name='gemba/pareto.html',
                           context={
                               "pareto_list": pareto,
+                              "pareto_status": pareto_status,
                               "available_time": available_time,
                               "availability": availability,
                               "quality": quality,
@@ -326,7 +328,7 @@ def available_time_cal(status, hours, time_stamp):
 
 
 def performance_cal(performance_numerator, available_time, downtime):
-    if available_time != 0:
+    if available_time - downtime != 0:
         performance = round((performance_numerator / (available_time - downtime)) * 100)
     else:
         performance = 0
