@@ -5,48 +5,48 @@ from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
-    ordering = ("id",)
-    list_display = ("scrap", "job", "qty", "completed", )
+    ordering = ("-id",)
+    list_display = ("pareto_id", "scrap", "job", "qty", "completed", )
     list_display_links = ("scrap",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "scrap", "job", "qty", "user", "completed"],
+            "fields": ["id", "pareto_id", "scrap", "job", "qty", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
 
 
 class DowntimeDetailAdmin(admin.ModelAdmin):
-    ordering = ("id",)
-    list_display = ("downtime", "job", "minutes", "completed", )
+    ordering = ("-id",)
+    list_display = ("pareto_id", "downtime", "job", "minutes", "completed", )
     list_display_links = ("downtime",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "pareto_id", "downtime", "job", "minutes", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
 
 
 class ParetoDetailAdmin(admin.ModelAdmin):
-    ordering = ("id",)
-    list_display = ("job", "qty", "good", "completed", )
+    ordering = ("-id",)
+    list_display = ("pareto_id", "job", "qty", "good", "completed", )
     list_display_links = ("job",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "job", "qty", "good", "user", "completed"],
+            "fields": ["id", "pareto_id", "job", "qty", "good", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
 
 
 class ParetoAdmin(admin.ModelAdmin):
-    ordering = ("id",)
-    list_display = ("pareto_date", "user", "shift", "hours", "completed", )
-    list_display_links = ("pareto_date",)
+    ordering = ("-id",)
+    list_display = ("id", "pareto_date", "user", "shift", "hours", "completed", )
+    list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {

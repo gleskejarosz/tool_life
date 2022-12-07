@@ -1,6 +1,5 @@
 from django.db import models
 
-# from gemba.models import DowntimeGroup
 from tools.utils import hours_recalculate
 
 
@@ -29,9 +28,6 @@ class JobModel(models.Model):
     name = models.CharField(max_length=64)
     target = models.IntegerField(default=1615)
     inner_size = models.PositiveSmallIntegerField(default=0)
-    # group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group_", blank=False,
-    #                           null=False)
-    # order = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"
