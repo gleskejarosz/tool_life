@@ -1,6 +1,6 @@
 import django_filters
 
-from gemba.models import Pareto
+from gemba.models import DowntimeDetail
 
 
 class ParetoFilter(django_filters.FilterSet):
@@ -11,6 +11,6 @@ class ParetoFilter(django_filters.FilterSet):
                                                lookup_expr='lte')
 
     class Meta:
-        model = Pareto
+        model = DowntimeDetail
         fields = "__all__"
 

@@ -49,6 +49,7 @@ class ParetoDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
+    pareto_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.job}"
@@ -76,6 +77,7 @@ class DowntimeDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
+    pareto_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.downtime}"
@@ -128,6 +130,7 @@ class ScrapDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
+    pareto_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.scrap}"

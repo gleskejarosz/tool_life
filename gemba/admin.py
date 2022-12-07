@@ -6,12 +6,12 @@ from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel
 
 class ScrapDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("pareto_id", "scrap", "job", "qty", "completed", )
+    list_display = ("pareto_id", "pareto_date", "scrap", "user", "job", "qty", "completed", )
     list_display_links = ("scrap",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "scrap", "job", "qty", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "scrap", "job", "qty", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
@@ -19,12 +19,12 @@ class ScrapDetailAdmin(admin.ModelAdmin):
 
 class DowntimeDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("pareto_id", "downtime", "job", "minutes", "completed", )
+    list_display = ("pareto_id", "pareto_date", "downtime", "user", "job", "minutes", "completed", )
     list_display_links = ("downtime",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "downtime", "job", "minutes", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
@@ -32,12 +32,12 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
 
 class ParetoDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("pareto_id", "job", "qty", "good", "completed", )
+    list_display = ("pareto_id", "pareto_date", "job", "qty", "good", "completed", )
     list_display_links = ("job",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "job", "qty", "good", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "job", "qty", "good", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]

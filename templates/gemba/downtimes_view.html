@@ -5,8 +5,20 @@
 <h4>Pareto View:</h4>
 <form method="get">
     <div class="well">
-      <p><a href="{% url 'gemba_app:pareto-view' %}">Clear all filters</a></p>
+      <p><a href="{% url 'gemba_app:downtimes-view' %}">Clear all filters</a></p>
       <div class="row">
+          <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.downtime.label_tag }}
+          {% render_field filter.form.downtime class="form-control" %}
+        </div>
+          <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.downtime.label_tag }}
+          {% render_field filter.form.downtime class="form-control" %}
+        </div>
+          <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.job.label_tag }}
+          {% render_field filter.form.job class="form-control" %}
+        </div>
         <div class="form-group col-sm-4 col-md-3">
           {{ filter.form.date_gte.label_tag }}
           {% render_field filter.form.date_gte class="form-control" %}
@@ -19,10 +31,7 @@
           {{ filter.form.user.label_tag }}
           {% render_field filter.form.user class="form-control" %}
         </div>
-        <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.shift.label_tag }}
-          {% render_field filter.form.shift class="form-control" %}
-        </div>
+
       </div>
       <button type="submit" class="btn btn-primary">
         <span class="glyphicon glyphicon-search"></span> Search
@@ -35,8 +44,11 @@
         <tr>
             <th scope="col">Date</th>
             <th scope="col">User / Line</th>
-            <th scope="col">Shift</th>
+            <th scope="col">Downtime</th>
+            <th scope="col">Description</th>
             <th scope="col">Minutes</th>
+            <th scope="col">Job</th>
+            <th scope="col">Pareto ID</th>
             <th scope="col">C/O </th>
         </tr>
         </thead>
@@ -45,8 +57,11 @@
             <tr>
                 <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
                 <td>{{ object.user }}</td>
-                <td>{{ object.shift }}</td>
-                <td>{{ 60|mul:object.hours }}</td>
+                <td>{{ object.downtime }}</td>
+                <td>{{ object.downtime.description }}</td>
+                <td>{{ object.minutes }}</td>
+                <td>{{ object.job }}</td>
+                <td>{{ object.pareto_id }}</td>
                 <td>{% if object.completed is True %} C {% else %} O {% endif %}</td>
            {% endfor %}
             </tr>

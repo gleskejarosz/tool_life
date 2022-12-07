@@ -30,15 +30,18 @@ class GembaIndex(TemplateView):
     template_name = 'gemba/index.html'
 
 
-def pareto_view(request):
-    paretos = Pareto.objects.all().order_by("-pareto_date")
+def downtimes_view(request):
+    paretos = DowntimeDetail.objects.all().order_by("-pareto_date")
     pareto_filter = ParetoFilter(request.GET, queryset=paretos)
-    return render(request, "gemba/pareto_view.html", {"filter": pareto_filter})
+    return render(request, "gemba/downtimes_view.html", {"filter": pareto_filter})
 
 
 @login_required
 def downtime_detail_create(request, pk):
     downtime = get_object_or_404(DowntimeModel, pk=pk)
+    pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+    pareto_id = pareto_qs[0].id
+    pareto_date = pareto_qs[0].pareto_date
     job_qs = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")
     scrap_created_qs = ScrapDetail.objects.filter(user=request.user, completed=False).order_by("-id")
     down_created_qs = DowntimeDetail.objects.filter(user=request.user, completed=False).order_by("-id")
@@ -59,9 +62,9 @@ def downtime_detail_create(request, pk):
         if form.is_valid():
             minutes = form.cleaned_data["minutes"]
             user = request.user
-            downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id)
+            downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id,
+                                                          pareto_id=pareto_id, pareto_date=pareto_date)
 
-            pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
             if pareto_qs.exists():
                 pareto = pareto_qs[0]
                 pareto.downtimes.add(downtime_elem)
@@ -103,6 +106,9 @@ def downtime_detail_create(request, pk):
 @login_required
 def scrap_detail_create(request, pk):
     scrap = get_object_or_404(ScrapModel, pk=pk)
+    pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+    pareto_id = pareto_qs[0].id
+    pareto_date = pareto_qs[0].pareto_date
     job_qs = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")
     scrap_created_qs = ScrapDetail.objects.filter(user=request.user, completed=False).order_by("-id")
     down_created_qs = DowntimeDetail.objects.filter(user=request.user, completed=False).order_by("-id")
@@ -122,8 +128,8 @@ def scrap_detail_create(request, pk):
             user = request.user
 
             job_id = JobModel.objects.get(name=job)
+
             scrap_qs = ScrapDetail.objects.filter(user=request.user, completed=False, scrap=scrap, job=job_id)
-            pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
             if pareto_qs.exists():
                 pareto = pareto_qs[0]
                 if scrap_qs.exists():
@@ -132,7 +138,8 @@ def scrap_detail_create(request, pk):
                     scrap_elem.save()
                     return redirect("gemba_app:pareto-summary")
                 else:
-                    scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job_id)
+                    scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job_id,
+                                                            pareto_id=pareto_id, pareto_date=pareto_date)
                     pareto.scrap.add(scrap_elem)
                     return redirect("gemba_app:pareto-summary")
 
@@ -181,13 +188,17 @@ def scrap_detail_create(request, pk):
 
 @login_required
 def pareto_detail_form(request):
+    pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+    pareto_id = pareto_qs[0].id
+    pareto_date = pareto_qs[0].pareto_date
     form = ParetoDetailForm(request.POST or None)
     user = request.user
     if form.is_valid():
         job = form.cleaned_data["job"]
         qty = form.cleaned_data["qty"]
         good = form.cleaned_data["good"]
-        pareto_item = ParetoDetail.objects.create(job=job, qty=qty, user=user, good=good)
+        pareto_item = ParetoDetail.objects.create(job=job, qty=qty, user=user, good=good, pareto_id=pareto_id,
+                                                  pareto_date=pareto_date)
 
         pareto_qs = Pareto.objects.filter(user=user, completed=False)
         if pareto_qs.exists():
