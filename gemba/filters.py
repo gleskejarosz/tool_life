@@ -3,7 +3,7 @@ import django_filters
 from gemba.models import DowntimeDetail
 
 
-class ParetoFilter(django_filters.FilterSet):
+class DowntimeFilter(django_filters.FilterSet):
     pareto_date = django_filters.DateFilter()
     date_gte = django_filters.DateFilter(label="Pareto Date after...", field_name='pareto_date',
                                                lookup_expr='gte')

@@ -7,9 +7,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView
+from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
+from django.db.models import Q
 
-from gemba.filters import ParetoFilter
+from gemba.filters import DowntimeFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
     DowntimeAdd, DowntimeJobAdd, NewPareto
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
@@ -32,8 +33,8 @@ class GembaIndex(TemplateView):
 
 def downtimes_view(request):
     paretos = DowntimeDetail.objects.all().order_by("-pareto_date")
-    pareto_filter = ParetoFilter(request.GET, queryset=paretos)
-    return render(request, "gemba/downtimes_view.html", {"filter": pareto_filter})
+    pareto_filter = DowntimeFilter(request.GET, queryset=paretos)
+    return render(request, "gemba/downtimes_view.html", {"filter": paretos})
 
 
 @login_required
@@ -727,17 +728,31 @@ def scrap_user_list(request):
     )
 
 
-def job_user_list(request):
-    group_qs = DowntimeGroup.objects.filter(user=request.user)
-    group = group_qs[0]
-    job_qs = JobUser.objects.filter(group=group)
+# def job_user_list(request):
+#     group_qs = DowntimeGroup.objects.filter(user=request.user)
+#     group = group_qs[0]
+#     job_qs = JobUser.objects.filter(group=group)
+#
+#     return render(
+#         request,
+#         template_name="gemba/job_user_view.html",
+#         context={
+#             "job_qs": job_qs,
+#             "group": group,
+#         },
+#     )
 
-    return render(
-        request,
-        template_name="gemba/job_user_view.html",
-        context={
-            "job_qs": job_qs,
-            "group": group,
-        },
-    )
 
+class SearchResultsView(ListView):
+    model = DowntimeDetail
+    template_name = "gemba/downtimes_search.html"
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        object_list = DowntimeDetail.objects.filter(
+            Q(pareto_date__icontains=query) | Q(user__icontains=query) |
+            Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
+            Q(minutes__icontains=query) | Q(job__icontains=query) |
+            Q(completed__icontains=query) | Q(pareto_id__icontains=query)
+        ).order_by('-id')
+        return object_list

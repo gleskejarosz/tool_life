@@ -2,10 +2,7 @@
 {% block content %}
 {% load widget_tweaks %}
 {% load mathfilters %}
-<h4>Downtime reasons View:</h4>
- <form action="{% url 'gemba_app:search-result' %}" method="get">
-    <input name="q" type="text" placeholder="Search...">
- </form>
+<h4>Results:</h4>
 <table class="table table-hover">
         <thead>
         <tr>
@@ -20,7 +17,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for object in filter %}
+        {% for object in object_list %}
             <tr>
                 <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
                 <td>{{ object.user }}</td>
