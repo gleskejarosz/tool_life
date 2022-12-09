@@ -10,7 +10,6 @@ from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 from django.db.models import Q
 
-from gemba.filters import DowntimeFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
     DowntimeAdd, DowntimeJobAdd, NewPareto
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
@@ -32,9 +31,25 @@ class GembaIndex(TemplateView):
 
 
 def downtimes_view(request):
-    paretos = DowntimeDetail.objects.all().order_by("-pareto_date")
-    pareto_filter = DowntimeFilter(request.GET, queryset=paretos)
-    return render(request, "gemba/downtimes_view.html", {"filter": paretos})
+    downtimes = DowntimeDetail.objects.all().order_by("-pareto_date")
+    today_downtimes = DowntimeDetail.objects.filter(pareto_date=datetime.today())
+    return render(request,
+                  template_name="gemba/downtimes_view.html",
+                  context={
+                      "filter": downtimes,
+                      "today_downtimes": today_downtimes,
+                  })
+
+
+def scraps_view(request):
+    scraps = ScrapDetail.objects.all().order_by("-pareto_date")
+    today_downtimes = ScrapDetail.objects.filter(pareto_date=datetime.today())
+    return render(request,
+                  template_name="gemba/scraps_view.html",
+                  context={
+                      "filter": scraps,
+                      "today_downtimes": today_downtimes,
+                  })
 
 
 @login_required
@@ -58,7 +73,7 @@ def downtime_detail_create(request, pk):
             job = down_elem_exists.job
 
         form = DowntimeMinutes(request.POST or None)
-        job = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")[0]
+        #job = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")[0]
         job_id = JobModel.objects.get(name=job)
         if form.is_valid():
             minutes = form.cleaned_data["minutes"]
@@ -84,16 +99,18 @@ def downtime_detail_create(request, pk):
             job = form.cleaned_data["job"]
 
             job_id = JobModel.objects.get(name=job)
-            downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id)
+            downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id,
+                                                          pareto_id=pareto_id, pareto_date=pareto_date)
 
-            pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
+            #pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
             if pareto_qs.exists():
                 pareto = pareto_qs[0]
                 pareto.downtimes.add(downtime_elem)
                 return redirect("gemba_app:pareto-summary")
 
             else:
-                pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today(), time_stamp=datetime.today())
+                pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today(),
+                                               time_stamp=datetime.today())
                 pareto.downtimes.add(downtime_elem)
                 return redirect("gemba_app:pareto-summary")
 
@@ -554,7 +571,7 @@ class ScrapDetailView(DetailView):
 
 class ScrapUpdateView(UpdateView):
     model = ScrapDetail
-    fields = ("qty", )
+    fields = ("qty",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -572,7 +589,7 @@ class DowntimeDetailView(DetailView):
 
 class DowntimeUpdateView(UpdateView):
     model = DowntimeDetail
-    fields = ("minutes", )
+    fields = ("minutes",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -590,7 +607,7 @@ class ParetoDetailView(DetailView):
 
 class ParetoDetailUpdateView(UpdateView):
     model = ParetoDetail
-    fields = ("job", "qty", "good", )
+    fields = ("job", "qty", "good",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -750,9 +767,24 @@ class SearchResultsView(ListView):
     def get_queryset(self):
         query = self.request.GET.get("q")
         object_list = DowntimeDetail.objects.filter(
-            Q(pareto_date__icontains=query) | Q(user__icontains=query) |
+            Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
             Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
-            Q(minutes__icontains=query) | Q(job__icontains=query) |
-            Q(completed__icontains=query) | Q(pareto_id__icontains=query)
+            Q(minutes__icontains=query) | Q(job__name__icontains=query) |
+            Q(pareto_id__icontains=query)
+        ).order_by('-id')
+        return object_list
+
+
+class ScrapSearchResultsView(ListView):
+    model = ScrapDetail
+    template_name = "gemba/scraps_search.html"
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        object_list = ScrapDetail.objects.filter(
+            Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
+            Q(scrap__code__icontains=query) | Q(scrap__description__icontains=query) |
+            Q(qty__icontains=query) | Q(job__name__icontains=query) |
+            Q(pareto_id__icontains=query)
         ).order_by('-id')
         return object_list

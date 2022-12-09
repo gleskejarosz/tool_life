@@ -6,8 +6,8 @@ from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel
 
 class ScrapDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("pareto_id", "pareto_date", "scrap", "user", "job", "qty", "completed", )
-    list_display_links = ("scrap",)
+    list_display = ("id", "pareto_date", "scrap", "user", "job", "qty", "pareto_id", "completed", )
+    list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
@@ -19,8 +19,8 @@ class ScrapDetailAdmin(admin.ModelAdmin):
 
 class DowntimeDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("pareto_id", "pareto_date", "downtime", "user", "job", "minutes", "completed", )
-    list_display_links = ("downtime",)
+    list_display = ("id", "pareto_date", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
+    list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
@@ -32,8 +32,8 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
 
 class ParetoDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("pareto_id", "pareto_date", "job", "qty", "good", "completed", )
-    list_display_links = ("job",)
+    list_display = ("id", "pareto_date", "job", "qty", "good", "pareto_id", "completed", )
+    list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {

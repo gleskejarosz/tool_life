@@ -1,8 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
-{% load widget_tweaks %}
-{% load mathfilters %}
 <h4>Results:</h4>
+<p><a href="{% url 'gemba_app:downtimes-view' %}">Go back</a></p>
 <table class="table table-hover">
         <thead>
         <tr>
@@ -13,20 +12,18 @@
             <th scope="col">Minutes</th>
             <th scope="col">Job</th>
             <th scope="col">Pareto ID</th>
-            <th scope="col">C/O </th>
         </tr>
         </thead>
         <tbody>
         {% for object in object_list %}
             <tr>
-                <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
+                <td>{{ object.pareto_date }}</td>
                 <td>{{ object.user }}</td>
                 <td>{{ object.downtime }}</td>
                 <td>{{ object.downtime.description }}</td>
                 <td>{{ object.minutes }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.pareto_id }}</td>
-                <td>{% if object.completed is True %} C {% else %} O {% endif %}</td>
            {% endfor %}
             </tr>
         </tbody>

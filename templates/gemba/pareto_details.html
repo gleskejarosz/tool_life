@@ -46,6 +46,7 @@
     <table class="table table-hover">
         <thead>
         <tr>
+            <th scope="col">Id</th>
             <th scope="col">Jobs</th>
             <th scope="col">Output</th>
             <th scope="col">Good</th>
@@ -57,6 +58,7 @@
         <tbody>
         <tr>
        {% for pareto_item in pareto_list.jobs.all %}
+            <td>{{ pareto_item.id }}</td>
             <td>{{ pareto_item.job.name }}</td>
             <td>{{ pareto_item.qty }}</td>
             <td>{{ pareto_item.good }}</td>
@@ -67,6 +69,7 @@
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
+            <td> </td>
             <td> <b>{{ output }}</b> </td>
             <td> <b>{{ good }}</b> </td>
             <td> <b>{{ output|sub:good}}</b> </td>
@@ -77,6 +80,7 @@
     <table class="table table-hover">
         <thead>
         <tr>
+            <th scope="col">Id</th>
             <th scope="col">Downtime</th>
             <th scope="col">Minutes</th>
             <th scope="col">Job</th>
@@ -84,6 +88,7 @@
         </thead>
         <tbody>
              <tr>{% for pareto_item in pareto_list.downtimes.all %}
+                 <td>{{ pareto_item.id }}</td>
             <td>{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</td>
             <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.job }}</td>
@@ -91,6 +96,7 @@
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
+            <td> </td>
             <td><b>{{ downtime }}</b> </td>
             <td> </td>
         </tr>
@@ -99,6 +105,7 @@
             <table class="table table-hover">
         <thead>
         <tr>
+            <th scope="col">Id</th>
             <th scope="col">Scrap</th>
             <th scope="col">Quantity</th>
             <th scope="col">Job</th>
@@ -106,6 +113,7 @@
         </thead>
         <tbody>
              <tr>{% for pareto_item in pareto_list.scrap.all %}
+                 <td>{{ pareto_item.id }}</td>
             <td>{{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</td>
             <td>{{ pareto_item.qty }}</td>
                  <td>{{ pareto_item.job }}</td>
@@ -113,6 +121,7 @@
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
+            <td> </td>
             <td><b>{{ scrap }}</b></td>
             <td> </td>
         </tr>

@@ -63,7 +63,7 @@ class DowntimeModel(models.Model):
     description = models.CharField(max_length=64, blank=False, null=False)
 
     def __str__(self):
-        return f"{self.code}"
+        return f"{self.code} - {self.description}"
 
     class Meta:
         verbose_name = "Downtime"
@@ -117,7 +117,7 @@ class ScrapModel(models.Model):
     description = models.CharField(max_length=64, blank=False, null=False)
 
     def __str__(self):
-        return f"{self.code}"
+        return f"{self.code} - {self.description}"
 
     class Meta:
         verbose_name = "Scrap reason"
