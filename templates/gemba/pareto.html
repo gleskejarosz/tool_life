@@ -21,7 +21,9 @@
     </button></a>
     {% endif %}
     </div>
-<h1>PARETO</h1>
+    <div>
+    <h2>PARETO  Date: {{ pareto_list.pareto_date|date:"d-m-Y" }}</h2>
+    </div>
     Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours
     <table class="table table-hover">
         <thead>

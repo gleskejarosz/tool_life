@@ -1,5 +1,4 @@
-from datetime import timezone
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -32,7 +31,8 @@ class GembaIndex(TemplateView):
 
 def downtimes_view(request):
     downtimes = DowntimeDetail.objects.all().order_by("-pareto_date")
-    today_downtimes = DowntimeDetail.objects.filter(pareto_date=datetime.today())
+    today_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now()-timedelta(days=7)).order_by(
+        "-pareto_date")
     return render(request,
                   template_name="gemba/downtimes_view.html",
                   context={
@@ -43,7 +43,8 @@ def downtimes_view(request):
 
 def scraps_view(request):
     scraps = ScrapDetail.objects.all().order_by("-pareto_date")
-    today_downtimes = ScrapDetail.objects.filter(pareto_date=datetime.today())
+    today_downtimes = ScrapDetail.objects.filter(pareto_date__gte=datetime.now()-timedelta(days=7)).order_by(
+        "-pareto_date")
     return render(request,
                   template_name="gemba/scraps_view.html",
                   context={
