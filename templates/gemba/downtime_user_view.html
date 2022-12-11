@@ -4,7 +4,7 @@
 <div>
     <br/>
     <h6>General downtime reasons</h6>
-    <table class="table table-hover">
+    <table class="table">
         <thead>
         <tr>
             <th scope="col">Code & Description</th>
@@ -16,33 +16,35 @@
         </thead>
         <tbody>
     <tr>
+
     {% for item in general_list|slice:"0:5" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">
+        <div style="background-color:white">{{ item.downtime }}</div></a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"5:10" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"10:15" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"15:20" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"20:25" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"25:30" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
         </tbody>
@@ -69,32 +71,32 @@
         {% endif %}
     <tr>
     {% for item in items_list|slice:"0:5" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"5:10" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"10:15" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"15:20" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"20:25" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"25:30" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }} - {{ item.downtime.description }}</a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
         </tbody>

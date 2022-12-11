@@ -34,6 +34,7 @@ class Pareto(models.Model):
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
     scrap = models.ManyToManyField("ScrapDetail")
+    ops = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f"{self.pareto_date}"
@@ -43,7 +44,7 @@ class Pareto(models.Model):
 
 
 class ParetoDetail(models.Model):
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs", blank=False, null=False)
+    job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs", blank=False, null=False)
     qty = models.PositiveIntegerField(default=0)
     good = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
@@ -72,7 +73,7 @@ class DowntimeModel(models.Model):
 class DowntimeDetail(models.Model):
     downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime", blank=False,
                                  null=False)
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs5", blank=False, null=False)
+    job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs5", blank=False, null=False)
     minutes = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)
@@ -125,7 +126,7 @@ class ScrapModel(models.Model):
 
 class ScrapDetail(models.Model):
     scrap = models.ForeignKey(ScrapModel, on_delete=models.CASCADE, related_name="scrap", blank=False, null=False)
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs3", blank=False, null=False)
+    job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs3", blank=False, null=False)
     qty = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     completed = models.BooleanField(default=False)
@@ -175,3 +176,106 @@ class LineHourModel(models.Model):
     class Meta:
         verbose_name = "Line start hour"
 
+
+class JobModel2(models.Model):
+    name = models.CharField(max_length=64)
+    target = models.IntegerField(default=1615)
+    inner_size = models.PositiveSmallIntegerField(default=0)
+    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=False,
+                              null=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        verbose_name = "Job"
+
+
+# from datetime import timedelta
+#
+# from django.db import models
+# from django.utils.timezone import now
+# from django.utils.translation import gettext as _
+# from django.contrib.auth.models import User
+#
+#
+# class TimerException(Exception):
+#     pass
+#
+#
+# class TimerStartException(TimerException):
+#     pass
+#
+#
+# class TimerResumeException(TimerException):
+#     pass
+#
+#
+# class TimerQuerySet(models.QuerySet):
+#
+#     def start(self, user=None):
+#         timer = self.create(user=user)
+#         timer.start()
+#         return timer
+#
+#
+# class Timer(models.Model):
+#
+#     STATUS = (
+#         ('running', _('running')),
+#         ('paused', _('paused')),
+#         ('stopped', _('stopped')),
+#     )
+#
+#     user = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
+#     status = models.CharField(max_length=12, choices=STATUS)
+#
+#     objects = TimerQuerySet.as_manager()
+#
+#     def duration(self):
+#         return sum([segment.duration() for segment in self.segment_set.all()], timedelta())
+#
+#     def start(self):
+#         if self.segment_set.count() > 0:
+#             raise TimerStartException(_('Timer has already been started.'))
+#         self.segment_set.create()
+#         self.status = 'running'
+#         self.save()
+#
+#     def stop(self):
+#         self.pause()
+#         self.status = 'stopped'
+#         self.save()
+#
+#     def pause(self):
+#         self.segment_set.last().stop()
+#         self.status = 'paused'
+#         self.save()
+#
+#     def resume(self):
+#         if self.status == 'stopped':
+#             raise TimerResumeException(_('Timer has been stopped and cannot be resumed.'))
+#         if not self.segment_set.last().stop_time:
+#             raise TimerResumeException(_('Cannot resume, if timer is still running.'))
+#         self.segment_set.create()
+#         self.status = 'running'
+#         self.save()
+#
+#
+# class Segment(models.Model):
+#
+#     timer = models.ForeignKey(to=Timer, on_delete=models.CASCADE)
+#
+#     start_time = models.DateTimeField(auto_now_add=True)
+#     stop_time = models.DateTimeField(null=True)
+#
+#     def duration(self):
+#         if not self.stop_time:
+#             return now() - self.start_time
+#         return self.stop_time - self.start_time
+#
+#     def stop(self):
+#         if not self.stop_time:
+#             self.stop_time = now()
+#             self.save()

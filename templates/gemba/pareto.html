@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
-
 <div>{% if pareto_status == "Not exist" %}
     <a href="{% url 'gemba_app:pareto-start-new' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Start new Pareto
@@ -16,40 +15,27 @@
     <a href="{% url 'gemba_app:scrap-user-view' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add scrap
     </button></a>
+    <a href="{% url 'gemba_app:pareto-update-view' pk=pareto_list.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update Pareto
+    </button></a>
     <a href="{% url 'gemba_app:close-pareto' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
     </button></a>
     {% endif %}
     </div>
-    <div>
-    <h2>PARETO  Date: {{ pareto_list.pareto_date|date:"d-m-Y" }}</h2>
-    </div>
-    Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours
-    <table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Available time</th>
-            <th scope="col">Availability</th>
-            <th scope="col">Performance</th>
-            <th scope="col">Quality</th>
-            <th scope="col">OEE</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td><b>{{ available_time }} min</b></td>
-            <td>{{ availability }}%</td>
-            <td>{{ performance }}%</td>
-            <td>{{ quality }}%</td>
-            <td><b>{{ oee }}%</b></td>
-        </tr>
-        </tbody>
-    </table>
+    <br/>
+<h2 style="text-align:left;">PARETO  date: {{ pareto_list.pareto_date|date:"d-m-Y" }} <span style="float:right;">
+    Line: {{ user }}</span></h2>
+    <p>Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours -
+        Operators: {{ pareto_list.ops }} - Time available until now: {{ available_time }} min</p>
 
-    <table class="table table-hover">
+<div>
+    <div class = "row">
+    <div class = "col">
+        <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Jobs</th>
+            <th scope="col">Job</th>
             <th scope="col">Output</th>
             <th scope="col">Good</th>
             <th scope="col">Scrap</th>
@@ -80,9 +66,43 @@
             <td> </td>
         </tr>
         </tbody>
-    </table>
+        </table>
+    </div>
+
+    <div class = "col">
+        <table class="table">
+            <thead>
+            <tr>
+                 <th scope="col" style="text-align:right;">OEE</th>
+                <th scope="col">Results</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td style="text-align:right;">Availability<br/>
+                Performance<br/>
+                Quality<br/>
+                    <br/>
+                <p style="font-size:1vw;"><b>OEE</b></p><br/>
+                </td>
+                <td>
+                {{ availability }}%<br/>
+                {{ performance }}%<br/>
+                {{ quality }}%<br/>
+                    <br/>
+                <p style="font-size:1vw;"><b>{{ oee }}%</b></p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
 <div>
-    <div>
+    <div class = "row">
+    <div class = "col">
+    <br/>
     <table class="table table-hover">
         <thead>
         <tr>
@@ -94,7 +114,7 @@
         <tbody>
         {% if pareto_list.downtimes.all|length == 0 %}
               <tr>
-                <td colspan='5'>0 downtimes recorded</td>
+                <td colspan='5'>No downtimes recorded</td>
               </tr>
         {% endif %}
              <tr>{% for pareto_item in pareto_list.downtimes.all %}
@@ -111,8 +131,9 @@
         </tr>
         </tbody>
     </table>
-        </div>
-    <div>
+
+    </div>
+    <div class = "col">
         {% if total_scrap_cal|sub:total_scrap < 0 %} Remove scrap qty:
         {{ total_scrap|sub:total_scrap_cal }} {% else %} Missing qty: {{ total_scrap_cal|sub:total_scrap }} {% endif %}
             <table class="table table-hover">
@@ -126,7 +147,7 @@
         <tbody>
         {% if pareto_list.scrap.all|length == 0 %}
               <tr>
-                <td colspan='5'>0 scrap reasons recorded</td>
+                <td colspan='5'>No scrap reasons recorded</td>
               </tr>
         {% endif %}
              <tr>{% for pareto_item in pareto_list.scrap.all %}
@@ -144,5 +165,7 @@
         </tbody>
     </table>
     </div>
+    </div>
 </div>
+
 {% endblock %}

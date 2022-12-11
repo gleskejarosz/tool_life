@@ -1,8 +1,10 @@
+import csv
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -10,9 +12,9 @@ from django.views.generic import TemplateView, UpdateView, DeleteView, DetailVie
 from django.db.models import Q
 
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
-    DowntimeAdd, DowntimeJobAdd, NewPareto
+    DowntimeAdd, DowntimeJobAdd, NewPareto, ParetoUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2
 from tools.models import JobModel
 
 
@@ -75,7 +77,7 @@ def downtime_detail_create(request, pk):
 
         form = DowntimeMinutes(request.POST or None)
         #job = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")[0]
-        job_id = JobModel.objects.get(name=job)
+        job_id = JobModel2.objects.get(name=job)
         if form.is_valid():
             minutes = form.cleaned_data["minutes"]
             user = request.user
@@ -99,7 +101,7 @@ def downtime_detail_create(request, pk):
             user = request.user
             job = form.cleaned_data["job"]
 
-            job_id = JobModel.objects.get(name=job)
+            job_id = JobModel2.objects.get(name=job)
             downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id,
                                                           pareto_id=pareto_id, pareto_date=pareto_date)
 
@@ -146,7 +148,7 @@ def scrap_detail_create(request, pk):
             qty = form.cleaned_data["qty"]
             user = request.user
 
-            job_id = JobModel.objects.get(name=job)
+            job_id = JobModel2.objects.get(name=job)
 
             scrap_qs = ScrapDetail.objects.filter(user=request.user, completed=False, scrap=scrap, job=job_id)
             if pareto_qs.exists():
@@ -176,7 +178,7 @@ def scrap_detail_create(request, pk):
             user = request.user
             job = form.cleaned_data["job"]
 
-            job_id = JobModel.objects.get(name=job)
+            job_id = JobModel2.objects.get(name=job)
             scrap_qs = ScrapDetail.objects.filter(user=request.user, completed=False, scrap=scrap, job=job_id)
             pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
             if pareto_qs.exists():
@@ -239,15 +241,15 @@ def pareto_detail_form(request):
 class ParetoSummary(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         try:
-            pareto = Pareto.objects.get(user=self.request.user, completed=False)
-
+            user = self.request.user
+            pareto = Pareto.objects.get(user=user, completed=False)
             pareto_status = ""
             status = pareto.completed
             hours = pareto.hours
             time_stamp = pareto.time_stamp
             available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp)
 
-            scrap_details = ParetoDetail.objects.filter(user=self.request.user, completed=False).values("id", "qty",
+            scrap_details = ParetoDetail.objects.filter(user=user, completed=False).values("id", "qty",
                                                                                                         "good", "job")
             total_good = 0
             total_output = 0
@@ -261,7 +263,7 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             quality = quality_cal(good=total_good, output=total_output)
 
-            down_qs = DowntimeDetail.objects.filter(user=self.request.user, completed=False).values("id", "minutes")
+            down_qs = DowntimeDetail.objects.filter(user=user, completed=False).values("id", "minutes")
             total_down = 0
             if down_qs.exists():
                 for down in down_qs:
@@ -270,7 +272,7 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             availability = availability_cal(available_time=available_time, downtime=total_down)
 
-            scrap_qs = ScrapDetail.objects.filter(user=self.request.user, completed=False).values("id", "qty")
+            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False).values("id", "qty")
             total_scrap = 0
             if scrap_qs.exists():
                 for scrap in scrap_qs:
@@ -296,6 +298,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                           template_name='gemba/pareto.html',
                           context={
                               "pareto_list": pareto,
+                              "user": user,
                               "pareto_status": pareto_status,
                               "available_time": available_time,
                               "availability": availability,
@@ -311,6 +314,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                           )
         except ObjectDoesNotExist:
             pareto_status = "Not exist"
+            user = self.request.user
             available_time = 0
             availability = 0
             quality = 0
@@ -326,6 +330,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                           template_name='gemba/pareto.html',
                           context={
                               "available_time": available_time,
+                              "user": user,
                               "availability": availability,
                               "quality": quality,
                               "performance": performance,
@@ -551,11 +556,12 @@ def pareto_create_new(request):
     if form.is_valid():
         shift = form.cleaned_data["shift"]
         hours = form.cleaned_data["hours"]
+        ops = form.cleaned_data["ops"]
         time_start = LineHourModel.objects.get(user=user, shift=shift)
 
         time_stamp = datetime.strptime(str(time_start), "%H:%M:%S")
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                              time_stamp=time_stamp)
+                              time_stamp=time_stamp, ops=ops)
         return redirect("gemba_app:pareto-summary")
 
     return render(
@@ -565,6 +571,13 @@ def pareto_create_new(request):
     )
 
 
+class ParetoUpdateView(UpdateView):
+    model = Pareto
+    template_name = "form.html"
+    form_class = ParetoUpdateForm
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
 class ScrapDetailView(DetailView):
     model = ScrapDetail
     template_name = "gemba/scrap_detail_view.html"
@@ -572,7 +585,7 @@ class ScrapDetailView(DetailView):
 
 class ScrapUpdateView(UpdateView):
     model = ScrapDetail
-    fields = ("qty",)
+    fields = ("job", "qty",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -590,7 +603,7 @@ class DowntimeDetailView(DetailView):
 
 class DowntimeUpdateView(UpdateView):
     model = DowntimeDetail
-    fields = ("minutes",)
+    fields = ("job", "minutes",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -746,21 +759,6 @@ def scrap_user_list(request):
     )
 
 
-# def job_user_list(request):
-#     group_qs = DowntimeGroup.objects.filter(user=request.user)
-#     group = group_qs[0]
-#     job_qs = JobUser.objects.filter(group=group)
-#
-#     return render(
-#         request,
-#         template_name="gemba/job_user_view.html",
-#         context={
-#             "job_qs": job_qs,
-#             "group": group,
-#         },
-#     )
-
-
 class SearchResultsView(ListView):
     model = DowntimeDetail
     template_name = "gemba/downtimes_search.html"
@@ -789,3 +787,93 @@ class ScrapSearchResultsView(ListView):
             Q(pareto_id__icontains=query)
         ).order_by('-id')
         return object_list
+
+
+def quarantine_view(request):
+    quarantine_qs = ScrapDetail.objects.filter(scrap=8).order_by("-id")
+
+    return render(
+        request,
+        template_name="gemba/quarantine_view.html",
+        context={
+            "quarantine_qs": quarantine_qs,
+        },
+    )
+
+
+def export_scrap_csv(request):
+    operations = ScrapDetail.objects.all()
+    # search_result = OperationFilter(request.GET, queryset=operations).qs
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="Scrap_reasons.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["Date", "User/Line", "Code", "Description", "Qty", "Pareto_id"])
+    for e in operations.values_list("pareto_date",
+                                       "user_id__username",
+                                       "scrap__code",
+                                       "scrap__description",
+                                       "qty",
+                                       "pareto_id"):
+        writer.writerow(e)
+    return response
+
+# from django.views.generic import View
+# from django.http import JsonResponse, Http404
+#
+# from gemba.models import Timer, TimerResumeException
+
+
+# class TimerView(View):
+#
+#     def get_json_response(self):
+#         if not hasattr(self, 'timer') or not self.timer:
+#             raise Http404
+#         return JsonResponse({
+#             'status': self.timer.status,
+#             'duration': self.timer.duration().total_seconds(),
+#         })
+#
+#     def get_timer(self, pk):
+#         try:
+#             return Timer.objects.get(pk=pk)
+#         except Timer.DoesNotExist:
+#             pass
+#
+#     def post(self, request, pk=None):
+#         self.timer = self.get_timer(pk)
+#         self.action(request, pk)
+#         return self.get_json_response()
+#
+#     def get_user(self, request):
+#         if request.user.is_authenticated:
+#             return request.user
+#
+#     def action(self, request, pk):
+#         raise NotImplementedError('{} has to define an action method.'.format(self.__class__))
+#
+#
+# class Start(TimerView):
+#
+#     def action(self, request, pk):
+#         self.timer.start()
+#
+#
+# class Pause(TimerView):
+#
+#     def action(self, request, pk):
+#         self.timer.pause()
+#
+#
+# class Resume(TimerView):
+#
+#     def action(self, request, pk):
+#         try:
+#             self.timer.resume()
+#         except TimerResumeException:
+#             pass
+#
+#
+# class Stop(TimerView):
+#
+#     def action(self, request, pk):
+#         self.timer.stop()

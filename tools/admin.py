@@ -5,7 +5,7 @@ from tools.models import JobModel, JobStationModel, JobUpdate, MachineModel, Ope
 
 class JobModelAdmin(admin.ModelAdmin):
     ordering = ("name",)
-    list_display = ("name", "target",)
+    list_display = ("id", "name", "target",)
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [

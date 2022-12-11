@@ -17,17 +17,17 @@
         <tbody>
     <tr>
     {% for item in general_list|slice:"0:5" %}
-    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"5:10" %}
-    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in general_list|slice:"10:15" %}
-    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         </tbody>
@@ -54,17 +54,17 @@
         {% endif %}
     <tr>
     {% for item in items_list|slice:"0:5" %}
-    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"5:10" %}
-    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
     <tr>
     {% for item in items_list|slice:"10:15" %}
-    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }} - {{ item.scrap.description }}</a></td>
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         </tbody>

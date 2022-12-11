@@ -1,4 +1,5 @@
 from django.urls import path
+from django.conf.urls import url
 
 from gemba import views
 
@@ -7,6 +8,7 @@ app_name = "gemba_app"
 
 urlpatterns = [
     path("gemba/index/", views.GembaIndex.as_view(), name="index"),
+    # path("timer/", views.TimerView.as_view(), name="timer"),
     path("gemba/pareto_summary/", views.ParetoSummary.as_view(), name="pareto-summary"),
     path("gemba/downtimes_view/", views.downtimes_view, name="downtimes-view"),
     path("gemba/scraps_view/", views.scraps_view, name="scraps-view"),
@@ -23,6 +25,7 @@ urlpatterns = [
     path("search-result/", views.SearchResultsView.as_view(), name="search-result"),
     path("scrap-search-result/", views.ScrapSearchResultsView.as_view(), name="scrap-search-result"),
     path("scrap_detail_view/<pk>/", views.ScrapDetailView.as_view(), name="scrap-detail-view"),
+    path("pareto_update_view/<pk>/", views.ParetoUpdateView.as_view(), name="pareto-update-view"),
     path("scrap_update_view/<pk>/", views.ScrapUpdateView.as_view(), name="scrap-update-view"),
     path("scrap_delete_view/<pk>/", views.ScrapDeleteView.as_view(), name="scrap-delete-view"),
     path("add_scrap_view/<pk>/", views.add_scrap_detail, name="add-scrap-view"),
@@ -34,4 +37,10 @@ urlpatterns = [
     path("pareto_details_view/<pk>/", views.ParetoDetailView.as_view(), name="pareto-details-view"),
     path("pareto_details_update_view/<pk>/", views.ParetoDetailUpdateView.as_view(), name="pareto-details-update-view"),
     path("pareto_details_delete_view/<pk>/", views.ParetoDetailDeleteView.as_view(), name="pareto-details-delete-view"),
+    path("gemba/quarantine_view/", views.quarantine_view, name="quarantine-view"),
+    path("export_scrap_csv/", views.export_scrap_csv, name="export-scrap-csv"),
+    # url(r'^(?P<pk>\d+)/start/$', views.Start.as_view(), name='start_timer'),
+    # url(r'^(?P<pk>\d+)/pause/$', views.Pause.as_view(), name='pause_timer'),
+    # url(r'^(?P<pk>\d+)/resume/$', views.Resume.as_view(), name='resume_timer'),
+    # url(r'^(?P<pk>\d+)/stop/$', views.Stop.as_view(), name='stop_timer'),
     ]

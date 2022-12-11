@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+{% load timer l10n i18n %}
+<div class="django-timer">
+    <form action="" method="POST">
+        {% csrf_token %}
+        <div class="django-timer-display {% if timer.status == 'running' %}active{% endif %}"
+            value="{{ timer.duration.total_seconds | unlocalize }}"
+            >
+            {{ timer.duration | hhmmss }}
+        </div>
+        <div class="django-timer-buttons">
+            {% if not timer.status %}
+            <button id="django-timer-start" formaction="{% url 'start_timer' timer.pk %}">{% trans 'Start' %}</button>
+            {% elif timer.status == 'running' %}
+            <button id="django-timer-pause" formaction="{% url 'pause_timer' timer.pk %}">{% trans 'Pause' %}</button>
+            <button id="django-timer-stop" formaction="{% url 'stop_timer' timer.pk %}">{% trans 'Stop' %}</button>
+            {% elif timer.status == 'paused' %}
+            <button id="django-timer-resume" formaction="{% url 'resume_timer' timer.pk %}">{% trans 'Weiter' %}</button>
+            <button id="django-timer-stop" formaction="{% url 'stop_timer' timer.pk %}">{% trans 'Stop' %}</button>
+            {% endif %}
+        </div>
+    </form>
+</div>
+{% endblock %}

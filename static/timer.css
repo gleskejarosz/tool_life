@@ -1,0 +1,69 @@
+.django-timer * {
+    box-sizing: border-box;
+}
+
+/* Buttons */
+
+.django-timer-buttons {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: baseline;
+}
+
+.django-timer-buttons > * {
+    margin-right: 6px;
+}
+
+.django-timer-buttons button {
+    border: unset;
+    padding: 6px 12px;
+    cursor: pointer;
+    background: #337ab4;
+    color: #fff;
+    border-radius: 4px;
+}
+
+#django-timer-stop {
+    background: red;
+}
+
+#django-timer-start,
+#django-timer-resume {
+    background: green;
+}
+
+/* Segments */
+
+.django-timer-segments {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    list-style: none;
+    padding: 0;
+}
+
+#django-timer-segments-toggler {
+    font-size: smaller;
+    color: #337ab4;
+    cursor: pointer;
+}
+
+#django-timer-segments-toggler:hover {
+    text-decoration: underline
+}
+
+
+.django-timer-segments .inactive {
+    color: #555;
+}
+
+.django-timer-segments .hide {
+    display: none;
+}
+
+.django-timer-segments li {
+    padding: 6px 12px;
+}
+
+.django-timer-segments li:not(:last-child) {
+    border-bottom: 1px solid #ccc;
+}
