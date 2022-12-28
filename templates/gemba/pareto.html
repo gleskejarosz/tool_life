@@ -27,7 +27,8 @@
 <h2 style="text-align:left;">PARETO  date: {{ pareto_list.pareto_date|date:"d-m-Y" }} <span style="float:right;">
     Line: {{ user }}</span></h2>
     <p>Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours -
-        Operators: {{ pareto_list.ops }} - Time available until now: {{ available_time }} min</p>
+        Operators: {{ pareto_list.ops }} - Time available until now: {{ available_time }} min - Not scheduled to run:
+        {{ pareto_list.not_scheduled_to_run}} min</p>
 
 <div>
     <div class = "row">

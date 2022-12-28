@@ -9,19 +9,6 @@
             <th scope="col">Line / User</th>
             <th scope="col">Date</th>
             <th scope="col">Shift</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td><b>{{ pareto_list.user }}</b></td>
-            <td>{{ pareto_list.pareto_date|date:"d-m-Y" }}</td>
-            <td>{{ pareto_list.shift }}</td>
-        </tr>
-        </tbody>
-    </table>
-    <table class="table table-hover">
-        <thead>
-        <tr>
             <th scope="col">Available time</th>
             <th scope="col">Downtime</th>
             <th scope="col">Availability</th>
@@ -32,6 +19,9 @@
         </thead>
         <tbody>
         <tr>
+            <td><b>{{ pareto_list.user }}</b></td>
+            <td>{{ pareto_list.pareto_date|date:"d-m-Y" }}</td>
+            <td>{{ pareto_list.shift }}</td>
             <td>{{ available_time }} min</td>
             <td>{{ downtime }} min</td>
             <td>{{ availability }}%</td>
@@ -41,7 +31,6 @@
         </tr>
         </tbody>
     </table>
-
 
     <table class="table table-hover">
         <thead>

@@ -26,5 +26,7 @@
             </tr>
         </tbody>
     </table>
-<p><a href="{% url 'gemba_app:export-scrap-csv' %}">Export search result</a></p>
+<div><a href="{% url 'gemba_app:export-scrap-csv' %}?{{request.GET.urlencode}}">
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export to CSV
+</button></a></div>
 {% endblock %}

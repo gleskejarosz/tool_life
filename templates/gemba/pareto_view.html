@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
-{% load mathfilters %}
-
-<h4>Daily OEE Report</h4>
-
+<h4>Daily OEE Report:</h4>
+Select a date
+ <form action="{% url 'gemba_app:daily-pareto-search-result' %}" method="get">
+    <input name="q" type="date">
+     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
+    </button>
+ </form>
 <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Date</th>
+          <th scope="col">Date</th>
             <th scope="col">Line / User</th>
             <th scope="col">Shift</th>
             <th scope="col">Availability</th>
@@ -17,7 +20,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for item in object_list %}
+        {% for item in report_list %}
         <tr>
             <td><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.date|date:"d-m-Y" }}</a></td>
             <td>{{ item.user }}</td>
@@ -30,7 +33,4 @@
         {% endfor %}
         </tbody>
 </table>
-<div><a href="{% url 'gemba_app:export_daily_oee_report' %}?{{request.GET.urlencode}}">
-<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export to CSV
-</button></a></div>
 {% endblock %}

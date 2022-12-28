@@ -11,20 +11,12 @@ from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 from django.db.models import Q
 
+from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, ScrapQuantityJob, DowntimeMinutesJob, \
-    DowntimeAdd, DowntimeJobAdd, NewPareto, ParetoUpdateForm
+    DowntimeAdd, DowntimeJobAdd, NewPareto, ParetoUpdateForm, NotScheduledToRunUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobModel2
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, Timer
 from tools.models import JobModel
-
-
-def index(request):
-    items_list = Pareto.objects.all().order_by("-pareto_date")
-    return render(
-        request,
-        template_name="gemba/pareto.html",
-        context={'object_list': items_list},
-    )
 
 
 class GembaIndex(TemplateView):
@@ -33,7 +25,7 @@ class GembaIndex(TemplateView):
 
 def downtimes_view(request):
     downtimes = DowntimeDetail.objects.all().order_by("-pareto_date")
-    today_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now()-timedelta(days=7)).order_by(
+    today_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
         "-pareto_date")
     return render(request,
                   template_name="gemba/downtimes_view.html",
@@ -45,7 +37,7 @@ def downtimes_view(request):
 
 def scraps_view(request):
     scraps = ScrapDetail.objects.all().order_by("-pareto_date")
-    today_downtimes = ScrapDetail.objects.filter(pareto_date__gte=datetime.now()-timedelta(days=7)).order_by(
+    today_downtimes = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
         "-pareto_date")
     return render(request,
                   template_name="gemba/scraps_view.html",
@@ -76,7 +68,7 @@ def downtime_detail_create(request, pk):
             job = down_elem_exists.job
 
         form = DowntimeMinutes(request.POST or None)
-        #job = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")[0]
+        # job = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")[0]
         job_id = JobModel2.objects.get(name=job)
         if form.is_valid():
             minutes = form.cleaned_data["minutes"]
@@ -105,7 +97,6 @@ def downtime_detail_create(request, pk):
             downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id,
                                                           pareto_id=pareto_id, pareto_date=pareto_date)
 
-            #pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
             if pareto_qs.exists():
                 pareto = pareto_qs[0]
                 pareto.downtimes.add(downtime_elem)
@@ -247,10 +238,11 @@ class ParetoSummary(LoginRequiredMixin, View):
             status = pareto.completed
             hours = pareto.hours
             time_stamp = pareto.time_stamp
-            available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp)
+            not_scheduled_to_run = pareto.not_scheduled_to_run
+            available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
+                                                not_scheduled_to_run=not_scheduled_to_run)
 
-            scrap_details = ParetoDetail.objects.filter(user=user, completed=False).values("id", "qty",
-                                                                                                        "good", "job")
+            scrap_details = ParetoDetail.objects.filter(user=user, completed=False).values("id", "qty", "good", "job")
             total_good = 0
             total_output = 0
             if scrap_details.exists():
@@ -345,9 +337,9 @@ class ParetoSummary(LoginRequiredMixin, View):
                           )
 
 
-def available_time_cal(status, hours, time_stamp):
+def available_time_cal(status, hours, time_stamp, not_scheduled_to_run):
     if status is True:
-        available_time = int(hours) * 60
+        available_time = int(hours) * 60 - not_scheduled_to_run
     else:
         now = datetime.now()
         sec_now = int(now.strftime('%S'))
@@ -382,7 +374,7 @@ def availability_cal(available_time, downtime):
     if available_time == 0:
         availability = 0
     else:
-        availability = round(((available_time - downtime) / available_time) * 100)
+        availability = round(((available_time - downtime) / available_time * 100))
     return availability
 
 
@@ -397,7 +389,9 @@ def pareto_detail_view(request, pk):
     status = pareto.completed
     hours = pareto.hours
     time_stamp = pareto.time_stamp
-    available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp)
+    not_scheduled_to_run = pareto.not_scheduled_to_run
+    available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
+                                        not_scheduled_to_run=not_scheduled_to_run)
 
     output = 0
     good = 0
@@ -442,28 +436,6 @@ def pareto_detail_view(request, pk):
                   )
 
 
-# @login_required
-# def add_to_pareto(request, pk):
-#     job = get_object_or_404(JobModel, pk=pk)
-#     pareto_item, created = ParetoDetail.objects.get_or_create(job=job, user=request.user, completed=False)
-#     pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
-#     if pareto_qs.exists():
-#         pareto = pareto_qs[0]
-#         print(pareto_qs)
-#         if pareto.jobs.filter(job__pk=job.pk).exists():
-#             pareto_item.qty += 1
-#             pareto_item.save()
-#             return redirect("gemba_app:pareto-summary")
-#         else:
-#             pareto.jobs.add(pareto_item)
-#             return redirect("gemba_app:pareto-summary")
-#
-#     else:
-#         pareto = Pareto.objects.create(user=request.user, pareto_date=datetime.today())
-#         pareto.jobs.add(pareto_item)
-#         return redirect("gemba_app:pareto-summary")
-
-
 @login_required
 def close_pareto(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
@@ -489,11 +461,13 @@ def close_pareto(request):
     return redirect("gemba_app:index")
 
 
-def daily_oee_report(request):
-    paretos = Pareto.objects.all().order_by("-pareto_date")
-
+def get_details_to_display(object_list):
+    """
+    Organizing data to be displayed in the form of a list of dictionaries, taking into account OEE calculations.
+    Used in Daily OEE Report.
+    """
     report_list = []
-    for pareto in paretos:
+    for pareto in object_list:
         date = pareto.pareto_date
         id = pareto.id
         shift = pareto.shift
@@ -501,7 +475,9 @@ def daily_oee_report(request):
         status = pareto.completed
         hours = pareto.hours
         time_stamp = pareto.time_stamp
-        available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp)
+        not_scheduled_to_run = pareto.not_scheduled_to_run
+        available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
+                                            not_scheduled_to_run=not_scheduled_to_run)
 
         output = 0
         good = 0
@@ -539,9 +515,46 @@ def daily_oee_report(request):
             "quality": quality,
             "oee": oee,
         })
+    return report_list
+
+
+class DailyParetoSearchResultsView(ListView):
+    model = Pareto
+    template_name = "gemba/daily_oee_report.html"
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        report_list = Pareto.objects.filter(
+            Q(pareto_date__exact=query)
+        ).order_by('-user')
+        object_list = get_details_to_display(object_list=report_list)
+        return object_list
+
+
+def export_daily_oee_report_csv(request):
+    query = request.GET.get("q")
+    report_list = Pareto.objects.filter(
+        Q(pareto_date__exact=query)
+    ).order_by('-user')
+    object_list = get_details_to_display(object_list=report_list)
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="Daily_Report.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["Id", "Date", "Shift", "User/Line", "Availability", "Performance", "Quality", "OEE"])
+    for e in object_list:
+        row = e.values()
+        writer.writerow(row)
+    return response
+
+
+def pareto_view(request):
+    today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by('-user')
+
+    report_list = get_details_to_display(object_list=today_pareto)
 
     return render(request,
-                  template_name="gemba/daily_oee_report.html",
+                  template_name="gemba/pareto_view.html",
                   context={
                       "report_list": report_list,
                   },
@@ -722,6 +735,7 @@ def add_downtime_detail(request):
 
 
 def downtime_user_list(request):
+    pareto = Pareto.objects.get(user=request.user, completed=False)
     general_list = DowntimeUser.objects.filter(group=1).order_by("order")
     group_qs = DowntimeGroup.objects.filter(user=request.user)
     if group_qs.exists():
@@ -734,6 +748,7 @@ def downtime_user_list(request):
         request,
         template_name="gemba/downtime_user_view.html",
         context={
+            "pareto": pareto,
             "general_list": general_list,
             "items_list": items_list,
         },
@@ -801,79 +816,185 @@ def quarantine_view(request):
     )
 
 
-def export_scrap_csv(request):
-    operations = ScrapDetail.objects.all()
-    # search_result = OperationFilter(request.GET, queryset=operations).qs
+def export_scrap_search_csv(request):
+    query = request.GET.get("q")
+    object_list = ScrapDetail.objects.filter(
+        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
+        Q(scrap__code__icontains=query) | Q(scrap__description__icontains=query) |
+        Q(qty__icontains=query) | Q(job__name__icontains=query) |
+        Q(pareto_id__icontains=query)
+    ).order_by('id')
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="Scrap_reasons.csv"'
     writer = csv.writer(response)
-    writer.writerow(["Date", "User/Line", "Code", "Description", "Qty", "Pareto_id"])
-    for e in operations.values_list("pareto_date",
-                                       "user_id__username",
-                                       "scrap__code",
-                                       "scrap__description",
-                                       "qty",
-                                       "pareto_id"):
-        writer.writerow(e)
+    writer.writerow(["Id", "Date", "User/Line", "Code - Description", "Qty", "Job", "Pareto id"])
+    for e in object_list:
+        writer.writerow([e.id,
+                         e.pareto_date,
+                         e.user,
+                         e.scrap,
+                         e.qty,
+                         e.job,
+                         e.pareto_id,
+                         ])
     return response
 
-# from django.views.generic import View
-# from django.http import JsonResponse, Http404
-#
-# from gemba.models import Timer, TimerResumeException
+
+def export_downtime_search_result_csv(request):
+    query = request.GET.get("q")
+    object_list = DowntimeDetail.objects.filter(
+        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
+        Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
+        Q(minutes__icontains=query) | Q(job__name__icontains=query) |
+        Q(pareto_id__icontains=query)
+    ).order_by('id')
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="Downtime_reasons.csv"'
+    writer = csv.writer(response)
+    writer.writerow(["Id", "Date", "User/Line", "Code - Description", "Minutes", "Job", "Pareto id"])
+    for e in object_list:
+        writer.writerow([e.id,
+                         e.pareto_date,
+                         e.user,
+                         e.downtime,
+                         e.minutes,
+                         e.job,
+                         e.pareto_id,
+                         ])
+    return response
 
 
-# class TimerView(View):
-#
-#     def get_json_response(self):
-#         if not hasattr(self, 'timer') or not self.timer:
-#             raise Http404
-#         return JsonResponse({
-#             'status': self.timer.status,
-#             'duration': self.timer.duration().total_seconds(),
-#         })
-#
-#     def get_timer(self, pk):
-#         try:
-#             return Timer.objects.get(pk=pk)
-#         except Timer.DoesNotExist:
-#             pass
-#
-#     def post(self, request, pk=None):
-#         self.timer = self.get_timer(pk)
-#         self.action(request, pk)
-#         return self.get_json_response()
-#
-#     def get_user(self, request):
-#         if request.user.is_authenticated:
-#             return request.user
-#
-#     def action(self, request, pk):
-#         raise NotImplementedError('{} has to define an action method.'.format(self.__class__))
-#
-#
-# class Start(TimerView):
-#
-#     def action(self, request, pk):
-#         self.timer.start()
-#
-#
-# class Pause(TimerView):
-#
-#     def action(self, request, pk):
-#         self.timer.pause()
-#
-#
-# class Resume(TimerView):
-#
-#     def action(self, request, pk):
-#         try:
-#             self.timer.resume()
-#         except TimerResumeException:
-#             pass
-#
-#
-# class Stop(TimerView):
-#
-#     def action(self, request, pk):
-#         self.timer.stop()
+import xlwt
+
+
+def export_downtimes_xls(request):
+    query = request.GET.get("q")
+    object_list = DowntimeDetail.objects.filter(
+        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
+        Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
+        Q(minutes__icontains=query) | Q(job__name__icontains=query) |
+        Q(pareto_id__icontains=query)
+    ).order_by('id')
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xls"'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Report')
+
+    row_num = 1
+    rows = object_list.values('id', 'pareto_date', 'user__username', 'downtime__code', 'downtime__description',
+                              'minutes', 'job__name', 'pareto_id')
+    row_list = ['id', 'pareto_date', 'user__username', 'downtime__code', 'downtime__description',
+                'minutes', 'job__name', 'pareto_id']
+    headers = ["Id", "Pareto date", "Line / User", "Code", "Description", "Minutes", "Job", "Pareto Id"]
+    for col_num in range(len(row_list)):
+        style = xlwt.easyxf('font: bold 1')
+        ws.write(0, col_num, headers[col_num], style)
+
+    for row in rows:
+        for col_num in range(len(row_list)):
+            elem = row[row_list[col_num]]
+            ws.write(row_num, col_num, elem)
+        row_num += 1
+    wb.save(response)
+
+    return response
+
+
+class IndexView(ListView):
+    model = Timer
+
+    def post(self, request):
+        Timer.objects.create()
+        return redirect('gemba/index.html')
+
+
+class ParetoNSUpdateView(UpdateView):
+    model = Pareto
+    template_name = "form.html"
+    form_class = NotScheduledToRunUpdateForm
+    success_url = reverse_lazy("gemba_app:pareto-summary")
+
+
+def pareto_details_query(request):
+    details = ParetoDetail.objects.all().order_by("-pareto_date")
+    details_filter = ParetoDetailFilter(request.GET, queryset=details)
+
+    details_list = details_filter.qs
+    total_output = 0
+    total_good = 0
+    for detail in details_list.values_list("qty", "good"):
+        total_output += detail[0]
+        total_good += detail[1]
+    return render(
+        request,
+        template_name="gemba/pareto_details_view.html",
+        context={
+            "filter": details_filter,
+            "total_output": total_output,
+            "total_good": total_good,
+        },
+    )
+
+
+from django.views.generic import View
+from django.http import JsonResponse, Http404
+
+from gemba.models import Timer, TimerResumeException
+
+
+class TimerView(View):
+
+    def get_json_response(self):
+        if not hasattr(self, 'timer') or not self.timer:
+            raise Http404
+        return JsonResponse({
+            'status': self.timer.status,
+            'duration': self.timer.duration().total_seconds(),
+        })
+
+    def get_timer(self, pk):
+        try:
+            return Timer.objects.get(pk=pk)
+        except Timer.DoesNotExist:
+            pass
+
+    def post(self, request, pk=None):
+        self.timer = self.get_timer(pk)
+        self.action(request, pk)
+        return self.get_json_response()
+
+    def get_user(self, request):
+        if request.user.is_authenticated:
+            return request.user
+
+    def action(self, request, pk):
+        raise NotImplementedError('{} has to define an action method.'.format(self.__class__))
+
+
+class Start(TimerView):
+
+    def action(self, request, pk):
+        self.timer.start()
+
+
+class Pause(TimerView):
+
+    def action(self, request, pk):
+        self.timer.pause()
+
+
+class Resume(TimerView):
+
+    def action(self, request, pk):
+        try:
+            self.timer.resume()
+        except TimerResumeException:
+            pass
+
+
+class Stop(TimerView):
+
+    def action(self, request, pk):
+        self.timer.stop()

@@ -2,6 +2,8 @@
 {% block content %}
 <h4>Downtime reasons:</h4>
 <div>
+    <p><a href="{% url 'gemba_app:pareto-ns-update-view' pk=pareto.pk %}">
+        Not scheduled to run - {{ pareto.not_scheduled_to_run }} min</a></p>
     <br/>
     <h6>General downtime reasons</h6>
     <table class="table">
@@ -18,8 +20,7 @@
     <tr>
 
     {% for item in general_list|slice:"0:5" %}
-    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">
-        <div style="background-color:white">{{ item.downtime }}</div></a></td>
+    <td><a href="{% url 'gemba_app:downtime-detail-create' pk=item.downtime.pk %}">{{ item.downtime }}</a></td>
     {% endfor %}
     </tr>
     <tr>

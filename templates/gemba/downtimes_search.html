@@ -26,4 +26,11 @@
             </tr>
         </tbody>
     </table>
+<div><a href="{% url 'gemba_app:export-downtimes-csv' %}?{{request.GET.urlencode}}">
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export to CSV
+</button></a></div>
+<br/>
+<div><a href="{% url 'gemba_app:export-downtimes-xls' %}?{{request.GET.urlencode}}">
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export to xls
+</button></a></div>
 {% endblock %}

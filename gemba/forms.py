@@ -65,4 +65,8 @@ class ParetoUpdateForm(forms.ModelForm):
         }
 
 
+class NotScheduledToRunUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Pareto
+        fields = ["not_scheduled_to_run"]
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, ParetoDetail, \
-    ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2
+    ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2, Timer
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -22,12 +22,12 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     def admin_downtimes(self, obj):
         return obj.pareto_date.strftime('%d-%m-%Y')
     ordering = ("-id",)
-    list_display = ("id", "admin_downtimes", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
+    list_display = ("id", "pareto_date", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "admin_downtimes", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "downtime", "job", "minutes", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
@@ -48,13 +48,13 @@ class ParetoDetailAdmin(admin.ModelAdmin):
 
 class ParetoAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "user", "shift", "hours", "ops", "completed", )
+    list_display = ("id", "pareto_date", "user", "shift", "hours", "ops", "completed", "not_scheduled_to_run", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "user", "pareto_date", "time_stamp", "shift", "hours", "completed", "jobs", "downtimes",
-                       "scrap", "ops"],
+            "fields": ["id", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run", "completed",
+                       "jobs", "downtimes", "scrap", "ops"],
         }),
     ]
     readonly_fields = ["id", "user", "jobs", "downtimes", "scrap"]
@@ -137,3 +137,4 @@ admin.site.register(DowntimeUser, DowntimeUserModelAdmin)
 admin.site.register(DowntimeGroup, DowntimeGroupModelAdmin)
 admin.site.register(ScrapUser, ScrapUserModelAdmin)
 admin.site.register(JobModel2)
+admin.site.register(Timer)

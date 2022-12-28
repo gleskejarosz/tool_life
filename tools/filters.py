@@ -1,4 +1,5 @@
 import django_filters
+from django.forms import DateInput
 
 from tools.models import JobUpdate, OperationModel
 
@@ -6,9 +7,9 @@ from tools.models import JobUpdate, OperationModel
 class JobFilter(django_filters.FilterSet):
     date = django_filters.DateFilter()
     date_gte = django_filters.DateFilter(label="Date after...", field_name='date',
-                                               lookup_expr='gte')
+                                               lookup_expr='gte', widget=DateInput(attrs={'type': 'date'}))
     date_lte = django_filters.DateFilter(label="Date before...", field_name='date',
-                                               lookup_expr='lte')
+                                               lookup_expr='lte', widget=DateInput(attrs={'type': 'date'}))
     job = django_filters.CharFilter(field_name='job_id__name', label="Job", lookup_expr="contains")
     parts = django_filters.CharFilter(lookup_expr="contains", label="Parts")
 
@@ -27,14 +28,14 @@ class OperationFilter(django_filters.FilterSet):
     tool = django_filters.CharFilter(field_name='tool_id__name', label="Tool", lookup_expr="contains")
     start_date = django_filters.DateFilter()
     start_date_gte = django_filters.DateFilter(label="Start Date after...", field_name='start_date',
-                                               lookup_expr='gte')
+                                               lookup_expr='gte', widget=DateInput(attrs={'type': 'date'}))
     start_date_lte = django_filters.DateFilter(label="Start Date before...", field_name='start_date',
-                                               lookup_expr='lte')
+                                               lookup_expr='lte', widget=DateInput(attrs={'type': 'date'}))
     finish_date = django_filters.DateFilter()
     finish_date_gte = django_filters.DateFilter(label="Finish Date after...", field_name='finish_date',
-                                                lookup_expr='gte')
+                                                lookup_expr='gte', widget=DateInput(attrs={'type': 'date'}))
     finish_date_lte = django_filters.DateFilter(label="Finish Date before...", field_name='finish_date',
-                                                lookup_expr='lte')
+                                                lookup_expr='lte', widget=DateInput(attrs={'type': 'date'}))
     status = django_filters.ChoiceFilter(choices=STATUS_CHOICES, label="Status")
     hours = django_filters.NumberFilter()
     hours_lte = django_filters.NumberFilter(label="Hours less than...", field_name="hours", lookup_expr="lte")

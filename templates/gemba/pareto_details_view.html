@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+{% load widget_tweaks %}
+{% load mathfilters %}
+<h4>Pareto Details View:</h4>
+<form method="get">
+    <div class="well">
+        <p><a href="{% url 'gemba_app:pareto-details' %}">Clear all filters</a></p>
+      <div class="row">
+            <div class="form-group col-sm-4 col-md-3">
+              {{ filter.form.pareto_date_gte.label_tag }}
+              {% render_field filter.form.pareto_date_gte class="form-control" %}
+            </div>
+            <div class="form-group col-sm-4 col-md-3">
+              {{ filter.form.pareto_date_lte.label_tag }}
+              {% render_field filter.form.pareto_date_lte class="form-control" %}
+            </div>
+            <div class="form-group col-sm-4 col-md-3">
+              {{ filter.form.job.label_tag }}
+              {% render_field filter.form.job class="form-control" %}
+            </div>
+            <div class="form-group col-sm-4 col-md-3">
+              {{ filter.form.user.label_tag }}
+              {% render_field filter.form.user class="form-control" %}
+            </div>
+
+      </div>
+        <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+</form>
+
+<table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">User / Line</th>
+                <th scope="col">Job</th>
+                <th scope="col">Pareto ID</th>
+                <th scope="col">Output</th>
+                <th scope="col">Good</th>
+                <th scope="col">Scrap</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for object in filter.qs %}
+            <tr>
+                <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
+                <td>{{ object.user }}</td>
+                <td>{{ object.job }}</td>
+                <td>{{ object.pareto_id }}</td>
+                <td>{{ object.qty }}</td>
+                <td>{{ object.good }}</td>
+                <td>{{ object.qty|sub:object.good }}</td>
+            </tr>
+        {% endfor %}
+            <tr>
+                <td><b>Total</b></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td><b>{{ total_output }}</b></td>
+                <td><b>{{ total_good }}</b></td>
+                <td><b>{{ total_output|sub:total_good }}</b></td>
+            </tr>
+        </tbody>
+</table>
+{% endblock %}
