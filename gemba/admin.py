@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, ParetoDetail, \
-    ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2, Timer
+from gemba.models import CalculationModel, DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto,\
+    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2, Timer
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -54,14 +54,14 @@ class ParetoAdmin(admin.ModelAdmin):
     fieldsets = [
         ("General", {
             "fields": ["id", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run", "completed",
-                       "jobs", "downtimes", "scrap", "ops"],
+                       "jobs", "job_otg", "downtimes", "scrap", "ops"],
         }),
     ]
     readonly_fields = ["id", "user", "jobs", "downtimes", "scrap"]
 
 
 class ScrapModelAdmin(admin.ModelAdmin):
-    ordering = ("id",)
+    ordering = ("code",)
     list_display = ("code", "description", )
     list_display_links = ("code",)
     list_per_page = 20
@@ -74,7 +74,7 @@ class ScrapModelAdmin(admin.ModelAdmin):
 
 
 class DowntimeModelAdmin(admin.ModelAdmin):
-    ordering = ("id",)
+    ordering = ("code",)
     list_display = ("code", "description", )
     list_display_links = ("code",)
     list_per_page = 20
@@ -88,12 +88,12 @@ class DowntimeModelAdmin(admin.ModelAdmin):
 
 class DowntimeGroupModelAdmin(admin.ModelAdmin):
     ordering = ("id",)
-    list_display = ("name", "description", "user", )
+    list_display = ("name", "description", "user", "calculation", )
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "name", "description", "user"],
+            "fields": ["id", "name", "description", "user", "calculation"],
         }),
     ]
     readonly_fields = ["id"]
@@ -125,6 +125,19 @@ class ScrapUserModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
+class JobModelAdmin2(admin.ModelAdmin):
+    ordering = ("name",)
+    list_display = ("id", "name", "target", "inner_size", "group", )
+    list_display_links = ("name",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "name", "target", "inner_size", "group"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
 admin.site.register(Pareto, ParetoAdmin)
 admin.site.register(ParetoDetail, ParetoDetailAdmin)
 admin.site.register(DowntimeModel, DowntimeModelAdmin)
@@ -136,5 +149,6 @@ admin.site.register(ScrapDetail, ScrapDetailAdmin)
 admin.site.register(DowntimeUser, DowntimeUserModelAdmin)
 admin.site.register(DowntimeGroup, DowntimeGroupModelAdmin)
 admin.site.register(ScrapUser, ScrapUserModelAdmin)
-admin.site.register(JobModel2)
+admin.site.register(JobModel2, JobModelAdmin2)
 admin.site.register(Timer)
+admin.site.register(CalculationModel)

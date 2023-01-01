@@ -1,8 +1,6 @@
 from django.conf import settings
 from django.db import models
 
-from tools.models import JobModel
-
 AM = "Morning shift"
 PM = "Afternoon shift"
 NS = "Night shift"
@@ -36,6 +34,7 @@ class Pareto(models.Model):
     scrap = models.ManyToManyField("ScrapDetail")
     ops = models.PositiveIntegerField(default=0)
     not_scheduled_to_run = models.PositiveIntegerField(default=0)
+    job_otg = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="job5", blank=True, null=True)
 
     def __str__(self):
         return f"{self.pareto_date}"
@@ -80,6 +79,7 @@ class DowntimeDetail(models.Model):
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     pareto_date = models.DateField(blank=True, null=True)
+    frequency = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return f"{self.downtime}"
@@ -92,6 +92,8 @@ class DowntimeGroup(models.Model):
     name = models.CharField(max_length=10, blank=False, null=False)
     description = models.CharField(max_length=64, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, unique=True)
+    calculation = models.ForeignKey("CalculationModel", default=1, on_delete=models.CASCADE, related_name="calc_settings",
+                                    blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -162,7 +164,7 @@ class HourModel(models.Model):
         return f"{self.start}"
 
     class Meta:
-        verbose_name = "Start hour"
+        verbose_name = "Hour"
 
 
 class LineHourModel(models.Model):
@@ -191,6 +193,17 @@ class JobModel2(models.Model):
 
     class Meta:
         verbose_name = "Job"
+
+
+class CalculationModel(models.Model):
+    code = models.CharField(max_length=10, blank=False, null=False)
+    description = models.CharField(max_length=64, blank=False, null=False)
+
+    def __str__(self):
+        return self.code
+
+    class Meta:
+        verbose_name = "Hourly Calculation"
 
 
 from datetime import timedelta

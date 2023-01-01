@@ -1,5 +1,6 @@
 from django.db import models
 
+from gemba.models import JobModel2
 from tools.utils import hours_recalculate
 
 
@@ -24,16 +25,16 @@ class StationModel(models.Model):
         verbose_name = "Station"
 
 
-class JobModel(models.Model):
-    name = models.CharField(max_length=64)
-    target = models.IntegerField(default=1615)
-    inner_size = models.PositiveSmallIntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.name}"
-
-    class Meta:
-        verbose_name = "Job"
+# class JobModel(models.Model):
+#     name = models.CharField(max_length=64)
+#     target = models.IntegerField(default=1615)
+#     inner_size = models.PositiveSmallIntegerField(default=0)
+#
+#     def __str__(self):
+#         return f"{self.name}"
+#
+#     class Meta:
+#         verbose_name = "Job"
 
 
 class ToolModel(models.Model):
@@ -60,7 +61,7 @@ class JobStationModel(models.Model):
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations2", blank=False,
                                 null=False)
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs1", blank=False, null=False)
+    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs1", blank=False, null=False)
 
     def __str__(self):
         return f"{self.job}"
@@ -97,7 +98,7 @@ class OperationModel(models.Model):
 
 class JobUpdate(models.Model):
     date = models.DateField(blank=False, null=False)
-    job = models.ForeignKey(JobModel, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
+    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
     parts = models.PositiveSmallIntegerField(default=0)
     hours = models.DecimalField(decimal_places=2, max_digits=10)
 

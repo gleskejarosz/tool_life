@@ -3,16 +3,36 @@
 <h4>Choose job:</h4>
 <div>
     <br/>
-    <table class="table table-hover">
+    <table class="table">
         <thead>
         <tr>
-            <th scope="col">Job</th>
+            <th scope="col">Jobs</th>
         </tr>
         </thead>
         <tbody>
     <tr>
-    {% for item in job_qs %}
-    <td>{{ item }}</td>
+    {% for item in job_list|slice:"0:10" %}
+    <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in job_list|slice:"11:20" %}
+    <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in job_list|slice:"21:30" %}
+    <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in job_list|slice:"31:40" %}
+    <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
+    {% endfor %}
+    </tr>
+    <tr>
+    {% for item in job_list|slice:"41:50" %}
+    <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
         </tbody>

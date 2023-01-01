@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 {% block content %}
 <h4>Scrap reasons:</h4>
+{% if pareto.job_otg is None or message_status == "Display" %}
+    <div class="alert alert-primary">
+    <strong>Info!</strong> You should <a href="{% url 'gemba_app:job-user-view' %}" class="alert-link">choose a job first!</a>
+    </div>
+{% endif %}
 <div>
     <br/>
     <h6>General scrap reasons</h6>
-    <table class="table table-hover">
+    <table class="table">
         <thead>
         <tr>
             <th scope="col">Code & Description</th>

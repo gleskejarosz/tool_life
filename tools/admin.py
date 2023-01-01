@@ -1,19 +1,19 @@
 from django.contrib import admin
 
-from tools.models import JobModel, JobStationModel, JobUpdate, MachineModel, OperationModel, StationModel, ToolModel
+from tools.models import JobStationModel, JobUpdate, MachineModel, OperationModel, StationModel, ToolModel
 
 
-class JobModelAdmin(admin.ModelAdmin):
-    ordering = ("name",)
-    list_display = ("id", "name", "target",)
-    list_display_links = ("name",)
-    list_per_page = 20
-    fieldsets = [
-        ("General", {
-            "fields": ["id", "name", "target"],
-        }),
-    ]
-    readonly_fields = ["id"]
+# class JobModelAdmin(admin.ModelAdmin):
+#     ordering = ("name",)
+#     list_display = ("id", "name", "target",)
+#     list_display_links = ("name",)
+#     list_per_page = 20
+#     fieldsets = [
+#         ("General", {
+#             "fields": ["id", "name", "target"],
+#         }),
+#     ]
+#     readonly_fields = ["id"]
 
 
 class JobStationModelAdmin(admin.ModelAdmin):
@@ -98,7 +98,7 @@ class OperationModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-admin.site.register(JobModel, JobModelAdmin)
+# admin.site.register(JobModel, JobModelAdmin)
 admin.site.register(JobUpdate, JobUpdateAdmin)
 admin.site.register(JobStationModel, JobStationModelAdmin)
 admin.site.register(MachineModel, MachineModelAdmin)

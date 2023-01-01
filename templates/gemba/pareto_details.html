@@ -75,6 +75,7 @@
             <th scope="col">Id</th>
             <th scope="col">Downtime</th>
             <th scope="col">Minutes</th>
+            <th scope="col">Frequency</th>
             <th scope="col">Job</th>
         </tr>
         </thead>
@@ -83,6 +84,7 @@
                  <td>{{ pareto_item.id }}</td>
             <td>{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</td>
             <td>{{ pareto_item.minutes }}</td>
+                 <td>{{ pareto_item.frequency }}</td>
                  <td>{{ pareto_item.job }}</td>
              </tr>
         {% endfor %}

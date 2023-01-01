@@ -11,6 +11,7 @@
             <th scope="col">User / Line</th>
             <th scope="col">Downtime Reason</th>
             <th scope="col">Minutes</th>
+            <th scope="col">Frequency</th>
             <th scope="col">Job</th>
             <th scope="col">Pareto ID</th>
         </tr>
@@ -22,6 +23,7 @@
                 <td>{{ object.user }}</td>
                 <td>{{ object.downtime }}</td>
                 <td>{{ object.minutes }}</td>
+                <td>{{ object.frequency }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.pareto_id }}</td>
            {% endfor %}

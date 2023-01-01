@@ -3,15 +3,19 @@ from datetime import datetime
 from django import forms
 from django.forms import DateInput, TimeInput
 
-from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto, JobModel2, DowntimeGroup
+from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto
 
 TODAY = datetime.today().strftime('%d-%m-%Y')
 
 
 class ParetoDetailForm(forms.Form):
-    job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
     qty = forms.IntegerField(label="Output")
     good = forms.IntegerField(label="Good parts")
+
+
+class ParetoTotalQtyDetailForm(forms.Form):
+    qty = forms.IntegerField(label="Total Output")
+    good = forms.IntegerField(label="Total Good parts")
 
 
 class DowntimeAdd(forms.Form):
@@ -19,28 +23,28 @@ class DowntimeAdd(forms.Form):
     minutes = forms.IntegerField()
 
 
-class DowntimeJobAdd(forms.Form):
-    job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
-    downtime = forms.ModelChoiceField(queryset=DowntimeModel.objects.all().order_by("code"))
-    minutes = forms.IntegerField()
+# class DowntimeJobAdd(forms.Form):
+#     job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
+#     downtime = forms.ModelChoiceField(queryset=DowntimeModel.objects.all().order_by("code"))
+#     minutes = forms.IntegerField()
 
 
 class DowntimeMinutes(forms.Form):
     minutes = forms.IntegerField(min_value=0)
 
 
-class DowntimeMinutesJob(forms.Form):
-    minutes = forms.IntegerField(min_value=0)
-    job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
+# class DowntimeMinutesJob(forms.Form):
+#     minutes = forms.IntegerField(min_value=0)
+#     job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
 
 
 class ScrapQuantity(forms.Form):
     qty = forms.IntegerField(min_value=0)
 
 
-class ScrapQuantityJob(forms.Form):
-    qty = forms.IntegerField(min_value=0)
-    job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
+# class ScrapQuantityJob(forms.Form):
+#     qty = forms.IntegerField(min_value=0)
+#     job = forms.ModelChoiceField(queryset=JobModel2.objects.all().order_by("name"))
 
 
 class NewPareto(forms.Form):
@@ -69,4 +73,3 @@ class NotScheduledToRunUpdateForm(forms.ModelForm):
     class Meta:
         model = Pareto
         fields = ["not_scheduled_to_run"]
-

@@ -5,9 +5,6 @@
     <div><a href="{% url 'tools_app:operation-update-view' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Change tool
     </button></a>
-    <a href="{% url 'tools_app:operation-barcode-view' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Change tool(barcode)
-    </button></a>
     <a href="{% url 'tools_app:update-parts' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update parts
     </button></a>
@@ -72,7 +69,7 @@
   </form>
     <div>
         <table id="table" class="table table-hover">
-            <thead class="alert-success">
+            <thead>
             <tr>
                 <th>Machine</th>
                 <th>Station</th>

@@ -5,11 +5,11 @@
         {% regroup tools_list by machine as machine_list %}
         {% for machine in machine_list %}
         <br>
-        <div class="alert alert-primary">
-            {{ machine.grouper }}
+        <div>
+            <b>{{ machine.grouper }}</b>
         </div>
         <table id="table" class="table table-hover">
-            <thead class="alert-success">
+            <thead>
             <tr>
                 <th>Station</th>
                 <th>Tool</th>

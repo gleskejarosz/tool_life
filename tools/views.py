@@ -7,9 +7,10 @@ from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.generic import FormView, DetailView, UpdateView, ListView, DeleteView
 
+from gemba.models import JobModel2
 from tools.filters import JobFilter, OperationFilter
-from tools.forms import JobAddForm, OperationBarcodeForm, OperationUpdateForm, JobAddBarcodeForm
-from tools.models import JobUpdate, OperationModel, JobModel, JobStationModel, ToolModel
+from tools.forms import JobAddForm, OperationUpdateForm
+from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel
 
 
 def index(request):
@@ -45,7 +46,7 @@ class JobFormView(LoginRequiredMixin, FormView):
             jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
             for j_dict in jobs:
                 job_num = j_dict["job"]
-                job_name = JobModel.objects.get(id=job_num)
+                job_name = JobModel2.objects.get(id=job_num)
                 if job == job_name:
                     updated_object = OperationModel.objects.get(id=new_id)
                     updated_object.hours += hours
@@ -53,38 +54,38 @@ class JobFormView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-class JobFormBarcodeView(LoginRequiredMixin, FormView):
-    template_name = 'form.html'
-    form_class = JobAddBarcodeForm
-    success_url = reverse_lazy("tools_app:search-form")
-
-    def form_valid(self, form):
-        date = form.cleaned_data["date"]
-        job = form.cleaned_data["job"]
-        parts = form.cleaned_data["parts"]
-
-        JobUpdate.objects.create(date=date, job=job, parts=parts)
-        new_job = JobUpdate.objects.all().values("id", "hours").order_by("-id")[0]
-        hours = new_job["hours"]
-
-        operations = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date).values("id",
-                                                                                                              "hours",
-                                                                                                              "station",
-                                                                                                              "machine")
-
-        for operation in operations:
-            station = operation["station"]
-            machine = operation["machine"]
-            new_id = operation["id"]
-            jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
-            for j_dict in jobs:
-                job_num = j_dict["job"]
-                job_name = JobModel.objects.get(id=job_num)
-                if job == job_name:
-                    updated_object = OperationModel.objects.get(id=new_id)
-                    updated_object.hours += hours
-                    updated_object.save()
-        return super().form_valid(form)
+# class JobFormBarcodeView(LoginRequiredMixin, FormView):
+#     template_name = 'form.html'
+#     form_class = JobAddBarcodeForm
+#     success_url = reverse_lazy("tools_app:search-form")
+#
+#     def form_valid(self, form):
+#         date = form.cleaned_data["date"]
+#         job = form.cleaned_data["job"]
+#         parts = form.cleaned_data["parts"]
+#
+#         JobUpdate.objects.create(date=date, job=job, parts=parts)
+#         new_job = JobUpdate.objects.all().values("id", "hours").order_by("-id")[0]
+#         hours = new_job["hours"]
+#
+#         operations = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date).values("id",
+#                                                                                                               "hours",
+#                                                                                                               "station",
+#                                                                                                               "machine")
+#
+#         for operation in operations:
+#             station = operation["station"]
+#             machine = operation["machine"]
+#             new_id = operation["id"]
+#             jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
+#             for j_dict in jobs:
+#                 job_num = j_dict["job"]
+#                 job_name = JobModel2.objects.get(id=job_num)
+#                 if job == job_name:
+#                     updated_object = OperationModel.objects.get(id=new_id)
+#                     updated_object.hours += hours
+#                     updated_object.save()
+#         return super().form_valid(form)
 
 
 def search(request):
@@ -137,41 +138,41 @@ class OperationFormView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-class OperationBarcodeFormView(LoginRequiredMixin, FormView):
-    template_name = 'form.html'
-    form_class = OperationBarcodeForm
-    success_url = reverse_lazy("tools_app:returning")
-
-    def form_valid(self, form):
-        tool = form.cleaned_data.get["tool"]
-        tool_type = form.cleaned_data["tool_type"]
-        machine = form.cleaned_data["machine"]
-        station = form.cleaned_data["station"]
-        start_date = form.cleaned_data["start_date"]
-        OperationModel.objects.create(tool=tool, tool_type=tool_type, machine=machine, station=station,
-                                      start_date=start_date)
-
-        tools = OperationModel.objects.filter(
-            machine=machine).filter(station=station).filter(status=False).values("id", "tool", "tool_type",
-                                                                                 "status", "finish_date")
-
-        max_id = 0
-        if len(tools) > 1:
-            for tool_dict in tools:
-                tool_id = tool_dict["id"]
-                if tool_id > max_id:
-                    max_id = tool_id
-
-            for tool_dict in tools:
-                tool_id = tool_dict["id"]
-                if tool_id != max_id:
-                    tool = OperationModel.objects.get(id=tool_id)
-                    if tool.tool_type == tool_type:
-                        tool.status = True
-                        tool.finish_date = datetime.now()
-                        tool.save()
-
-        return super().form_valid(form)
+# class OperationBarcodeFormView(LoginRequiredMixin, FormView):
+#     template_name = 'form.html'
+#     form_class = OperationBarcodeForm
+#     success_url = reverse_lazy("tools_app:returning")
+#
+#     def form_valid(self, form):
+#         tool = form.cleaned_data.get["tool"]
+#         tool_type = form.cleaned_data["tool_type"]
+#         machine = form.cleaned_data["machine"]
+#         station = form.cleaned_data["station"]
+#         start_date = form.cleaned_data["start_date"]
+#         OperationModel.objects.create(tool=tool, tool_type=tool_type, machine=machine, station=station,
+#                                       start_date=start_date)
+#
+#         tools = OperationModel.objects.filter(
+#             machine=machine).filter(station=station).filter(status=False).values("id", "tool", "tool_type",
+#                                                                                  "status", "finish_date")
+#
+#         max_id = 0
+#         if len(tools) > 1:
+#             for tool_dict in tools:
+#                 tool_id = tool_dict["id"]
+#                 if tool_id > max_id:
+#                     max_id = tool_id
+#
+#             for tool_dict in tools:
+#                 tool_id = tool_dict["id"]
+#                 if tool_id != max_id:
+#                     tool = OperationModel.objects.get(id=tool_id)
+#                     if tool.tool_type == tool_type:
+#                         tool.status = True
+#                         tool.finish_date = datetime.now()
+#                         tool.save()
+#
+#         return super().form_valid(form)
 
 
 def returning(request):
