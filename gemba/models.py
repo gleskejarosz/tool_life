@@ -1,14 +1,14 @@
 from django.conf import settings
 from django.db import models
 
-AM = "Morning shift"
-PM = "Afternoon shift"
-NS = "Night shift"
+AM = "1 - Morning shift"
+PM = "2 - Afternoon shift"
+NS = "3 - Night shift"
 SHIFT_CHOICES = (
     ("--", "No choice"),
-    (AM, "Morning shift"),
-    (PM, "Afternoon shift"),
-    (NS, "Night shift"),
+    (AM, "1 - Morning shift"),
+    (PM, "2 - Afternoon shift"),
+    (NS, "3 - Night shift"),
 )
 HOUR_CHOICES = (
     ("6", "6"),

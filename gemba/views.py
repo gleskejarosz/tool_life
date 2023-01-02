@@ -127,7 +127,7 @@ def pareto_detail_form(request):
     pareto = pareto_qs[0]
     job = pareto.job_otg
     # setup on id=0 Not selected
-    job_message = JobModel2.objects.get(id=29)
+    job_message = JobModel2.objects.get(id=1)
 
     if job is None:
         pareto.job_otg = job_message
@@ -536,7 +536,7 @@ class DailyParetoSearchResultsView(ListView):
         query = self.request.GET.get("q")
         report_list = Pareto.objects.filter(
             Q(pareto_date__exact=query)
-        ).order_by("-user", "-shift")
+        ).order_by("-user", "shift")
         object_list = get_details_to_display(object_list=report_list)
         return object_list
 
@@ -597,7 +597,7 @@ def export_daily_oee_report_csv(request):
 
 
 def pareto_view(request):
-    today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by('-user')
+    today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by("-user", "shift")
 
     report_list = get_details_to_display(object_list=today_pareto)
 
@@ -789,7 +789,7 @@ def downtime_user_list(request):
     message_status = ""
     job_otg = pareto.job_otg
     # setup on id=0 Not selected
-    job_message = JobModel2.objects.get(id=29)
+    job_message = JobModel2.objects.get(id=1)
 
     if job_otg == job_message:
         message_status = "Display"
@@ -819,7 +819,7 @@ def scrap_user_list(request):
     message_status = ""
     job_otg = pareto.job_otg
     # setup on id=0 Not selected
-    job_message = JobModel2.objects.get(id=29)
+    job_message = JobModel2.objects.get(id=1)
 
     if job_otg == job_message:
         message_status = "Display"
