@@ -17,8 +17,7 @@ from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, DowntimeAdd, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, Timer
-
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, Timer, SHIFT_CHOICES
 
 
 class GembaIndex(TemplateView):
@@ -126,15 +125,7 @@ def pareto_detail_form(request):
     pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
     pareto = pareto_qs[0]
     job = pareto.job_otg
-    # setup on id=0 Not selected
-    job_message = JobModel2.objects.get(id=1)
-
     if job is None:
-        pareto.job_otg = job_message
-        pareto.save()
-        return redirect("gemba_app:pareto-summary")
-
-    if job == job_message:
         return redirect("gemba_app:pareto-summary")
 
     pareto_details_qs = ParetoDetail.objects.filter(user=request.user, completed=False)
@@ -194,9 +185,7 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             message_status = ""
             job_otg = pareto.job_otg
-            #setup on id=0 Not selected
-            job_message = JobModel2.objects.get(id=29)
-            if job_otg == job_message:
+            if job_otg is None:
                 message_status = "Display"
 
             available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
@@ -609,6 +598,13 @@ def pareto_view(request):
                   )
 
 
+START_CHOICES = (
+    (SHIFT_CHOICES[1][1], "06:00:00"),
+    (SHIFT_CHOICES[2][1], "14:00:00"),
+    (SHIFT_CHOICES[3][1], "22:00:00"),
+)
+
+
 @login_required
 def pareto_create_new(request):
     user = request.user
@@ -618,9 +614,18 @@ def pareto_create_new(request):
         shift = form.cleaned_data["shift"]
         hours = form.cleaned_data["hours"]
         ops = form.cleaned_data["ops"]
-        time_start = LineHourModel.objects.get(user=user, shift=shift)
+        time_start = LineHourModel.objects.filter(user=user, shift=shift)
 
-        time_stamp = datetime.strptime(str(time_start), "%H:%M:%S")
+        if time_start.exists():
+            time_stamp = datetime.strptime(str(time_start), "%H:%M:%S")
+        else:
+            if shift == SHIFT_CHOICES[1][1]:
+                time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
+            elif shift == SHIFT_CHOICES[2][1]:
+                time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
+            else:
+                time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
+
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
                               time_stamp=time_stamp, ops=ops)
         return redirect("gemba_app:pareto-summary")
@@ -733,65 +738,14 @@ def add_downtime_time(request, pk):
     )
 
 
-# @login_required
-# def add_downtime_detail(request):
-#     job_qs = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")
-#     scrap_created_qs = ScrapDetail.objects.filter(user=request.user, completed=False).order_by("-id")
-#     down_created_qs = DowntimeDetail.objects.filter(user=request.user, completed=False).order_by("-id")
-#
-#     if job_qs.exists() or scrap_created_qs.exists() or down_created_qs.exists():
-#         if job_qs.exists():
-#             job = job_qs[0]
-#         elif scrap_created_qs.exists():
-#             scrap_elem_exists = scrap_created_qs[0]
-#             job = scrap_elem_exists.job
-#         else:
-#             down_elem_exists = down_created_qs[0]
-#             job = down_elem_exists.job
-#         job_id = JobModel.objects.get(name=job)
-#
-#         form = DowntimeAdd(request.POST or None)
-#         if form.is_valid():
-#             downtime = form.cleaned_data["downtime"]
-#             minutes = form.cleaned_data["minutes"]
-#             user = request.user
-#             downtime_detail = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id)
-#
-#             pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
-#             pareto = pareto_qs[0]
-#             pareto.downtimes.add(downtime_detail)
-#             return redirect("gemba_app:pareto-summary")
-#     else:
-#         form = DowntimeJobAdd(request.POST or None)
-#         if form.is_valid():
-#             job = form.cleaned_data["job"]
-#             downtime = form.cleaned_data["downtime"]
-#             minutes = form.cleaned_data["minutes"]
-#             user = request.user
-#             downtime_detail = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job)
-#
-#             pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
-#             pareto = pareto_qs[0]
-#             pareto.downtimes.add(downtime_detail)
-#             return redirect("gemba_app:pareto-summary")
-#
-#     return render(
-#         request,
-#         template_name="form.html",
-#         context={"form": form}
-#     )
-
-
 def downtime_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
     general_list = DowntimeUser.objects.filter(group=1).order_by("order")
     group_qs = DowntimeGroup.objects.filter(user=request.user)
     message_status = ""
     job_otg = pareto.job_otg
-    # setup on id=0 Not selected
-    job_message = JobModel2.objects.get(id=1)
 
-    if job_otg == job_message:
+    if job_otg is None:
         message_status = "Display"
 
     if group_qs.exists():
@@ -818,10 +772,8 @@ def scrap_user_list(request):
     group_qs = DowntimeGroup.objects.filter(user=request.user)
     message_status = ""
     job_otg = pareto.job_otg
-    # setup on id=0 Not selected
-    job_message = JobModel2.objects.get(id=1)
 
-    if job_otg == job_message:
+    if job_otg is None:
         message_status = "Display"
 
     if group_qs.exists():
