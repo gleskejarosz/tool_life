@@ -1,15 +1,16 @@
 import csv
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import FormView, DetailView, UpdateView, ListView, DeleteView
+from django.views.generic import FormView, DetailView, ListView, DeleteView
 
 from gemba.models import JobModel2
 from tools.filters import JobFilter, OperationFilter
-from tools.forms import JobAddForm, OperationUpdateForm
+from tools.forms import JobAddForm, OperationUpdateForm, JobUpdateForm
 from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel
 
 
@@ -30,62 +31,33 @@ class JobFormView(LoginRequiredMixin, FormView):
         job = form.cleaned_data["job"]
         parts = form.cleaned_data["parts"]
 
-        JobUpdate.objects.create(date=date, job=job, parts=parts)
-        new_job = JobUpdate.objects.all().values("id", "hours").order_by("-id")[0]
-        hours = new_job["hours"]
+        new_job = JobUpdate.objects.create(date=date, job=job, parts=parts)
+        new_job_id = new_job.id
+        print(new_job_id)
+        new_job_obj = JobUpdate.objects.get(id=new_job_id)
+        new_hours = new_job_obj.hours
 
-        operations = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date).values("id",
-                                                                                                              "hours",
-                                                                                                              "station",
-                                                                                                              "machine")
+        operations1_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
+        operations2_qs = OperationModel.objects.filter(start_date=date).filter(status=False)
+        operations_qs = operations1_qs.difference(operations2_qs)
 
-        for operation in operations:
-            station = operation["station"]
-            machine = operation["machine"]
-            new_id = operation["id"]
-            jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
-            for j_dict in jobs:
-                job_num = j_dict["job"]
-                job_name = JobModel2.objects.get(id=job_num)
+        for operation in operations_qs:
+            station = operation.station
+            machine = operation.machine
+            new_id = operation.id
+            used_hours = operation.hours
+            jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
+            for j_dict in jobs_qs:
+                job_id = j_dict.job_id
+                job_name = JobModel2.objects.get(id=job_id)
                 if job == job_name:
                     updated_object = OperationModel.objects.get(id=new_id)
-                    updated_object.hours += hours
+                    print(new_id)
+                    print(f"Tool hours: {used_hours} + new hours {new_hours}")
+                    updated_object.hours += new_hours
                     updated_object.save()
+
         return super().form_valid(form)
-
-
-# class JobFormBarcodeView(LoginRequiredMixin, FormView):
-#     template_name = 'form.html'
-#     form_class = JobAddBarcodeForm
-#     success_url = reverse_lazy("tools_app:search-form")
-#
-#     def form_valid(self, form):
-#         date = form.cleaned_data["date"]
-#         job = form.cleaned_data["job"]
-#         parts = form.cleaned_data["parts"]
-#
-#         JobUpdate.objects.create(date=date, job=job, parts=parts)
-#         new_job = JobUpdate.objects.all().values("id", "hours").order_by("-id")[0]
-#         hours = new_job["hours"]
-#
-#         operations = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date).values("id",
-#                                                                                                               "hours",
-#                                                                                                               "station",
-#                                                                                                               "machine")
-#
-#         for operation in operations:
-#             station = operation["station"]
-#             machine = operation["machine"]
-#             new_id = operation["id"]
-#             jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
-#             for j_dict in jobs:
-#                 job_num = j_dict["job"]
-#                 job_name = JobModel2.objects.get(id=job_num)
-#                 if job == job_name:
-#                     updated_object = OperationModel.objects.get(id=new_id)
-#                     updated_object.hours += hours
-#                     updated_object.save()
-#         return super().form_valid(form)
 
 
 def search(request):
@@ -136,43 +108,6 @@ class OperationFormView(LoginRequiredMixin, FormView):
                         tool_availability.save()
 
         return super().form_valid(form)
-
-
-# class OperationBarcodeFormView(LoginRequiredMixin, FormView):
-#     template_name = 'form.html'
-#     form_class = OperationBarcodeForm
-#     success_url = reverse_lazy("tools_app:returning")
-#
-#     def form_valid(self, form):
-#         tool = form.cleaned_data.get["tool"]
-#         tool_type = form.cleaned_data["tool_type"]
-#         machine = form.cleaned_data["machine"]
-#         station = form.cleaned_data["station"]
-#         start_date = form.cleaned_data["start_date"]
-#         OperationModel.objects.create(tool=tool, tool_type=tool_type, machine=machine, station=station,
-#                                       start_date=start_date)
-#
-#         tools = OperationModel.objects.filter(
-#             machine=machine).filter(station=station).filter(status=False).values("id", "tool", "tool_type",
-#                                                                                  "status", "finish_date")
-#
-#         max_id = 0
-#         if len(tools) > 1:
-#             for tool_dict in tools:
-#                 tool_id = tool_dict["id"]
-#                 if tool_id > max_id:
-#                     max_id = tool_id
-#
-#             for tool_dict in tools:
-#                 tool_id = tool_dict["id"]
-#                 if tool_id != max_id:
-#                     tool = OperationModel.objects.get(id=tool_id)
-#                     if tool.tool_type == tool_type:
-#                         tool.status = True
-#                         tool.finish_date = datetime.now()
-#                         tool.save()
-#
-#         return super().form_valid(form)
 
 
 def returning(request):
@@ -242,40 +177,59 @@ def jobs(request):
     )
 
 
-def update_parts(request):
-    completed_jobs = JobUpdate.objects.values("date", "job", "hours").order_by("date")
-    OperationModel.objects.all().update(hours=0)
+def update_parts(pk, old_hours):
+    changed_job = JobUpdate.objects.get(pk=pk)
+    date = changed_job.date
+    job = changed_job.job
+    new_hours = changed_job.hours
 
-    for complete_job in completed_jobs:
-        date = complete_job["date"]
-        job = complete_job["job"]
-        hours = complete_job["hours"]
+    operations1_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
+    print(operations1_qs)
+    operations2_qs = OperationModel.objects.filter(start_date=date).filter(status=False)
+    print(operations2_qs)
+    operations_qs = operations1_qs.difference(operations2_qs)
+    print(operations_qs)
 
-        operations = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date).values("id",
-                                                    "hours", "station", "machine").order_by("id")[:100]
-        for operation in operations:
-            station = operation["station"]
-            machine = operation["machine"]
-            new_id = operation["id"]
-            jobs = JobStationModel.objects.filter(machine=machine).filter(station=station).values("id", "job")
+    for operation in operations_qs:
+        station = operation.station
+        machine = operation.machine
+        new_id = operation.id
+        used_hours = operation.hours
+        jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
+        for j_dict in jobs_qs:
+            job_id = j_dict.job_id
+            job_name = JobModel2.objects.get(id=job_id)
+            if job == job_name:
+                updated_object = OperationModel.objects.get(id=new_id)
+                print(new_id)
+                new_used_hours = new_hours - old_hours
+                print(f"Tool hours: {used_hours} + (Difference: {new_hours} - {old_hours})")
+                updated_object.hours += new_used_hours
+                updated_object.save()
 
-            for j_dict in jobs:
-                job_num = j_dict["job"]
-                if job == job_num:
-                    updated_object = OperationModel.objects.get(id=new_id)
-                    updated_object.hours += hours
-                    updated_object.save()
-
-    operations_after = OperationModel.objects.all().order_by("-start_date")
-    operations_filter = OperationFilter(request.GET, queryset=operations_after)
-    return render(request, "tools/return.html", {"filter": operations_filter})
+    return redirect("tools_app:search-form")
 
 
-class JobUpdateView(LoginRequiredMixin, UpdateView):
-    model = JobUpdate
-    fields = ("date", "job", "parts")
-    template_name = "form.html"
-    success_url = reverse_lazy("tools_app:search-form")
+@login_required
+def job_update(request, pk):
+    job_to_update = get_object_or_404(JobUpdate, pk=pk)
+    old_hours = job_to_update.hours
+
+    form = JobUpdateForm(instance=job_to_update)
+    if request.method == "POST":
+        form = JobUpdateForm(request.POST, instance=job_to_update)
+
+    if form.is_valid():
+        form.save()
+
+        update_parts(pk=pk, old_hours=old_hours)
+        return redirect("tools_app:search-form")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
 
 
 class JobDeleteView(LoginRequiredMixin, DeleteView):
