@@ -6,6 +6,7 @@
     <strong>Info!</strong> You should <a href="{% url 'gemba_app:job-user-view' %}" class="alert-link">choose a job first!</a>
     </div>
 {% endif %}
+
 <div>
     <p><a href="{% url 'gemba_app:pareto-ns-update-view' pk=pareto.pk %}">
         Not scheduled to run </a>- {{ pareto.not_scheduled_to_run }} min</p>

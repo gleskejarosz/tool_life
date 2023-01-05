@@ -242,7 +242,8 @@ class Timer(models.Model):
         ('stopped', _('stopped')),
     )
 
-    user = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
+    # user = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     status = models.CharField(max_length=12, choices=STATUS)
 
     objects = TimerQuerySet.as_manager()

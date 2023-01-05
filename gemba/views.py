@@ -733,55 +733,6 @@ def add_downtime_time(request, pk):
     )
 
 
-# @login_required
-# def add_downtime_detail(request):
-#     job_qs = ParetoDetail.objects.filter(user=request.user, completed=False).order_by("-id")
-#     scrap_created_qs = ScrapDetail.objects.filter(user=request.user, completed=False).order_by("-id")
-#     down_created_qs = DowntimeDetail.objects.filter(user=request.user, completed=False).order_by("-id")
-#
-#     if job_qs.exists() or scrap_created_qs.exists() or down_created_qs.exists():
-#         if job_qs.exists():
-#             job = job_qs[0]
-#         elif scrap_created_qs.exists():
-#             scrap_elem_exists = scrap_created_qs[0]
-#             job = scrap_elem_exists.job
-#         else:
-#             down_elem_exists = down_created_qs[0]
-#             job = down_elem_exists.job
-#         job_id = JobModel.objects.get(name=job)
-#
-#         form = DowntimeAdd(request.POST or None)
-#         if form.is_valid():
-#             downtime = form.cleaned_data["downtime"]
-#             minutes = form.cleaned_data["minutes"]
-#             user = request.user
-#             downtime_detail = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job_id)
-#
-#             pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
-#             pareto = pareto_qs[0]
-#             pareto.downtimes.add(downtime_detail)
-#             return redirect("gemba_app:pareto-summary")
-#     else:
-#         form = DowntimeJobAdd(request.POST or None)
-#         if form.is_valid():
-#             job = form.cleaned_data["job"]
-#             downtime = form.cleaned_data["downtime"]
-#             minutes = form.cleaned_data["minutes"]
-#             user = request.user
-#             downtime_detail = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job)
-#
-#             pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
-#             pareto = pareto_qs[0]
-#             pareto.downtimes.add(downtime_detail)
-#             return redirect("gemba_app:pareto-summary")
-#
-#     return render(
-#         request,
-#         template_name="form.html",
-#         context={"form": form}
-#     )
-
-
 def downtime_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
     general_list = DowntimeUser.objects.filter(group=1).order_by("order")
