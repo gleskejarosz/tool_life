@@ -25,18 +25,6 @@ class StationModel(models.Model):
         verbose_name = "Station"
 
 
-# class JobModel(models.Model):
-#     name = models.CharField(max_length=64)
-#     target = models.IntegerField(default=1615)
-#     inner_size = models.PositiveSmallIntegerField(default=0)
-#
-#     def __str__(self):
-#         return f"{self.name}"
-#
-#     class Meta:
-#         verbose_name = "Job"
-
-
 class ToolModel(models.Model):
     SPARE = "Spare"
     USE = "In use"
@@ -111,4 +99,3 @@ class JobUpdate(models.Model):
     def save(self, *args, **kwargs):
         self.hours = hours_recalculate(self.parts, self.job)
         super().save(*args, **kwargs)
-

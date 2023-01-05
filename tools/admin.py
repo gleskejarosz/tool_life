@@ -3,19 +3,6 @@ from django.contrib import admin
 from tools.models import JobStationModel, JobUpdate, MachineModel, OperationModel, StationModel, ToolModel
 
 
-# class JobModelAdmin(admin.ModelAdmin):
-#     ordering = ("name",)
-#     list_display = ("id", "name", "target",)
-#     list_display_links = ("name",)
-#     list_per_page = 20
-#     fieldsets = [
-#         ("General", {
-#             "fields": ["id", "name", "target"],
-#         }),
-#     ]
-#     readonly_fields = ["id"]
-
-
 class JobStationModelAdmin(admin.ModelAdmin):
     ordering = ("job",)
     list_display = ("job", "station", "machine",)
@@ -32,13 +19,13 @@ class JobStationModelAdmin(admin.ModelAdmin):
 
 class JobUpdateAdmin(admin.ModelAdmin):
     ordering = ("-date",)
-    list_display = ("date", "job", "parts",)
+    list_display = ("date", "job", "parts", "hours", )
     list_display_links = ("date",)
     list_per_page = 20
     list_filter = ("job",)
     fieldsets = [
         ("General", {
-            "fields": ["id", "date", "job", "parts"],
+            "fields": ["id", "date", "job", "parts", "hours"],
         }),
     ]
     readonly_fields = ["id"]
