@@ -50,12 +50,12 @@
           {% render_field filter.form.status class="form-control" %}
         </div>
         <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.hours_lte.label_tag }}
-          {% render_field filter.form.hours_lte class="form-control" %}
+          {{ filter.form.minutes_lte.label_tag }}
+          {% render_field filter.form.minutes_lte class="form-control" %}
         </div>
         <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.hours_gte.label_tag }}
-          {% render_field filter.form.hours_gte class="form-control" %}
+          {{ filter.form.minutes_gte.label_tag }}
+          {% render_field filter.form.minutes_gte class="form-control" %}
         </div>
 
       </div>
@@ -75,7 +75,7 @@
                 <th>Start Date</th>
                 <th>Finish Date</th>
                 <th>Status</th>
-                <th>Hours</th>
+                <th>Minutes</th>
             </tr>
             </thead>
             <tbody>
@@ -90,7 +90,7 @@
                     <td>
                         {% if operation.status is True %} Used {% else %} In use {% endif %}
                     </td>
-                    <td>{{ operation.hours }}</td>
+                    <td>{{ operation.minutes }}</td>
                 </tr>
             {% endfor %}
             </tbody>

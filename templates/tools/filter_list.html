@@ -43,7 +43,7 @@
         <th>Date</th>
         <th>Job</th>
         <th>Parts</th>
-        <th>Hours</th>
+        <th>Minutes</th>
       </tr>
     </thead>
     <tbody>
@@ -52,7 +52,7 @@
           <td>{{ item.date|date:"Y-m-d" }}</td>
           <td><a href="{% url 'tools_app:job-detail-view' pk=item.pk %}">{{ item.job }}</a></td>
           <td>{{ item.parts }}</td>
-          <td>{{ item.hours }}</td>
+          <td>{{ item.minutes }}</td>
         </tr>
       {% empty %}
         <tr>

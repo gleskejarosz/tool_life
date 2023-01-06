@@ -1,6 +1,5 @@
 
-def hours_recalculate(parts, job):
+def minutes_recalculate(parts, job):
     target = job.target
-    hours = parts / target
-    return hours
-
+    minutes = (parts / target) * 60
+    return minutes

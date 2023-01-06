@@ -1,7 +1,7 @@
 from django.db import models
 
 from gemba.models import JobModel2
-from tools.utils import hours_recalculate
+from tools.utils import minutes_recalculate
 
 
 class MachineModel(models.Model):
@@ -58,6 +58,17 @@ class JobStationModel(models.Model):
         verbose_name = "Job Station"
 
 
+class ToolJobModel(models.Model):
+    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools1", blank=False, null=False)
+    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs_3", blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.tool}"
+
+    class Meta:
+        verbose_name = "Tools vs Job"
+
+
 class OperationModel(models.Model):
     TOOL = "Tool"
     RUBBER = "Rubber"
@@ -68,14 +79,14 @@ class OperationModel(models.Model):
 
     tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=True, null=True)
     tool_type = models.CharField(max_length=64, choices=TOOL_CHOICES, default=TOOL)
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines2", blank=False,
+    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines", blank=False,
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=False,
                                 null=False)
     start_date = models.DateField(blank=False, null=False)
     finish_date = models.DateField(blank=True, null=True)
     status = models.BooleanField(default=False)
-    hours = models.DecimalField(decimal_places=2, max_digits=10, default=0)
+    minutes = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"{self.tool}"
@@ -88,7 +99,7 @@ class JobUpdate(models.Model):
     date = models.DateField(blank=False, null=False)
     job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
     parts = models.PositiveSmallIntegerField(default=0)
-    hours = models.DecimalField(decimal_places=2, max_digits=10)
+    minutes = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"{self.date} - {self.job} - {self.parts}"
@@ -97,5 +108,5 @@ class JobUpdate(models.Model):
         verbose_name = "Job update"
 
     def save(self, *args, **kwargs):
-        self.hours = hours_recalculate(self.parts, self.job)
+        self.minutes = minutes_recalculate(self.parts, self.job)
         super().save(*args, **kwargs)

@@ -184,8 +184,8 @@ class JobModel2(models.Model):
     name = models.CharField(max_length=64)
     target = models.IntegerField(default=1615)
     inner_size = models.PositiveSmallIntegerField(default=0)
-    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=False,
-                              null=False)
+    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=True,
+                              null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):

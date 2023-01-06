@@ -11,7 +11,7 @@ from django.views.generic import FormView, DetailView, ListView, DeleteView
 from gemba.models import JobModel2
 from tools.filters import JobFilter, OperationFilter
 from tools.forms import JobAddForm, OperationUpdateForm, JobUpdateForm
-from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel
+from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel
 
 
 def index(request):
@@ -33,29 +33,30 @@ class JobFormView(LoginRequiredMixin, FormView):
 
         new_job = JobUpdate.objects.create(date=date, job=job, parts=parts)
         new_job_id = new_job.id
-        print(new_job_id)
-        new_job_obj = JobUpdate.objects.get(id=new_job_id)
-        new_hours = new_job_obj.hours
 
-        operations1_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
-        operations2_qs = OperationModel.objects.filter(start_date=date).filter(status=False)
-        operations_qs = operations1_qs.difference(operations2_qs)
+        new_job_obj = JobUpdate.objects.get(id=new_job_id)
+        new_minutes = new_job_obj.minutes
+
+        operations_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
+        # operations2_qs = OperationModel.objects.filter(start_date=date).filter(status=False)
+        # operations_qs = operations1_qs.difference(operations2_qs)
 
         for operation in operations_qs:
             station = operation.station
             machine = operation.machine
-            new_id = operation.id
-            used_hours = operation.hours
+            # new_id = operation.id
+            used_minutes = operation.minutes
+
             jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
-            for j_dict in jobs_qs:
-                job_id = j_dict.job_id
+            print(jobs_qs)
+            for job_elem in jobs_qs:
+                job_id = job_elem.job_id
                 job_name = JobModel2.objects.get(id=job_id)
                 if job == job_name:
-                    updated_object = OperationModel.objects.get(id=new_id)
-                    print(new_id)
-                    print(f"Tool hours: {used_hours} + new hours {new_hours}")
-                    updated_object.hours += new_hours
-                    updated_object.save()
+                    # updated_object = OperationModel.objects.get(id=new_id)
+                    print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
+                    operation.minutes += new_minutes
+                    operation.save()
 
         return super().form_valid(form)
 
@@ -101,8 +102,9 @@ class OperationFormView(LoginRequiredMixin, FormView):
                     tool = OperationModel.objects.get(id=tool_id)
                     if tool.tool_type == tool_type:
                         tool.status = True
-                        tool.finish_date = datetime.now()
+                        tool.finish_date = start_date
                         tool.save()
+                        print(tool)
                         tool_availability = ToolModel.objects.get(name=tool)
                         tool_availability.tool_status = "Spare"
                         tool_availability.save()
@@ -122,11 +124,11 @@ def export_csv(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="Operations.csv"'
     writer = csv.writer(response)
-    writer.writerow(["Machine", "Station", "Tool", "Hours", "Start Date", "Finish Date", "Status"])
+    writer.writerow(["Machine", "Station", "Tool", "Minutes", "Start Date", "Finish Date", "Status"])
     for e in search_result.values_list("machine_id__name",
                                        "station_id__name",
                                        "tool_id__name",
-                                       "hours",
+                                       "minutes",
                                        "start_date",
                                        "finish_date",
                                        "status"):
@@ -140,11 +142,11 @@ def export_csv2(request):
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = 'attachment; filename="Completed_jobs.csv"'
     writer = csv.writer(response)
-    writer.writerow(["Date", "Job", "Parts", "Hours"])
+    writer.writerow(["Date", "Job", "Parts", "Minutes"])
     for e in search_result.values_list("date",
                                        "job_id__name",
                                        "parts",
-                                       "hours"):
+                                       "minutes"):
         writer.writerow(e)
     return response
 
@@ -177,11 +179,11 @@ def jobs(request):
     )
 
 
-def update_parts(pk, old_hours):
+def update_parts(pk, old_minutes):
     changed_job = JobUpdate.objects.get(pk=pk)
     date = changed_job.date
     job = changed_job.job
-    new_hours = changed_job.hours
+    new_minutes = changed_job.minutes
 
     operations1_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
     print(operations1_qs)
@@ -194,7 +196,7 @@ def update_parts(pk, old_hours):
         station = operation.station
         machine = operation.machine
         new_id = operation.id
-        used_hours = operation.hours
+        used_minutes = operation.minutes
         jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
         for j_dict in jobs_qs:
             job_id = j_dict.job_id
@@ -202,9 +204,9 @@ def update_parts(pk, old_hours):
             if job == job_name:
                 updated_object = OperationModel.objects.get(id=new_id)
                 print(new_id)
-                new_used_hours = new_hours - old_hours
-                print(f"Tool hours: {used_hours} + (Difference: {new_hours} - {old_hours})")
-                updated_object.hours += new_used_hours
+                new_used_minutes = new_minutes - old_minutes
+                print(f"Tool minutes: {used_minutes} + (Difference: {new_minutes} - {old_minutes})")
+                updated_object.minutes += new_used_minutes
                 updated_object.save()
 
     return redirect("tools_app:search-form")
@@ -213,7 +215,7 @@ def update_parts(pk, old_hours):
 @login_required
 def job_update(request, pk):
     job_to_update = get_object_or_404(JobUpdate, pk=pk)
-    old_hours = job_to_update.hours
+    old_minutes = job_to_update.minutes
 
     form = JobUpdateForm(instance=job_to_update)
     if request.method == "POST":
@@ -222,7 +224,7 @@ def job_update(request, pk):
     if form.is_valid():
         form.save()
 
-        update_parts(pk=pk, old_hours=old_hours)
+        update_parts(pk=pk, old_minutes=old_minutes)
         return redirect("tools_app:search-form")
 
     return render(

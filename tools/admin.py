@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from tools.models import JobStationModel, JobUpdate, MachineModel, OperationModel, StationModel, ToolModel
+from tools.models import JobStationModel, JobUpdate, MachineModel, OperationModel, StationModel, ToolModel,\
+    ToolJobModel
 
 
 class JobStationModelAdmin(admin.ModelAdmin):
@@ -19,13 +20,13 @@ class JobStationModelAdmin(admin.ModelAdmin):
 
 class JobUpdateAdmin(admin.ModelAdmin):
     ordering = ("-date",)
-    list_display = ("date", "job", "parts", "hours", )
+    list_display = ("date", "job", "parts", "minutes", )
     list_display_links = ("date",)
     list_per_page = 20
     list_filter = ("job",)
     fieldsets = [
         ("General", {
-            "fields": ["id", "date", "job", "parts", "hours"],
+            "fields": ["id", "date", "job", "parts", "minutes"],
         }),
     ]
     readonly_fields = ["id"]
@@ -72,23 +73,37 @@ class ToolModelAdmin(admin.ModelAdmin):
 
 class OperationModelAdmin(admin.ModelAdmin):
     ordering = ("-start_date",)
-    list_display = ("tool", "tool_type", "station", "machine", "start_date", "finish_date", "status", "hours",)
+    list_display = ("tool", "tool_type", "station", "machine", "start_date", "finish_date", "status", "minutes",)
     list_display_links = ("tool",)
     list_per_page = 20
     list_filter = ("machine", "station", "status", "tool", "tool_type",)
     fieldsets = [
         ("General", {
             "fields": ["id", "tool", "tool_type", "machine", "station", "start_date", "finish_date", "status",
-                       "hours"],
+                       "minutes"],
         }),
     ]
     readonly_fields = ["id"]
 
 
-# admin.site.register(JobModel, JobModelAdmin)
+class ToolJobStationModelAdmin(admin.ModelAdmin):
+    ordering = ("tool",)
+    list_display = ("tool", "job",)
+    list_display_links = ("tool",)
+    list_per_page = 20
+    list_filter = ("tool", "job", )
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "tool", "job"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
 admin.site.register(JobUpdate, JobUpdateAdmin)
 admin.site.register(JobStationModel, JobStationModelAdmin)
 admin.site.register(MachineModel, MachineModelAdmin)
 admin.site.register(OperationModel, OperationModelAdmin)
 admin.site.register(StationModel, StationModelAdmin)
 admin.site.register(ToolModel, ToolModelAdmin)
+admin.site.register(ToolJobModel, ToolJobStationModelAdmin)

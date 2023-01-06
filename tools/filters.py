@@ -37,9 +37,9 @@ class OperationFilter(django_filters.FilterSet):
     finish_date_lte = django_filters.DateFilter(label="Finish Date before...", field_name='finish_date',
                                                 lookup_expr='lte', widget=DateInput(attrs={'type': 'date'}))
     status = django_filters.ChoiceFilter(choices=STATUS_CHOICES, label="Status")
-    hours = django_filters.NumberFilter()
-    hours_lte = django_filters.NumberFilter(label="Hours less than...", field_name="hours", lookup_expr="lte")
-    hours_gte = django_filters.NumberFilter(label="Hours greater than...", field_name="hours", lookup_expr="gte")
+    minutes = django_filters.NumberFilter()
+    minutes_lte = django_filters.NumberFilter(label="Minutes less than...", field_name="minutes", lookup_expr="lte")
+    minutes_gte = django_filters.NumberFilter(label="Minutes greater than...", field_name="minutes", lookup_expr="gte")
 
     class Meta:
         model = OperationModel
