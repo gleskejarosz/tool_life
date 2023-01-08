@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Tools vs jobs:</h4>
+
+<table>
+    <thead>
+        <tr>
+        {% for item in table_qs %}
+            {% if forloop.first %}
+                {% for h in item %}
+                    <th>{{ h }}</th>
+                {% endfor %}
+            {% endif%}
+        {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in table_qs %}
+            <tr>
+                {% for key,value in item.items %}
+                    <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

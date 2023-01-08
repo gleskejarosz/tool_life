@@ -50,25 +50,26 @@ class JobFormView(LoginRequiredMixin, FormView):
             used_minutes = operation.minutes
             status = operation.status
 
-            jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
+            tools_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
 
-            for job_elem in jobs_qs:
-                job_id = job_elem.job_id
-                job_name = JobModel2.objects.get(id=job_id)
-                if job == job_name:
-                    if start_date == date or finish_date == date:
-                        tools_qs = ToolJobModel.objects.filter(job=job)
-                        for tool_elem in tools_qs:
-                            tool_id = tool_elem.tool_id
-                            tool_name = ToolModel.objects.get(id=tool_id)
-                            if tool == tool_name and status is True:
+            for tool_elem in tools_qs:
+                tool_id = tool_elem.tool_id
+                tool_name = ToolModel.objects.get(id=tool_id)
+                if tool == tool_name:
+                    jobs_qs = ToolJobModel.objects.filter(tool=tool)
+                    for job_elem in jobs_qs:
+                        job_id = job_elem.job_id
+                        job_name = JobModel2.objects.get(id=job_id)
+                        if job == job_name:
+                            if start_date == date or finish_date == date:
+                                if status is True:
+                                    print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
+                                    operation.minutes += new_minutes
+                                    operation.save()
+                            else:
                                 print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
                                 operation.minutes += new_minutes
                                 operation.save()
-                    else:
-                        print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
-                        operation.minutes += new_minutes
-                        operation.save()
 
         return super().form_valid(form)
 
@@ -243,17 +244,24 @@ def update_parts(pk, old_minutes):
         machine = operation.machine
         new_id = operation.id
         used_minutes = operation.minutes
-        jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
-        for j_dict in jobs_qs:
-            job_id = j_dict.job_id
-            job_name = JobModel2.objects.get(id=job_id)
-            if job == job_name:
-                updated_object = OperationModel.objects.get(id=new_id)
-                print(new_id)
-                new_used_minutes = new_minutes - old_minutes
-                print(f"Tool minutes: {used_minutes} + (Difference: {new_minutes} - {old_minutes})")
-                updated_object.minutes += new_used_minutes
-                updated_object.save()
+        tool = operation.tool
+
+        tools_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
+        for tool_elem in tools_qs:
+            tool_id = tool_elem.tool_id
+            tool_name = ToolModel.objects.get(id=tool_id)
+            if tool == tool_name:
+                jobs_qs = ToolJobModel.objects.filter(tool=tool)
+                for job_elem in jobs_qs:
+                    job_id = job_elem.job_id
+                    job_name = JobModel2.objects.get(id=job_id)
+                    if job == job_name:
+                        updated_object = OperationModel.objects.get(id=new_id)
+                        print(new_id)
+                        new_used_minutes = new_minutes - old_minutes
+                        print(f"Tool minutes: {used_minutes} + (Difference: {new_minutes} - {old_minutes})")
+                        updated_object.minutes += new_used_minutes
+                        updated_object.save()
 
     return redirect("tools_app:search-form")
 
@@ -284,3 +292,44 @@ class JobDeleteView(LoginRequiredMixin, DeleteView):
     model = JobUpdate
     template_name = "tools/delete_scrap.html"
     success_url = reverse_lazy("tools_app:search-form")
+
+
+def tools_vs_jobs_table(request):
+    tools_vs_jobs = ToolJobModel.objects.all().order_by("tool")
+    tools_qs = JobStationModel.objects.all().order_by("machine__name").order_by("station__num")
+    print(tools_qs)
+    all_jobs = JobModel2.objects.all()
+    jobs_list = []
+    for job in all_jobs:
+        job_name = job.name
+        jobs_list.append(job_name)
+
+    order = [x for x in range(len(jobs_list))]
+    table_qs = []
+    print(jobs_list)
+    for idx, tool_elem in enumerate(tools_qs):
+        machine = tool_elem.machine.name
+        station = tool_elem.station.name
+        tool = tool_elem.tool
+        table_qs.append({
+            "Machine": machine,
+            "Station": station,
+            "Tool": tool,
+        })
+        for job in jobs_list:
+            table_elem = table_qs[idx]
+            table_elem[job] = 0
+
+        jobs_qs = ToolJobModel.objects.filter(tool=tool).order_by("job")
+        for job_elem in jobs_qs:
+            job_id = job_elem.job_id
+            job_item = JobModel2.objects.get(id=job_id)
+            job_elem_name = job_item.name
+            table_elem = table_qs[idx]
+            table_elem[job_elem_name] = 1
+
+    return render(
+        request,
+        template_name="tools/tools_vs_jobs_table.html",
+        context={"table_qs": table_qs},
+    )
