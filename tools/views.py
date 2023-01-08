@@ -3,15 +3,15 @@ from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import FormView, DetailView, ListView, DeleteView
 
 from gemba.models import JobModel2
 from tools.filters import JobFilter, OperationFilter
-from tools.forms import JobAddForm, OperationUpdateForm, JobUpdateForm
-from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel
+from tools.forms import JobAddForm, JobUpdateForm, OperationAddForm
+from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel, MachineModel, StationModel
 
 
 def index(request):
@@ -38,25 +38,37 @@ class JobFormView(LoginRequiredMixin, FormView):
         new_minutes = new_job_obj.minutes
 
         operations_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
-        # operations2_qs = OperationModel.objects.filter(start_date=date).filter(status=False)
+
         # operations_qs = operations1_qs.difference(operations2_qs)
 
         for operation in operations_qs:
             station = operation.station
             machine = operation.machine
-            # new_id = operation.id
+            tool = operation.tool
+            start_date = operation.start_date
+            finish_date = operation.finish_date
             used_minutes = operation.minutes
+            status = operation.status
 
             jobs_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
-            print(jobs_qs)
+
             for job_elem in jobs_qs:
                 job_id = job_elem.job_id
                 job_name = JobModel2.objects.get(id=job_id)
                 if job == job_name:
-                    # updated_object = OperationModel.objects.get(id=new_id)
-                    print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
-                    operation.minutes += new_minutes
-                    operation.save()
+                    if start_date == date or finish_date == date:
+                        tools_qs = ToolJobModel.objects.filter(job=job)
+                        for tool_elem in tools_qs:
+                            tool_id = tool_elem.tool_id
+                            tool_name = ToolModel.objects.get(id=tool_id)
+                            if tool == tool_name and status is True:
+                                print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
+                                operation.minutes += new_minutes
+                                operation.save()
+                    else:
+                        print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
+                        operation.minutes += new_minutes
+                        operation.save()
 
         return super().form_valid(form)
 
@@ -69,7 +81,7 @@ def search(request):
 
 class OperationFormView(LoginRequiredMixin, FormView):
     template_name = 'form.html'
-    form_class = OperationUpdateForm
+    form_class = OperationAddForm
     success_url = reverse_lazy("tools_app:returning")
 
     def form_valid(self, form):
@@ -110,6 +122,40 @@ class OperationFormView(LoginRequiredMixin, FormView):
                         tool_availability.save()
 
         return super().form_valid(form)
+
+
+def select_machine(request):
+    machine_qs = MachineModel.objects.all().order_by("name")
+    return render(request, "tools/machine.html", {"machine_qs": machine_qs})
+
+
+def select_station(request, machine_id):
+    machine = get_object_or_404(MachineModel, pk=machine_id)
+    machine_name = machine.name
+    station_qs = StationModel.objects.filter(machine=machine).order_by("num")
+    return render(request,
+                  template_name="tools/station.html",
+                  context={
+                      "machine_name": machine_name,
+                      "station_qs": station_qs,
+                  })
+
+
+def select_tool(request, station_id):
+    station = get_object_or_404(StationModel, pk=station_id)
+    station_name = station.name
+    tool_qs = JobStationModel.objects.filter(station=station)
+    return render(request,
+                  template_name="tools/tool.html",
+                  context={
+                      "station_name": station_name,
+                      "tool_qs": tool_qs,
+                  })
+
+
+def select_tool_type(request, pk):
+    tool = ToolModel.object.get(pk=pk)
+    pass
 
 
 def returning(request):

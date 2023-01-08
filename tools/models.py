@@ -5,7 +5,14 @@ from tools.utils import minutes_recalculate
 
 
 class MachineModel(models.Model):
+    NOT_IN_USE = "Not in use"
+    PRODUCTIVE = "Productive"
+    MACHINE_STATUS = (
+        (NOT_IN_USE, "Not in use"),
+        (PRODUCTIVE, "Productive"),
+    )
     name = models.CharField(max_length=64)
+    machine_status = models.CharField(max_length=64, choices=MACHINE_STATUS, default=PRODUCTIVE)
 
     def __str__(self):
         return f"{self.name}"
@@ -16,7 +23,9 @@ class MachineModel(models.Model):
 
 class StationModel(models.Model):
     name = models.CharField(max_length=64)
-    num = models.DecimalField(default=100, max_digits=3, decimal_places=0, blank=False, null=False)
+    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines2", blank=True,
+                                null=True)
+    num = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
         return f"{self.name}"
@@ -49,24 +58,25 @@ class JobStationModel(models.Model):
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations2", blank=False,
                                 null=False)
-    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs1", blank=False, null=False)
-
-    def __str__(self):
-        return f"{self.job}"
-
-    class Meta:
-        verbose_name = "Job Station"
-
-
-class ToolJobModel(models.Model):
-    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools1", blank=False, null=False)
-    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs_3", blank=False, null=False)
+    # job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs1", blank=False, null=False)
+    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools2", blank=True, null=True)
 
     def __str__(self):
         return f"{self.tool}"
 
     class Meta:
-        verbose_name = "Tools vs Job"
+        verbose_name = "Tool Station"
+
+
+class ToolJobModel(models.Model):
+    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs_3", blank=False, null=False)
+    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools1", blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.job}"
+
+    class Meta:
+        verbose_name = "Jobs vs Tool"
 
 
 class OperationModel(models.Model):
@@ -77,12 +87,12 @@ class OperationModel(models.Model):
         (RUBBER, "Rubber"),
     )
 
-    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=True, null=True)
+    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=False, default="")
     tool_type = models.CharField(max_length=64, choices=TOOL_CHOICES, default=TOOL)
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines", blank=False,
-                                null=False)
-    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=False,
-                                null=False)
+    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines", blank=True,
+                                null=True)
+    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=True,
+                                null=True)
     start_date = models.DateField(blank=False, null=False)
     finish_date = models.DateField(blank=True, null=True)
     status = models.BooleanField(default=False)

@@ -49,9 +49,9 @@
        {% for pareto_item in pareto_list.jobs.all %}
             <td>{{ pareto_item.id }}</td>
             <td>{{ pareto_item.job.name }}</td>
-            <td>{{ pareto_item.qty }}</td>
+            <td>{{ pareto_item.output }}</td>
             <td>{{ pareto_item.good }}</td>
-            <td>{{ pareto_item.qty|sub:pareto_item.good }}</td>
+            <td>{{ pareto_item.scrap }}</td>
             <td>{{ pareto_item.job.target }}</td>
             <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
         </tr>

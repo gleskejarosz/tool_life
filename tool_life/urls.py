@@ -19,21 +19,6 @@ from django.urls import path, include
 from tool_life import views
 
 
-from django.conf.urls import url, include
-from django.shortcuts import redirect
-from django.views.generic import ListView
-
-from gemba.models import Timer
-
-
-class IndexView(ListView):
-    model = Timer
-
-    def post(self, request):
-        Timer.objects.create()
-        return redirect('/')
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.HomePage.as_view(), name="homepage"),
@@ -41,5 +26,4 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('tools/', include('tools.urls')),
     path('gemba/', include('gemba.urls')),
-    url('elle/', IndexView.as_view(), name='index'),
 ]

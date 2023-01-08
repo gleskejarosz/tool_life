@@ -4,29 +4,9 @@ from django import forms
 from django.forms import DateInput
 
 from gemba.models import JobModel2
-from tools.models import ToolModel, MachineModel, StationModel, JobUpdate
+from tools.models import ToolModel, MachineModel, StationModel, JobUpdate, OperationModel, JobStationModel
 
 TODAY = datetime.today().strftime('%d-%m-%Y')
-
-
-class OperationUpdateForm(forms.Form):
-    TOOL = "Tool"
-    RUBBER = "Rubber"
-    TOOL_CHOICES = (
-        (TOOL, "Tool"),
-        (RUBBER, "Rubber"),
-    )
-    SPARE = "Spare"
-
-    machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
-    station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
-    tool = forms.ModelChoiceField(queryset=ToolModel.objects.filter(tool_status=SPARE).order_by("name"))
-    tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
-    start_date = forms.DateField(
-        required=True,
-        initial=TODAY,
-        widget=DateInput(attrs={"type": "date"}),
-    )
 
 
 class JobAddForm(forms.Form):
@@ -57,3 +37,23 @@ class JobUpdateForm(forms.ModelForm):
         fields = [
             "date", "job", "parts"
         ]
+
+
+class OperationAddForm(forms.Form):
+    TOOL = "Tool"
+    RUBBER = "Rubber"
+    TOOL_CHOICES = (
+        (TOOL, "Tool"),
+        (RUBBER, "Rubber"),
+    )
+    SPARE = "Spare"
+
+    machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
+    station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
+    tool = forms.ModelChoiceField(queryset=ToolModel.objects.filter(tool_status=SPARE).order_by("name"))
+    tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
+    start_date = forms.DateField(
+        required=True,
+        initial=TODAY,
+        widget=DateInput(attrs={"type": "date"}),
+    )

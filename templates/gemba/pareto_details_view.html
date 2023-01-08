@@ -2,7 +2,7 @@
 {% block content %}
 {% load widget_tweaks %}
 {% load mathfilters %}
-<h4>Pareto Details View:</h4>
+<h4>Productivity View:</h4>
 <form method="get">
     <div class="well">
         <p><a href="{% url 'gemba_app:pareto-details' %}">Clear all filters</a></p>
@@ -50,9 +50,9 @@
                 <td>{{ object.user }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.pareto_id }}</td>
-                <td>{{ object.qty }}</td>
+                <td>{{ object.output }}</td>
                 <td>{{ object.good }}</td>
-                <td>{{ object.qty|sub:object.good }}</td>
+                <td>{{ object.scrap }}</td>
             </tr>
         {% endfor %}
             <tr>

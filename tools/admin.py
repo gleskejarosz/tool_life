@@ -5,14 +5,14 @@ from tools.models import JobStationModel, JobUpdate, MachineModel, OperationMode
 
 
 class JobStationModelAdmin(admin.ModelAdmin):
-    ordering = ("job",)
-    list_display = ("job", "station", "machine",)
-    list_display_links = ("job",)
+    ordering = ("tool",)
+    list_display = ("tool", "station", "machine", )
+    list_display_links = ("tool",)
     list_per_page = 20
-    list_filter = ("machine", "station", "job",)
+    list_filter = ("machine", "station", "tool")
     fieldsets = [
         ("General", {
-            "fields": ["id", "machine", "station", "job"],
+            "fields": ["id", "machine", "station", "tool"],
         }),
     ]
     readonly_fields = ["id"]
@@ -47,12 +47,12 @@ class MachineModelAdmin(admin.ModelAdmin):
 
 class StationModelAdmin(admin.ModelAdmin):
     ordering = ("name", "num",)
-    list_display = ("name", "num",)
+    list_display = ("name", "machine", "num",)
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "name", "num"],
+            "fields": ["id", "name", "machine", "num"],
         }),
     ]
     readonly_fields = ["id"]
@@ -88,13 +88,13 @@ class OperationModelAdmin(admin.ModelAdmin):
 
 class ToolJobStationModelAdmin(admin.ModelAdmin):
     ordering = ("tool",)
-    list_display = ("tool", "job",)
-    list_display_links = ("tool",)
+    list_display = ("job", "tool",)
+    list_display_links = ("job",)
     list_per_page = 20
-    list_filter = ("tool", "job", )
+    list_filter = ("job", "tool", )
     fieldsets = [
         ("General", {
-            "fields": ["id", "tool", "job"],
+            "fields": ["id", "job", "tool"],
         }),
     ]
     readonly_fields = ["id"]

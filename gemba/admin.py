@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from gemba.models import CalculationModel, DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, \
-    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2, Timer, Segment
+    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -35,12 +35,12 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
 
 class ParetoDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "job", "qty", "good", "pareto_id", "completed", )
+    list_display = ("id", "pareto_date", "job", "output", "good", "scrap", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "job", "qty", "good", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "job", "output", "good", "scrap", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
@@ -87,16 +87,16 @@ class DowntimeModelAdmin(admin.ModelAdmin):
 
 
 class DowntimeGroupModelAdmin(admin.ModelAdmin):
-    ordering = ("id",)
-    list_display = ("name", "description", "user", "calculation", )
-    list_display_links = ("name",)
+    ordering = ("user",)
+    list_display = ("user", "name", "description", "calculation", )
+    list_display_links = ("user",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "name", "description", "user", "calculation"],
+            "fields": ["user", "name", "description", "calculation"],
         }),
     ]
-    readonly_fields = ["id"]
+    readonly_fields = []
 
 
 class DowntimeUserModelAdmin(admin.ModelAdmin):
@@ -150,6 +150,3 @@ admin.site.register(DowntimeUser, DowntimeUserModelAdmin)
 admin.site.register(DowntimeGroup, DowntimeGroupModelAdmin)
 admin.site.register(ScrapUser, ScrapUserModelAdmin)
 admin.site.register(JobModel2, JobModelAdmin2)
-admin.site.register(Timer)
-admin.site.register(Segment)
-admin.site.register(CalculationModel)

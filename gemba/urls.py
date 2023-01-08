@@ -1,5 +1,4 @@
 from django.urls import path
-from django.conf.urls import url
 
 from gemba import views
 
@@ -8,14 +7,13 @@ app_name = "gemba_app"
 
 urlpatterns = [
     path("index/", views.GembaIndex.as_view(), name="index"),
-    path("timer/", views.IndexView.as_view(), name="timer"),
-    path("pareto_summary/", views.ParetoSummary.as_view(), name="pareto-summary"),
+    path("pareto_summary_view/", views.ParetoSummary.as_view(), name="pareto-summary"),
     path("downtimes_view/", views.downtimes_view, name="downtimes-view"),
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("pareto_view/", views.pareto_view, name="pareto-view"),
     path("pareto-details/", views.pareto_details_query, name="pareto-details"),
     path("pareto_detail_view/<pk>/", views.pareto_detail_view, name="pareto-detail-view"),
-    path("gemba/pareto_details_create_view/", views.pareto_detail_form, name="pareto-details-create-view"),
+    path("pareto_details_create_view/", views.pareto_detail_form, name="pareto-details-create-view"),
     path("downtime_detail_add/<pk>/", views.downtime_detail_create, name="downtime-detail-create"),
     path("scrap_detail_add/<pk>/", views.scrap_detail_create, name="scrap-detail-create"),
     path("gemba/close_pareto/", views.close_pareto, name="close-pareto"),
@@ -46,9 +44,4 @@ urlpatterns = [
     path("export_daily_oee_report/", views.export_daily_oee_report_csv, name="export_daily_oee_report"),
     path("select_job/<pk>/", views.select_job, name="select-job"),
     path("tableau/", views.tableau_export, name="tableau"),
-    path("timer/", views.TimerView.as_view()),
-    url("start_timer/<pk>/", views.Start.as_view(), name="start_timer"),
-    url(r'^(?P<pk>\d+)/pause/$', views.Pause.as_view(), name='pause_timer'),
-    url(r'^(?P<pk>\d+)/resume/$', views.Resume.as_view(), name='resume_timer'),
-    url(r'^(?P<pk>\d+)/stop/$', views.Stop.as_view(), name='stop_timer'),
     ]

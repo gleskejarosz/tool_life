@@ -1,9 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
         <p><a href="{% url 'gemba_app:pareto-view' %}">Daily OEE Report</a></p>
-        <p><a href="{% url 'gemba_app:pareto-details' %}">Pareto Details Report</a></p>
+        <p><a href="{% url 'gemba_app:pareto-details' %}">Productivity View</a></p>
         <p><a href="{% url 'gemba_app:downtimes-view' %}">Downtimes View</a></p>
         <p><a href="{% url 'gemba_app:scraps-view' %}">Scrap View</a></p>
         <p><a href="{% url 'gemba_app:quarantine-view' %}">Quarantine View</a></p>
-
 {% endblock %}

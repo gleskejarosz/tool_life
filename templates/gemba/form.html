@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+
+<table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Previous Output</th>
+            <th scope="col">Previous Good</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>{{ total_output }}</td>
+            <td>{{ total_good }}</td>
+        </tr>
+        </tbody>
+        </table>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

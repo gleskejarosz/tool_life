@@ -43,12 +43,10 @@
 <div>
     <div class = "row">
     <div class = "col">
-        {% regroup pareto_list.jobs.all by job as job_list %}
-        {% for job in job_list %}
         <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">{{ job.grouper }}</th>
+            <th scope="col">Job</th>
             <th scope="col">Output</th>
             <th scope="col">Good</th>
             <th scope="col">Scrap</th>
@@ -61,13 +59,13 @@
                 <td colspan='5'>No records</td>
               </tr>
         {% endif %}
+        {% for pareto_item in pareto_list.jobs.all %}
         <tr>
-        {% for pareto_item in job.list %}
             <td><a href="{% url 'gemba_app:pareto-details-view' pk=pareto_item.pk %}">
                 {{ pareto_item.job.name }}</a></td>
-            <td>{{ pareto_item.qty }}</td>
+            <td>{{ pareto_item.output }}</td>
             <td>{{ pareto_item.good }}</td>
-            <td>{{ pareto_item.qty|sub:pareto_item.good }}</td>
+            <td>{{ pareto_item.scrap }}</td>
             <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
         </tr>
         {% endfor %}
@@ -80,7 +78,6 @@
         </tr>
         </tbody>
         </table>
-        {% endfor %}
     </div>
 
     <div class = "col">
@@ -132,17 +129,19 @@
                 <td colspan='5'>No downtimes recorded</td>
               </tr>
         {% endif %}
-             <tr>{% for pareto_item in pareto_list.downtimes.all %}
+        {% for pareto_item in pareto_list.downtimes.all %}
+        <tr>
             <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">
                 {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
             <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.frequency }}</td>
                  <td>{{ pareto_item.job }}</td>
-             </tr>
+        </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
             <td><b>{{ total_down }}</b> </td>
+            <td> </td>
             <td> </td>
         </tr>
         </tbody>
