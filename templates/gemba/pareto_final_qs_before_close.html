@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+Are you sure you want to finish Pareto? In case of mistake contact with data administrator.
+<br/>
+<br/>
+<a href="{% url 'gemba_app:close-pareto' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>
+    Submit</button>
+</a>
+{% endblock %}

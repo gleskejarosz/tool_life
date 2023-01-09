@@ -21,7 +21,7 @@
     <a href="{% url 'gemba_app:job-user-view' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Select job
     </button></a>
-    <a href="{% url 'gemba_app:close-pareto' %}">
+    <a href="{% url 'gemba_app:before-close-pareto' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
     </button></a>
     {% endif %}
@@ -149,8 +149,9 @@
 
     </div>
     <div class = "col">
-        {% if total_scrap_cal|sub:total_scrap < 0 %} Remove scrap qty:
+        {% if calc_option == TC %} {% if total_scrap_cal|sub:total_scrap < 0 %} Remove scrap qty:
         {{ total_scrap|sub:total_scrap_cal }} {% else %} Missing qty: {{ total_scrap_cal|sub:total_scrap }} {% endif %}
+        {% else %} -- {% endif %}
             <table class="table table-hover">
         <thead>
         <tr>

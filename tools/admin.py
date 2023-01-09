@@ -34,12 +34,12 @@ class JobUpdateAdmin(admin.ModelAdmin):
 
 class MachineModelAdmin(admin.ModelAdmin):
     ordering = ("name",)
-    list_display = ("name",)
+    list_display = ("name", "machine_status", "id", )
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "name"],
+            "fields": ["id", "name", "machine_status"],
         }),
     ]
     readonly_fields = ["id"]

@@ -18,7 +18,7 @@ from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC
 
 
 class GembaIndex(TemplateView):
@@ -142,9 +142,9 @@ def pareto_detail_form(request):
     pareto_id = pareto.id
     pareto_date = pareto.pareto_date
     down_group = DowntimeGroup.objects.get(user=user)
-    calc_form = down_group.calculation
+    calc_option = down_group.calculation
 
-    if calc_form == TC:
+    if calc_option == TC:
         form = ParetoTotalQtyDetailForm(request.POST or None)
         if form.is_valid():
             output = form.cleaned_data["output"]
@@ -282,6 +282,9 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             oee = oee_cal(availability=availability, performance=performance, quality=quality)
 
+            down_group = DowntimeGroup.objects.get(user=user)
+            calc_option = down_group.calculation
+
             return render(self.request,
                           template_name='gemba/pareto.html',
                           context={
@@ -299,6 +302,8 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "total_output": total_output,
                               "total_good": total_good,
                               "total_scrap_cal": total_scrap_cal,
+                              "calc_option": calc_option,
+                              "TC": TC,
                           },
                           )
         except ObjectDoesNotExist:
@@ -433,6 +438,62 @@ def pareto_detail_view(request, pk):
                       "scrap": scrap,
                   },
                   )
+
+
+def before_close_pareto(request):
+    pareto = Pareto.objects.get(user=request.user, completed=False)
+
+    hours = pareto.hours
+    not_scheduled_to_run = pareto.not_scheduled_to_run
+    available_time = int(hours) * 60 - not_scheduled_to_run
+
+    output = 0
+    good = 0
+    performance_numerator = 0
+
+    for detail in pareto.jobs.all():
+        output += detail.output
+        good += detail.good
+        performance_numerator += (detail.output * (60 / detail.job.target))
+
+    quality = quality_cal(good=good, output=output)
+
+    downtime = 0
+    for down_elem in pareto.downtimes.all():
+        downtime += down_elem.minutes
+
+    performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
+                                  downtime=downtime)
+
+    availability = availability_cal(available_time=available_time, downtime=downtime)
+
+    oee = oee_cal(availability=availability, performance=performance, quality=quality)
+
+    scrap = 0
+    for scrap_elem in pareto.scrap.all():
+        scrap += scrap_elem.qty
+
+    return render(request,
+                  template_name='gemba/pareto_before_close.html',
+                  context={
+                      "pareto_list": pareto,
+                      "available_time": available_time,
+                      "output": output,
+                      "good": good,
+                      "downtime": downtime,
+                      "availability": availability,
+                      "quality": quality,
+                      "performance": performance,
+                      "oee": oee,
+                      "scrap": scrap,
+                  },
+                  )
+
+
+@login_required
+def final_confirmation_before_close_pareto(request):
+    return render(request,
+                  template_name='gemba/pareto_final_qs_before_close.html')
 
 
 @login_required
@@ -698,7 +759,7 @@ class ScrapDetailView(DetailView):
 
 class ScrapUpdateView(UpdateView):
     model = ScrapDetail
-    fields = ("job", "output",)
+    fields = ("job", "qty",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 

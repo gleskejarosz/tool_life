@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+<a href="{% url 'gemba_app:final-confirmation-before-close-pareto' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
+    </button>
+</a>
+<br/>
+<br/>
+    <h4 style="text-align:left;">PARETO FINAL VERSION
+    <span style="float:right;">Line: {{ user }}</span></h4>
+<p>Date: {{ pareto_list.pareto_date|date:"d-m-Y" }}</p>
+<p> {{ pareto_list.shift|slice:"4:" }} - {{ pareto_list.hours }} hours -
+    Operators: {{ pareto_list.ops }} - Available time: {{ available_time }} min - Not scheduled to run:
+    {{ pareto_list.not_scheduled_to_run}} min</p>
+<p> Total Downtime: {{ downtime }} min </p>
+<div>
+    <div class = "row">
+    <div class = "col">
+        <table class="table table">
+        <thead>
+        <tr>
+            <th scope="col">Job</th>
+            <th scope="col">Output</th>
+            <th scope="col">Good</th>
+            <th scope="col">Scrap</th>
+            <th scope="col">Takt time</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% if pareto_list.jobs.all|length == 0 %}
+              <tr>
+                <td colspan='5'>No records</td>
+              </tr>
+        {% endif %}
+        {% for pareto_item in pareto_list.jobs.all %}
+        <tr>
+            <td>{{ pareto_item.job.name }}</td>
+            <td>{{ pareto_item.output }}</td>
+            <td>{{ pareto_item.good }}</td>
+            <td>{{ pareto_item.scrap }}</td>
+            <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
+        </tr>
+        {% endfor %}
+        <tr>
+            <td> <b>Total</b> </td>
+            <td> <b>{{ output }}</b> </td>
+            <td> <b>{{ good }}</b> </td>
+            <td> <b>{{ scrap }}</b> </td>
+            <td> </td>
+        </tr>
+        </tbody>
+        </table>
+    </div>
+
+    <div class = "col">
+        <table class="table">
+            <thead>
+            <tr>
+                 <th scope="col" style="text-align:right;">OEE</th>
+                <th scope="col">Results</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td style="text-align:right;">Availability<br/>
+                Performance<br/>
+                Quality<br/>
+                    <br/>
+                <p style="font-size:1vw;"><b>OEE</b></p><br/>
+                </td>
+                <td>
+                {{ availability }}%<br/>
+                {{ performance }}%<br/>
+                {{ quality }}%<br/>
+                    <br/>
+                <p style="font-size:1vw;"><b>{{ oee }}%</b></p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    </div>
+</div>
+
+{% endblock %}
