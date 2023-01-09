@@ -1,5 +1,4 @@
 import csv
-from datetime import datetime
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -294,25 +293,28 @@ class JobDeleteView(LoginRequiredMixin, DeleteView):
     success_url = reverse_lazy("tools_app:search-form")
 
 
-def tools_vs_jobs_table(request):
-    tools_vs_jobs = ToolJobModel.objects.all().order_by("tool")
-    tools_qs = JobStationModel.objects.all().order_by("machine__name").order_by("station__num")
-    print(tools_qs)
+def machines_view(request):
+    machine_qs = MachineModel.objects.all().order_by("name")
+    return render(request, "tools/machines.html", {"machine_qs": machine_qs})
+
+
+def tools_vs_jobs_table(request, machine_id):
+    machine = MachineModel.objects.get(pk=machine_id)
+
+    tools_qs = JobStationModel.objects.filter(machine=machine).order_by("station__num")
+
     all_jobs = JobModel2.objects.all()
     jobs_list = []
     for job in all_jobs:
         job_name = job.name
         jobs_list.append(job_name)
 
-    order = [x for x in range(len(jobs_list))]
     table_qs = []
     print(jobs_list)
     for idx, tool_elem in enumerate(tools_qs):
-        machine = tool_elem.machine.name
         station = tool_elem.station.name
         tool = tool_elem.tool
         table_qs.append({
-            "Machine": machine,
             "Station": station,
             "Tool": tool,
         })
@@ -333,3 +335,4 @@ def tools_vs_jobs_table(request):
         template_name="tools/tools_vs_jobs_table.html",
         context={"table_qs": table_qs},
     )
+

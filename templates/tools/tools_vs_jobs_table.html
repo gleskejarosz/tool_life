@@ -2,7 +2,7 @@
 {% block content %}
 <h4>Tools vs jobs:</h4>
 
-<table>
+<table class="table table-hover">
     <thead>
         <tr>
         {% for item in table_qs %}
@@ -18,7 +18,7 @@
         {% for item in table_qs %}
             <tr>
                 {% for key,value in item.items %}
-                    <td>{{ value }}</td>
+                    <td>{% if value == 1 %} used {% elif value == 0 %} {% else %} {{ value }} {% endif %}</td>
                 {% endfor %}
             </tr>
         {% endfor %}

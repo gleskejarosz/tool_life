@@ -2,6 +2,7 @@ from django.urls import path
 
 from gemba import views
 
+
 app_name = "gemba_app"
 
 
@@ -47,4 +48,5 @@ urlpatterns = [
     path("export_daily_oee_report/", views.export_daily_oee_report_csv, name="export_daily_oee_report"),
     path("select_job/<pk>/", views.select_job, name="select-job"),
     path("tableau/", views.tableau_export, name="tableau"),
+    path("chart/", views.EditorChartView.as_view(), name="chart"),
     ]

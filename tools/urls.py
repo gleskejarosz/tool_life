@@ -22,5 +22,6 @@ urlpatterns = [
     path("selected_machine/", views.select_machine, name="select-machine"),
     path("selected_station/<machine_id>/", views.select_station, name="select-station"),
     path("selected_tool/<station_id>/", views.select_tool, name="select-tool"),
-    path("tools_vs_jobs/", views.tools_vs_jobs_table, name="tools_vs_jobs"),
+    path("machines_view/", views.machines_view, name="machines"),
+    path("tools_vs_jobs/<machine_id>", views.tools_vs_jobs_table, name="tools_vs_jobs"),
     ]

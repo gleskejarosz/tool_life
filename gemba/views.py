@@ -18,7 +18,7 @@ from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors
 
 
 class GembaIndex(TemplateView):
@@ -1075,3 +1075,11 @@ def pareto_details_query(request):
         },
     )
 
+
+class EditorChartView(TemplateView):
+    template_name = 'gemba/chart.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["qs"] = Editors.objects.all()
+        return context
