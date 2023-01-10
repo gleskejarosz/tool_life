@@ -10,7 +10,8 @@ from django.views.generic import FormView, DetailView, ListView, DeleteView
 from gemba.models import JobModel2
 from tools.filters import JobFilter, OperationFilter
 from tools.forms import JobAddForm, JobUpdateForm, OperationAddForm
-from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel, MachineModel, StationModel
+from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel, MachineModel,\
+    StationModel, PRODUCTIVE
 
 
 def index(request):
@@ -315,7 +316,7 @@ class JobDeleteView(LoginRequiredMixin, DeleteView):
 
 
 def machines_view(request):
-    machine_qs = MachineModel.objects.all().order_by("name")
+    machine_qs = MachineModel.objects.filter(machine_status=PRODUCTIVE).order_by("name")
     return render(request, "tools/machines.html", {"machine_qs": machine_qs})
 
 
@@ -324,14 +325,22 @@ def tools_vs_jobs_table(request, machine_id):
 
     tools_qs = JobStationModel.objects.filter(machine=machine).order_by("station__num")
 
-    all_jobs = JobModel2.objects.all()
     jobs_list = []
-    for job in all_jobs:
-        job_name = job.name
-        jobs_list.append(job_name)
+    for tool_obj in tools_qs:
+        tool_id = tool_obj.tool_id
+        jobs_qs = ToolJobModel.objects.filter(tool=tool_id)
+        for job_elem in jobs_qs:
+            job_id = job_elem.job_id
+            job = JobModel2.objects.get(id=job_id)
+            job_name = job.name
+            if job not in jobs_list:
+                jobs_list.append(job_name)
+
+    jobs_set = set(jobs_list)
+    jobs_list = sorted(list(jobs_set))
 
     table_qs = []
-    print(jobs_list)
+
     for idx, tool_elem in enumerate(tools_qs):
         station = tool_elem.station.name
         tool = tool_elem.tool
@@ -343,8 +352,8 @@ def tools_vs_jobs_table(request, machine_id):
             table_elem = table_qs[idx]
             table_elem[job] = 0
 
-        jobs_qs = ToolJobModel.objects.filter(tool=tool).order_by("job")
-        for job_elem in jobs_qs:
+        tool_jobs_qs = ToolJobModel.objects.filter(tool=tool).order_by("job")
+        for job_elem in tool_jobs_qs:
             job_id = job_elem.job_id
             job_item = JobModel2.objects.get(id=job_id)
             job_elem_name = job_item.name

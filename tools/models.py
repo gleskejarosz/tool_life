@@ -3,10 +3,11 @@ from django.db import models
 from gemba.models import JobModel2
 from tools.utils import minutes_recalculate
 
+NOT_IN_USE = "Not in use"
+PRODUCTIVE = "Productive"
+
 
 class MachineModel(models.Model):
-    NOT_IN_USE = "Not in use"
-    PRODUCTIVE = "Productive"
     MACHINE_STATUS = (
         (NOT_IN_USE, "Not in use"),
         (PRODUCTIVE, "Productive"),

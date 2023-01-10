@@ -2,13 +2,13 @@
 {% block content %}
 <h4>Tools vs jobs:</h4>
 
-<table class="table table-hover">
+<table class="table table-bordered">
     <thead>
         <tr>
         {% for item in table_qs %}
             {% if forloop.first %}
                 {% for h in item %}
-                    <th>{{ h }}</th>
+                    <th style="writing-mode: vertical-lr; vertical-align: middle; text-align: center">{{ h }}</th>
                 {% endfor %}
             {% endif%}
         {% endfor %}
@@ -18,7 +18,7 @@
         {% for item in table_qs %}
             <tr>
                 {% for key,value in item.items %}
-                    <td>{% if value == 1 %} used {% elif value == 0 %} {% else %} {{ value }} {% endif %}</td>
+                <td style="text-align: center;">{% if value == 1 %} &#10003; {% elif value == 0 %} {% else %} {{ value }} {% endif %}</td>
                 {% endfor %}
             </tr>
         {% endfor %}
