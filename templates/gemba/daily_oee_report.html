@@ -22,7 +22,7 @@
         <tr>
             <td><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.id }}</a></td>
             <td>{{ item.user }}</td>
-            <td>{{ item.shift|slice:"4:" }}</td>
+            <td>{{ item.shift }}</td>
             <td>{% if item.job_otg is None %} ----- {% else %} {{ item.job_otg }} {% endif %}</td>
             <td>{{ item.availability }}%</td>
             <td>{{ item.performance }}%</td>

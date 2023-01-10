@@ -6,13 +6,13 @@
 <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">{{ station_name }}</th>
+            <th scope="col">{{ machine_name }} - >> {{ station_name }}</th>
         </tr>
         </thead>
         <tbody>
         {% for object in tool_qs %}
             <tr>
-                <td>{{ object.tool }}</td>
+                <td><a href="{% url 'tools_app:select-tool' machine_id=machine_id station_id=station_id tool_id=object.pk %}">{{ object.tool }}</a></td>
             </tr>
         {% endfor %}
         </tbody>

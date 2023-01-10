@@ -141,21 +141,42 @@ def select_station(request, machine_id):
                   })
 
 
-def select_tool(request, station_id):
+def select_tool(request, machine_id, station_id):
     station = get_object_or_404(StationModel, pk=station_id)
     station_name = station.name
-    tool_qs = JobStationModel.objects.filter(station=station)
+    machine = get_object_or_404(MachineModel, pk=machine_id)
+    machine_name = machine.name
+
+    tool_qs = JobStationModel.objects.filter(station=station_id)
+
     return render(request,
                   template_name="tools/tool.html",
                   context={
+                      "station_id": station_id,
                       "station_name": station_name,
+                      "machine_id": machine_id,
+                      "machine_name": machine_name,
                       "tool_qs": tool_qs,
                   })
 
 
-def select_tool_type(request, pk):
-    tool = ToolModel.object.get(pk=pk)
-    pass
+def change_tool(request, machine_id, station_id, tool_id):
+    tool = ToolModel.object.get(pk=tool_id)
+    tool_name = tool.name
+    station = get_object_or_404(StationModel, pk=station_id)
+    station_name = station.name
+    machine = get_object_or_404(MachineModel, pk=machine_id)
+    machine_name = machine.name
+
+    return render(request,
+                  template_name="tools/change_tool.html",
+                  context={
+                      "station_id": station_id,
+                      "station_name": station_name,
+                      "machine_id": machine_id,
+                      "machine_name": machine_name,
+                      "tool_name": tool_name,
+                  })
 
 
 def returning(request):

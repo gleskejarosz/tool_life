@@ -360,7 +360,7 @@ def available_time_cal(status, hours, time_stamp, not_scheduled_to_run):
 
 def performance_cal(performance_numerator, available_time, downtime):
     if available_time - downtime != 0:
-        performance = round((performance_numerator / (available_time - downtime)) * 100)
+        performance = round((performance_numerator / (available_time - downtime)) * 100, ndigits=2)
     else:
         performance = 0
     return performance
@@ -368,7 +368,7 @@ def performance_cal(performance_numerator, available_time, downtime):
 
 def quality_cal(good, output):
     if output != 0:
-        quality = round((good / output) * 100)
+        quality = round((good / output) * 100, ndigits=2)
     else:
         quality = 0
     return quality
@@ -378,12 +378,12 @@ def availability_cal(available_time, downtime):
     if available_time == 0:
         availability = 0
     else:
-        availability = round(((available_time - downtime) / available_time * 100))
+        availability = round(((available_time - downtime) / available_time * 100), ndigits=2)
     return availability
 
 
 def oee_cal(availability, performance, quality):
-    oee = round(availability * performance * quality / 10000)
+    oee = round(availability * performance * quality / 10000, ndigits=2)
     return oee
 
 
@@ -440,16 +440,18 @@ def pareto_detail_view(request, pk):
                   )
 
 
-def before_close_pareto(request):
-    pareto = Pareto.objects.get(user=request.user, completed=False)
-
+def oee_calculation(pareto):
     hours = pareto.hours
     not_scheduled_to_run = pareto.not_scheduled_to_run
     available_time = int(hours) * 60 - not_scheduled_to_run
 
+    calculation = {}
+
     output = 0
     good = 0
     performance_numerator = 0
+
+    calculation["available_time"]= available_time
 
     for detail in pareto.jobs.all():
         output += detail.output
@@ -457,21 +459,50 @@ def before_close_pareto(request):
         performance_numerator += (detail.output * (60 / detail.job.target))
 
     quality = quality_cal(good=good, output=output)
+    calculation["quality"] = quality
+    calculation["good"] = good
 
     downtime = 0
     for down_elem in pareto.downtimes.all():
         downtime += down_elem.minutes
 
+    calculation["output"] = output
+    calculation["downtime"] = downtime
+
     performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
                                   downtime=downtime)
+    calculation["performance"] = performance
 
     availability = availability_cal(available_time=available_time, downtime=downtime)
 
+    calculation["availability"] = availability
+
     oee = oee_cal(availability=availability, performance=performance, quality=quality)
 
+    calculation["oee"] = oee
     scrap = 0
     for scrap_elem in pareto.scrap.all():
         scrap += scrap_elem.qty
+
+    calculation["scrap"] = scrap
+
+    return calculation
+
+
+def before_close_pareto(request):
+    pareto = Pareto.objects.get(user=request.user, completed=False)
+
+    calculation = oee_calculation(pareto)
+
+    available_time = calculation["available_time"]
+    output = calculation["output"]
+    good = calculation["good"]
+    downtime = calculation["downtime"]
+    availability = calculation["availability"]
+    quality = calculation["quality"]
+    performance = calculation["performance"]
+    oee = calculation["oee"]
+    scrap = calculation["scrap"]
 
     return render(request,
                   template_name='gemba/pareto_before_close.html',
@@ -500,6 +531,13 @@ def final_confirmation_before_close_pareto(request):
 def close_pareto(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
 
+    calculation = oee_calculation(pareto)
+
+    availability = calculation["availability"]
+    quality = calculation["quality"]
+    performance = calculation["performance"]
+    oee = calculation["oee"]
+
     down_items = pareto.downtimes.all()
     down_items.update(completed=True)
     for item in down_items:
@@ -515,6 +553,10 @@ def close_pareto(request):
     for item in details_item:
         item.save()
 
+    pareto.availability = availability
+    pareto.performance = performance
+    pareto.quality = quality
+    pareto.oee = oee
     pareto.completed = True
     pareto.save()
 

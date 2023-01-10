@@ -1,14 +1,14 @@
 from django.conf import settings
 from django.db import models
 
-AM = "1 - Morning shift"
-PM = "2 - Afternoon shift"
-NS = "3 - Night shift"
+AM = "Morning shift"
+PM = "Afternoon shift"
+NS = "Night shift"
 SHIFT_CHOICES = (
     ("--", "No choice"),
-    (AM, "1 - Morning shift"),
-    (PM, "2 - Afternoon shift"),
-    (NS, "3 - Night shift"),
+    (AM, "Morning shift"),
+    (PM, "Afternoon shift"),
+    (NS, "Night shift"),
 )
 HOUR_CHOICES = (
     ("6", "6"),
@@ -43,6 +43,10 @@ class Pareto(models.Model):
     downtimes = models.ManyToManyField("DowntimeDetail")
     scrap = models.ManyToManyField("ScrapDetail")
     ops = models.PositiveIntegerField(default=0)
+    availability = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    performance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    quality = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    oee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     not_scheduled_to_run = models.PositiveIntegerField(default=0)
     job_otg = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="job5", blank=True, null=True)
 
