@@ -117,8 +117,7 @@ USE_L10N = False
 
 # dd/mm/yyyy and dd/mm/yy date & datetime input field settings
 DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%d %b %Y',
-                      '%d %b, %Y', '%d %b %Y', '%d %b, %Y', '%d %B, %Y',
-                      '%d %B %Y', '%d.%m.%Y')
+                      '%d %b %Y', '%d %B %Y', '%d.%m.%Y')
 DATETIME_INPUT_FORMATS = ('%d/%m/%Y %H:%M:%S', '%d/%m/%Y %H:%M', '%d/%m/%Y',
                           '%d/%m/%y %H:%M:%S', '%d/%m/%y %H:%M', '%d/%m/%y',
                           '%Y-%m-%d %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d')

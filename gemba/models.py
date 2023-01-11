@@ -122,6 +122,7 @@ class DowntimeUser(models.Model):
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="downtime_group", blank=True,
                               null=True)
     order = models.PositiveIntegerField(blank=True, null=True)
+    gemba = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.downtime}"
@@ -163,6 +164,7 @@ class ScrapUser(models.Model):
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="scrap_group", blank=False,
                               null=False)
     order = models.PositiveIntegerField(blank=True, null=True)
+    gemba = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.scrap}"

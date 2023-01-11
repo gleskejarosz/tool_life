@@ -47,6 +47,6 @@ urlpatterns = [
     path("export_downtimes_xls/", views.export_downtimes_xls, name="export-downtimes-xls"),
     path("export_daily_oee_report/", views.export_daily_oee_report_csv, name="export_daily_oee_report"),
     path("select_job/<pk>/", views.select_job, name="select-job"),
-    path("tableau/", views.tableau_export, name="tableau"),
+    path("tableau/<pk>/", views.tableau_export, name="tableau"),
     path("chart/", views.EditorChartView.as_view(), name="chart"),
     ]

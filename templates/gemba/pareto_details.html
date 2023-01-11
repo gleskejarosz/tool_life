@@ -3,6 +3,7 @@
 {% load mathfilters %}
 
 <h4>Pareto Detail View</h4>
+<div>
 <table class="table table-hover">
         <thead>
         <tr>
@@ -22,12 +23,12 @@
             <td><b>{{ pareto_list.user }}</b></td>
             <td>{{ pareto_list.pareto_date|date:"d-m-Y" }}</td>
             <td>{{ pareto_list.shift }}</td>
-            <td>{{ available_time }} min</td>
-            <td>{{ downtime }} min</td>
-            <td>{{ availability }}%</td>
-            <td>{{ performance }}%</td>
-            <td>{{ quality }}%</td>
-            <td><b>{{ oee }}%</b></td>
+            <td>{{ report_list.available_time }} min</td>
+            <td>{{ report_list.downtime }} min</td>
+            <td>{{ report_list.availability }}%</td>
+            <td>{{ report_list.performance }}%</td>
+            <td>{{ report_list.quality }}%</td>
+            <td><b>{{ report_list.oee }}%</b></td>
         </tr>
         </tbody>
     </table>
@@ -59,9 +60,9 @@
         <tr>
             <td> <b>Total</b> </td>
             <td> </td>
-            <td> <b>{{ output }}</b> </td>
-            <td> <b>{{ good }}</b> </td>
-            <td> <b>{{ output|sub:good}}</b> </td>
+            <td> <b>{{ report_list.output }}</b> </td>
+            <td> <b>{{ report_list.good }}</b> </td>
+            <td> <b>{{ report_list.output|sub:report_list.good}}</b> </td>
             <td> </td>
         </tr>
         </tbody>
@@ -91,7 +92,7 @@
         <tr>
             <td> <b>Total</b> </td>
             <td> </td>
-            <td><b>{{ downtime }}</b> </td>
+            <td><b>{{ report_list.downtime }}</b> </td>
             <td> </td>
         </tr>
         </tbody>
@@ -119,11 +120,16 @@
         <tr>
             <td> <b>Total</b> </td>
             <td> </td>
-            <td><b>{{ scrap }}</b></td>
+            <td><b>{{ report_list.scrap }}</b></td>
             <td> </td>
         </tr>
         </tbody>
     </table>
     <div class = "col">
 </div>
+</div>
+
+<p><a href="{% url 'gemba_app:tableau' pk=10 %}">
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export Tableau file
+</button></a></p>
 {% endblock %}
