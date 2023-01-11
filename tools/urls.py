@@ -25,4 +25,6 @@ urlpatterns = [
     path("change_tool/<machine_id>/<station_id>/<tool_id>/", views.change_tool, name="change-tool"),
     path("machines_view/", views.machines_view, name="machines"),
     path("tools_vs_jobs/<machine_id>", views.tools_vs_jobs_table, name="tools_vs_jobs"),
+    path("machines_tools_view/", views.machines_view2, name="tools-machines"),
+    path("tools/<machine_id>", views.tools, name="tools"),
     ]

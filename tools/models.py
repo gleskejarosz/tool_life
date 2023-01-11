@@ -59,7 +59,6 @@ class JobStationModel(models.Model):
                                 null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations2", blank=False,
                                 null=False)
-    # job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs1", blank=False, null=False)
     tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools2", blank=True, null=True)
 
     def __str__(self):

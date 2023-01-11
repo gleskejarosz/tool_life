@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Tools assigned for {{ machine_name }}:</h4>
+{% regroup qs by station as station_list %}
+{% for station in station_list %}
+<b>{{ station.grouper }}</b>
+<table class="table table-table">
+        <thead>
+        <tr>
+            <th scope="col"></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for obj in station.list %}
+            <tr>
+                <td>{{ obj.tool }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
+{% endblock %}

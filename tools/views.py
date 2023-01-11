@@ -366,3 +366,26 @@ def tools_vs_jobs_table(request, machine_id):
         context={"table_qs": table_qs},
     )
 
+
+def machines_view2(request):
+    machine_qs = MachineModel.objects.filter(machine_status=PRODUCTIVE).order_by("name")
+    return render(request, "tools/tools_machines.html", {"machine_qs": machine_qs})
+
+
+def tools(request, machine_id):
+    machine = get_object_or_404(MachineModel, pk=machine_id)
+    machine_name = machine.name
+
+    qs = JobStationModel.objects.filter(machine=machine_id).order_by("station__num")
+
+    return render(
+        request,
+        template_name="tools/tools.html",
+        context={
+            "qs": qs,
+            "machine_name": machine_name,
+        },
+    )
+
+
+
