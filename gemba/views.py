@@ -641,9 +641,9 @@ def tableau_export(request, pk):
     hours = pareto.hours
     not_scheduled_to_run = pareto.not_scheduled_to_run
     available_time = int(hours) * 60 - not_scheduled_to_run
-    performance = pareto.performance
-    quality = pareto.quality
-    availability = pareto.availability
+    performance = pareto.performance / 100
+    quality = pareto.quality / 100
+    availability = pareto.availability / 100
     oee = pareto.oee
     ops = pareto.ops
 
@@ -689,7 +689,7 @@ def tableau_export(request, pk):
         elem_job_id = elem.job.id
         job_obj = JobModel2.objects.get(id=elem_job_id)
         target = job_obj.target
-        elem_takt_time = 60 / target
+        elem_takt_time = round(60 / target, ndigits=4)
         elem_output = elem.output
         elem_good = elem.good
         ws.write(0, col, elem_job)
