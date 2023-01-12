@@ -762,10 +762,11 @@ def pareto_create_new(request):
         shift = form.cleaned_data["shift"]
         hours = form.cleaned_data["hours"]
         ops = form.cleaned_data["ops"]
-        time_start = LineHourModel.objects.filter(user=user, shift=shift)
+        time_start_qs = LineHourModel.objects.filter(user=user, shift=shift)
 
-        if time_start.exists():
-            time_stamp = datetime.strptime(str(time_start), "%H:%M:%S")
+        if time_start_qs.exists():
+            time_stamp_obj = time_start_qs[0].start
+            time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
         else:
             if shift == SHIFT_CHOICES[1][1]:
                 time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
