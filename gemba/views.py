@@ -644,7 +644,7 @@ def tableau_export(request, pk):
     performance = pareto.performance / 100
     quality = pareto.quality / 100
     availability = pareto.availability / 100
-    oee = pareto.oee
+    oee = pareto.oee / 100
     ops = pareto.ops
 
     response = HttpResponse(content_type="application/ms-excel")
