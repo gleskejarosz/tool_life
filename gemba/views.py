@@ -18,7 +18,7 @@ from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS
 
 
 class GembaIndex(TemplateView):
@@ -386,16 +386,19 @@ def availability_cal(available_time, downtime):
 
 def oee_cal(availability, performance, quality):
     divider = 10000
+
+    if availability == 0 or performance == 0 or quality == 0:
+        return 0
+
     availability = int(availability * 100)
-    if availability > 0:
-        divider *= 100
+    divider *= 100
     performance = int(performance * 100)
-    if performance > 0:
-        divider *= 100
+    divider *= 100
     quality = int(quality * 100)
-    if quality > 0:
-        divider *= 100
+    divider *= 100
+
     oee = round(availability * performance * quality / divider, ndigits=2)
+
     return oee
 
 
@@ -626,53 +629,114 @@ def tableau_export(request, pk):
     pareto = Pareto.objects.get(pk=pk)
 
     date = pareto.pareto_date
-    id = pareto.id
     shift = pareto.shift
-    user = pareto.user.username
-    status = pareto.completed
+    if shift == AM:
+        shift = "AM"
+    elif shift == PM:
+        shift = "PM"
+    elif shift == NS:
+        shift = "NS"
+
+    user = pareto.user
     hours = pareto.hours
-    time_stamp = pareto.time_stamp
     not_scheduled_to_run = pareto.not_scheduled_to_run
-    available_time = hours * 60 - not_scheduled_to_run
+    available_time = int(hours) * 60 - not_scheduled_to_run
     performance = pareto.performance
     quality = pareto.quality
     availability = pareto.availability
     oee = pareto.oee
-
-    output = 0
-    good = 0
-
-    for detail in pareto.jobs.all():
-        output += detail.output
-        good += detail.good
-
-    downtime = 0
-    for down_elem in pareto.downtimes.all():
-        downtime += down_elem.minutes
-
-    scrap = 0
-    for scrap_elem in pareto.scrap.all():
-        scrap += scrap_elem.qty
+    ops = pareto.ops
 
     response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Tableua.xls"'
+    response["Content-Disposition"] = 'attachment; filename="Tableau.xls"'
 
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("Report")
 
     style3 = XFStyle()
     style3.num_format_str = "YYYY-MM-DD"
-    #A1 Date
+    # A1 Date
     ws.write(0, 0, date, style3)
-    #A2 Machine name
-
-    #A3 Shift
+    # A2 Line name <- fix it later
+    ws.write(1, 0, user.username)
+    # A3 Shift
     ws.write(2, 0, shift)
-
-    #A4 Available time
+    # A4 Available time
     ws.write(3, 0, available_time)
+    # H1 Operators
+    ws.write(0, 7, ops)
 
+    style2 = XFStyle()
+    style2.num_format_str = "0%"
+    # O1 Availability
+    ws.write(0, 14, "Availability")
+    ws.write(0, 15, availability, style2)
+    # O2 Performance
+    ws.write(1, 14, "Performance")
+    ws.write(1, 15, performance, style2)
+    # 03 Quality
+    ws.write(2, 14, "Quality")
+    ws.write(2, 15, quality, style2)
+    # 04 OEE
+    ws.write(3, 14, "OEE")
+    ws.write(3, 15, oee, style2)
 
+    jobs = []
+    col = 1
+    for elem in pareto.jobs.all():
+        elem_job = elem.job.name
+        jobs.append(elem_job)
+        elem_job_id = elem.job.id
+        job_obj = JobModel2.objects.get(id=elem_job_id)
+        target = job_obj.target
+        elem_takt_time = 60 / target
+        elem_output = elem.output
+        elem_good = elem.good
+        ws.write(0, col, elem_job)
+        ws.write(1, col, elem_takt_time)
+        ws.write(2, col, elem_output)
+        ws.write(3, col, elem_good)
+        col += 1
+
+    group = DowntimeGroup.objects.get(user=user)
+    scrap_qs = ScrapUser.objects.filter(group=group).order_by("gemba")
+
+    vector = 4  # start scrap reasons from row 5
+
+    for idx, scrap_obj in enumerate(scrap_qs):
+        scrap_id = scrap_obj.scrap.id
+        scrap_item = ScrapModel.objects.get(id=scrap_id)
+        scrap_name = scrap_item.description
+        ws.write(vector + idx, 0, scrap_name)
+
+        scraps_exist_qs = ScrapDetail.objects.filter(pareto_id=pk).filter(scrap=scrap_id)
+        for elem in scraps_exist_qs:
+            job = elem.job.name
+            column = jobs.index(job) + 1
+            qty = elem.qty
+            ws.write(vector + idx, column, qty)
+
+    down_qs = DowntimeUser.objects.filter(group=group).order_by("gemba")
+
+    for idx, down_obj in enumerate(down_qs):
+        down_id = down_obj.downtime.id
+        down_item = DowntimeModel.objects.get(id=down_id)
+        down_code = down_item.code
+        down_name = down_item.description
+        ws.write(idx, 9, down_code)
+        ws.write(idx, 10, down_name)
+
+        down_exist_obj = DowntimeDetail.objects.filter(pareto_id=pk).filter(downtime=down_id)
+        minutes = 0
+        frequency = 0
+        if down_exist_obj.exists():
+            for down_obj in down_exist_obj:
+                obj_min = down_obj.minutes
+                obj_freq = down_obj.frequency
+                minutes += obj_min
+                frequency += obj_freq
+            ws.write(idx, 11, minutes)
+            ws.write(idx, 12, frequency)
 
     wb.save(response)
     return response
