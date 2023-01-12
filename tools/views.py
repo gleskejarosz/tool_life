@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.response import TemplateResponse
 from django.urls import reverse_lazy
 from django.views.generic import FormView, DetailView, ListView, DeleteView
 
@@ -142,11 +143,9 @@ def select_station(request, machine_id):
                   })
 
 
-def select_tool(request, machine_id, station_id):
-    station = get_object_or_404(StationModel, pk=station_id)
-    station_name = station.name
-    machine = get_object_or_404(MachineModel, pk=machine_id)
-    machine_name = machine.name
+def select_tool(request, station_id):
+    obj = get_object_or_404(StationModel, pk=station_id)
+    station_name = obj.name
 
     tool_qs = JobStationModel.objects.filter(station=station_id)
 
@@ -155,27 +154,18 @@ def select_tool(request, machine_id, station_id):
                   context={
                       "station_id": station_id,
                       "station_name": station_name,
-                      "machine_id": machine_id,
-                      "machine_name": machine_name,
                       "tool_qs": tool_qs,
                   })
 
 
-def change_tool(request, machine_id, station_id, tool_id):
-    tool = ToolModel.object.get(pk=tool_id)
-    tool_name = tool.name
-    station = get_object_or_404(StationModel, pk=station_id)
-    station_name = station.name
-    machine = get_object_or_404(MachineModel, pk=machine_id)
-    machine_name = machine.name
+def change_tool(request, tool_id):
+    obj = JobStationModel.object.get(pk=tool_id)
+
+    tool_name = obj.tool.name
 
     return render(request,
                   template_name="tools/change_tool.html",
                   context={
-                      "station_id": station_id,
-                      "station_name": station_name,
-                      "machine_id": machine_id,
-                      "machine_name": machine_name,
                       "tool_name": tool_name,
                   })
 
