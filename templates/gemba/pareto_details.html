@@ -74,7 +74,7 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Id</th>
+            <th scope="col">Last entry</th>
             <th scope="col">Downtime</th>
             <th scope="col">Minutes</th>
             <th scope="col">Frequency</th>
@@ -83,7 +83,7 @@
         </thead>
         <tbody>
              <tr>{% for pareto_item in pareto_list.downtimes.all %}
-                 <td>{{ pareto_item.id }}</td>
+                 <td>{{ pareto_item.datetime|date:"H:i" }}</td>
             <td>{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</td>
             <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.frequency }}</td>

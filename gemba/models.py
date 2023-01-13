@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.conf import settings
 from django.db import models
 
@@ -66,6 +68,7 @@ class ParetoDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
+    datetime = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
@@ -73,6 +76,10 @@ class ParetoDetail(models.Model):
 
     class Meta:
         verbose_name = "Pareto Detail"
+
+    def save(self, *args, **kwargs):
+        self.datetime = datetime.now()
+        super().save(*args, **kwargs)
 
 
 class DowntimeModel(models.Model):
@@ -102,8 +109,11 @@ class DowntimeDetail(models.Model):
         return f"{self.downtime}"
 
     class Meta:
-        ordering = ["-datetime"]
         verbose_name = "Downtime Detail"
+
+    def save(self, *args, **kwargs):
+        self.datetime = datetime.now()
+        super().save(*args, **kwargs)
 
 
 class DowntimeGroup(models.Model):
@@ -152,6 +162,7 @@ class ScrapDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
+    datetime = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
@@ -159,6 +170,10 @@ class ScrapDetail(models.Model):
 
     class Meta:
         verbose_name = "Scrap detail"
+
+    def save(self, *args, **kwargs):
+        self.datetime = datetime.now()
+        super().save(*args, **kwargs)
 
 
 class ScrapUser(models.Model):

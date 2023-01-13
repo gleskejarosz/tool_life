@@ -34,35 +34,38 @@
 <table class="table table-hover">
         <thead>
             <tr>
-                <th scope="col">Date</th>
+                <th scope="col">Last entry</th>
                 <th scope="col">User / Line</th>
                 <th scope="col">Job</th>
-                <th scope="col">Pareto ID</th>
                 <th scope="col">Output</th>
                 <th scope="col">Good</th>
                 <th scope="col">Scrap</th>
+                <th scope="col">Pareto ID</th>
+                <th scope="col">Pareto Date</th>
             </tr>
         </thead>
         <tbody>
         {% for object in filter.qs %}
             <tr>
-                <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
+                <td>{{ object.datetime|date:'d-m-Y H:i' }}</td>
                 <td>{{ object.user }}</td>
                 <td>{{ object.job }}</td>
-                <td>{{ object.pareto_id }}</td>
                 <td>{{ object.output }}</td>
                 <td>{{ object.good }}</td>
                 <td>{{ object.scrap }}</td>
+                <td>{{ object.pareto_id }}</td>
+                <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
             </tr>
         {% endfor %}
             <tr>
                 <td><b>Total</b></td>
                 <td></td>
                 <td></td>
-                <td></td>
                 <td><b>{{ total_output }}</b></td>
                 <td><b>{{ total_good }}</b></td>
                 <td><b>{{ total_output|sub:total_good }}</b></td>
+                <td></td>
+                <td></td>
             </tr>
         </tbody>
 </table>

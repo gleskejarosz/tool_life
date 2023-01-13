@@ -5,7 +5,6 @@ from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -37,14 +36,14 @@ def downtimes_view(request):
 
 
 def scraps_view(request):
-    scraps = ScrapDetail.objects.all().order_by("-pareto_date")
-    today_downtimes = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
-        "-pareto_date")
+    scraps = ScrapDetail.objects.all().order_by("-datetime")
+    today_scraps = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
+        "-datetime")
     return render(request,
                   template_name="gemba/scraps_view.html",
                   context={
                       "filter": scraps,
-                      "today_downtimes": today_downtimes,
+                      "today_scraps": today_scraps,
                   })
 
 
@@ -223,9 +222,12 @@ def pareto_detail_create(request):
 
 class ParetoSummary(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
-        try:
-            user = self.request.user
-            pareto = Pareto.objects.get(user=user, completed=False)
+        user = self.request.user
+        pareto_qs = Pareto.objects.filter(user=user, completed=False)
+        if pareto_qs.exists():
+            pareto = pareto_qs[0]
+
+            pareto_id = pareto.id
             pareto_status = ""
             status = pareto.completed
             hours = pareto.hours
@@ -240,7 +242,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
                                                 not_scheduled_to_run=not_scheduled_to_run)
 
-            pareto_details = ParetoDetail.objects.filter(user=user, completed=False)
+            pareto_details = ParetoDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id)
             total_good = 0
             total_output = 0
             if pareto_details.exists():
@@ -253,7 +255,7 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             quality = quality_cal(good=total_good, output=total_output)
 
-            down_qs = DowntimeDetail.objects.filter(user=user, completed=False)
+            down_qs = DowntimeDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by("datetime")
             total_down = 0
             if down_qs.exists():
                 for down in down_qs:
@@ -262,7 +264,7 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             availability = availability_cal(available_time=available_time, downtime=total_down)
 
-            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False)
+            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by("datetime")
             total_scrap = 0
             for scrap_elem in scrap_qs:
                 qty = scrap_elem.qty
@@ -290,6 +292,8 @@ class ParetoSummary(LoginRequiredMixin, View):
                           template_name='gemba/pareto.html',
                           context={
                               "pareto_list": pareto,
+                              "down_qs": down_qs,
+                              "scrap_qs": scrap_qs,
                               "user": user,
                               "pareto_status": pareto_status,
                               "message_status": message_status,
@@ -307,7 +311,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "TC": TC,
                           },
                           )
-        except ObjectDoesNotExist:
+        else:
             pareto_status = "Not exist"
             message_status = ""
             user = self.request.user

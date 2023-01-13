@@ -6,12 +6,12 @@ from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel
 
 class ScrapDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "scrap", "user", "job", "qty", "pareto_id", "completed", )
+    list_display = ("id", "pareto_date", "datetime", "scrap", "user", "job", "qty", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "scrap", "job", "qty", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "datetime", "scrap", "job", "qty", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]

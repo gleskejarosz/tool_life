@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
-{% load order_by %}
+
 <div>{% if pareto_status == "Not exist" %}
     <a href="{% url 'gemba_app:pareto-start-new' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Start new Pareto
@@ -52,6 +52,7 @@
             <th scope="col">Good</th>
             <th scope="col">Scrap</th>
             <th scope="col">Takt time</th>
+            <th>Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -68,10 +69,12 @@
             <td>{{ pareto_item.good }}</td>
             <td>{{ pareto_item.scrap }}</td>
             <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
+            <td>{{ pareto_item.datetime|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
+            <td> </td>
             <td> <b>{{ total_output }}</b> </td>
             <td> <b>{{ total_good }}</b> </td>
             <td> <b>{{ total_scrap_cal }}</b> </td>
@@ -118,30 +121,33 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col" width="50%">Downtime Reason</th>
-            <th scope="col" width="15%">Minutes</th>
-            <th scope="col" width="15%">Frequency</th>
-            <th scope="col" width="20%">Job</th>
+            <th>Downtime Reason</th>
+            <th>Minutes</th>
+            <th>Frequency</th>
+            <th>Job</th>
+            <th>Last Entry</th>
         </tr>
         </thead>
         <tbody>
-        {% if pareto_list.downtimes.all|length == 0 %}
+        {% if down_qs|length == 0 %}
               <tr>
                 <td colspan='5'>No downtimes recorded</td>
               </tr>
         {% endif %}
-        {% for pareto_item in pareto_list.downtimes.all|order_by:"-datetime" %}
+        {% for pareto_item in down_qs %}
         <tr>
             <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">
                 {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
             <td>{{ pareto_item.minutes }}</td>
-                 <td>{{ pareto_item.frequency }}</td>
-                 <td>{{ pareto_item.job }}</td>
+            <td>{{ pareto_item.frequency }}</td>
+            <td>{{ pareto_item.job }}</td>
+            <td>{{ pareto_item.datetime|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
             <td><b>{{ total_down }}</b> </td>
+            <td> </td>
             <td> </td>
             <td> </td>
         </tr>
@@ -156,26 +162,29 @@
             <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col" width="50%">Scrap Reason</th>
-            <th scope="col" width="25%">Quantity</th>
-            <th scope="col" width="25%">Job</th>
+            <th>Scrap Reason</th>
+            <th>Quantity</th>
+            <th>Job</th>
+            <th>Last Entry</th>
         </tr>
         </thead>
         <tbody>
-        {% if pareto_list.scrap.all|length == 0 %}
+        {% if scrap_qs|length == 0 %}
               <tr>
                 <td colspan='5'>No scrap reasons recorded</td>
               </tr>
         {% endif %}
-             <tr>{% for pareto_item in pareto_list.scrap.all %}
+             <tr>{% for pareto_item in scrap_qs %}
                  <td><a href="{% url 'gemba_app:scrap-detail-view' pk=pareto_item.pk %}">
                      {{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
-            <td>{{ pareto_item.qty }}</td>
+                 <td>{{ pareto_item.qty }}</td>
                  <td>{{ pareto_item.job }}</td>
+                 <td>{{ pareto_item.datetime|date:"H:i" }}</td>
              </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
+            <td> </td>
             <td><b>{{ total_scrap }}</b></td>
             <td> </td>
         </tr>
