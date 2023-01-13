@@ -12,7 +12,6 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 from django.db.models import Q
-from django.utils.translation import gettext_lazy as _
 
 from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
@@ -26,9 +25,9 @@ class GembaIndex(TemplateView):
 
 
 def downtimes_view(request):
-    downtimes = DowntimeDetail.objects.all().order_by("-pareto_date")
+    downtimes = DowntimeDetail.objects.all().order_by("-datetime")
     today_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
-        "-pareto_date")
+        "-datetime")
     return render(request,
                   template_name="gemba/downtimes_view.html",
                   context={
@@ -122,7 +121,7 @@ def scrap_detail_create(request, pk):
 
 
 @login_required
-def pareto_detail_form(request):
+def pareto_detail_create(request):
     user = request.user
     pareto_qs = Pareto.objects.filter(user=user, completed=False)
     pareto = pareto_qs[0]
@@ -405,7 +404,6 @@ def oee_cal(availability, performance, quality):
 def pareto_detail_view(request, pk):
     pareto = Pareto.objects.get(pk=pk)
     report_list = oee_calculation(pareto)
-
     return render(request,
                   template_name='gemba/pareto_details.html',
                   context={
@@ -418,7 +416,11 @@ def pareto_detail_view(request, pk):
 def oee_calculation(pareto):
     hours = pareto.hours
     not_scheduled_to_run = pareto.not_scheduled_to_run
-    available_time = int(hours) * 60 - not_scheduled_to_run
+    status = pareto.completed
+    time_stamp = pareto.time_stamp
+
+    available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
+                                        not_scheduled_to_run=not_scheduled_to_run)
 
     calculation = {}
 
@@ -433,7 +435,10 @@ def oee_calculation(pareto):
         good += detail.good
         performance_numerator += (detail.output * (60 / detail.job.target))
 
-    quality = quality_cal(good=good, output=output)
+    if status is True:
+        quality = pareto.quality
+    else:
+        quality = quality_cal(good=good, output=output)
     calculation["quality"] = quality
     calculation["good"] = good
 
@@ -444,15 +449,24 @@ def oee_calculation(pareto):
     calculation["output"] = output
     calculation["downtime"] = downtime
 
-    performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
-                                  downtime=downtime)
+    if status is True:
+        performance = pareto.performance
+    else:
+        performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
+                                      downtime=downtime)
     calculation["performance"] = performance
 
-    availability = availability_cal(available_time=available_time, downtime=downtime)
+    if status is True:
+        availability = pareto.availability
+    else:
+        availability = availability_cal(available_time=available_time, downtime=downtime)
 
     calculation["availability"] = availability
 
-    oee = oee_cal(availability=availability, performance=performance, quality=quality)
+    if status is True:
+        oee = pareto.oee
+    else:
+        oee = oee_cal(availability=availability, performance=performance, quality=quality)
 
     calculation["oee"] = oee
     scrap = 0
@@ -648,7 +662,9 @@ def tableau_export(request, pk):
     ops = pareto.ops
 
     response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Tableau.xls"'
+    filename = f"{date} - {shift} - {user.username}.xls"
+    #dest = ('\\').join(source.split('\\')[:1})
+    response["Content-Disposition"] = 'attachment; filename= "{}"'.format(filename)
 
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("Report")
@@ -742,7 +758,7 @@ def tableau_export(request, pk):
     return response
 
 
-def export_daily_oee_report_csv(request):
+def export_daily_oee_report_xls(request):
     query = request.GET.get("q")
     report_list = Pareto.objects.filter(
         Q(pareto_date__exact=query)

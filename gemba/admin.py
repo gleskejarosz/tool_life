@@ -1,7 +1,7 @@
 from django.contrib import admin
 
-from gemba.models import CalculationModel, DowntimeDetail, DowntimeModel, HourModel, LineHourModel, Pareto, \
-    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2, Editors
+from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel, LineUser, Pareto, \
+    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, DowntimeGroup, ScrapUser, JobModel2, Editors, Line
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -22,12 +22,12 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     def admin_downtimes(self, obj):
         return obj.pareto_date.strftime('%d-%m-%Y')
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
+    list_display = ("id", "pareto_date", "datetime", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "datetime", "downtime", "job", "minutes", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user"]
@@ -153,3 +153,5 @@ admin.site.register(DowntimeGroup, DowntimeGroupModelAdmin)
 admin.site.register(ScrapUser, ScrapUserModelAdmin)
 admin.site.register(JobModel2, JobModelAdmin2)
 admin.site.register(Editors)
+admin.site.register(LineUser)
+admin.site.register(Line)

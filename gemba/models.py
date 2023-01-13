@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 
+
 AM = "Morning shift"
 PM = "Afternoon shift"
 NS = "Night shift"
@@ -33,7 +34,7 @@ CALCULATION_CHOICES = (
 
 class Pareto(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.SET_NULL, blank=True, null=True)
+                             on_delete=models.CASCADE, blank=True, null=True)
     pareto_date = models.DateField()
     shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, default="--")
     hours = models.CharField(max_length=32, choices=HOUR_CHOICES, default=8)
@@ -62,7 +63,7 @@ class ParetoDetail(models.Model):
     output = models.PositiveIntegerField(default=0)
     good = models.PositiveIntegerField(default=0)
     scrap = models.PositiveIntegerField(default=0)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     pareto_date = models.DateField(blank=True, null=True)
@@ -90,23 +91,25 @@ class DowntimeDetail(models.Model):
                                  null=False)
     job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs5", blank=False, null=False)
     minutes = models.PositiveIntegerField(default=0, blank=False, null=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     pareto_date = models.DateField(blank=True, null=True)
+    datetime = models.DateTimeField(auto_now_add=True, blank=True)
     frequency = models.PositiveIntegerField(default=1)
 
     def __str__(self):
         return f"{self.downtime}"
 
     class Meta:
+        ordering = ["-datetime"]
         verbose_name = "Downtime Detail"
 
 
 class DowntimeGroup(models.Model):
     name = models.CharField(max_length=10, blank=False, null=False)
     description = models.CharField(max_length=64, blank=False, null=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, unique=True)
     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
 
     def __str__(self):
@@ -146,7 +149,7 @@ class ScrapDetail(models.Model):
     scrap = models.ForeignKey(ScrapModel, on_delete=models.CASCADE, related_name="scrap", blank=False, null=False)
     job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs3", blank=False, null=False)
     qty = models.PositiveIntegerField(default=0, blank=False, null=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     pareto_date = models.DateField(blank=True, null=True)
@@ -184,7 +187,7 @@ class HourModel(models.Model):
 
 
 class LineHourModel(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=False, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=True)
     start = models.ForeignKey(HourModel, on_delete=models.CASCADE, related_name="starts", blank=False,
                               null=False)
     shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, blank=False, null=False)
@@ -202,7 +205,7 @@ class JobModel2(models.Model):
     inner_size = models.PositiveSmallIntegerField(default=1)
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=True,
                               null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -228,3 +231,21 @@ class Editors(models.Model):
 
     def __str__(self):
         return "{}-{}".format(self.editor_name, self.num_users)
+
+
+class Line(models.Model):
+    code = models.CharField(max_length=8)
+    name = models.CharField(max_length=16)
+    description = models.CharField(max_length=64, blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.code} - {self.name}"
+
+
+class LineUser(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name="lines", blank=False, null=False)
+
+    def __str__(self):
+        return f"{self.user} - {self.line}"
+

@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
+{% load order_by %}
 <div>{% if pareto_status == "Not exist" %}
     <a href="{% url 'gemba_app:pareto-start-new' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Start new Pareto
@@ -129,7 +130,7 @@
                 <td colspan='5'>No downtimes recorded</td>
               </tr>
         {% endif %}
-        {% for pareto_item in pareto_list.downtimes.all %}
+        {% for pareto_item in pareto_list.downtimes.all|order_by:"-datetime" %}
         <tr>
             <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">
                 {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
