@@ -36,7 +36,7 @@
     <br/>
 <h2 style="text-align:left;">PARETO  Date: {{ pareto_list.pareto_date|date:"d-m-Y" }}
     {% if pareto_list.job_otg is None %} Job: Please select! {% else %} Job: {{ pareto_list.job_otg }}{% endif %}
-    <span style="float:right;">Line: {{ user }}</span></h2>
+    <span style="float:right;">Line: {{ pareto_list.line }}</span></h2>
     <p>Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours -
         Operators: {{ pareto_list.ops }} - Time available until now: {{ available_time }} min - Not scheduled to run:
         {{ pareto_list.not_scheduled_to_run}} min</p>
@@ -51,8 +51,8 @@
             <th scope="col">Output</th>
             <th scope="col">Good</th>
             <th scope="col">Scrap</th>
-            <th scope="col">Takt time</th>
-            <th>Last Entry</th>
+            <th scope="col" style="font-size:0.8vw;">Takt time</th>
+            <th style="font-size:0.8vw;">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -68,16 +68,16 @@
             <td>{{ pareto_item.output }}</td>
             <td>{{ pareto_item.good }}</td>
             <td>{{ pareto_item.scrap }}</td>
-            <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
-            <td>{{ pareto_item.datetime|date:"H:i" }}</td>
+            <td style="font-size:0.8vw;">{{ pareto_item.takt_time }}</td>
+            <td style="font-size:0.8vw;">{{ pareto_item.datetime|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td> </td>
             <td> <b>{{ total_output }}</b> </td>
             <td> <b>{{ total_good }}</b> </td>
             <td> <b>{{ total_scrap_cal }}</b> </td>
+            <td> </td>
             <td> </td>
         </tr>
         </tbody>
@@ -121,11 +121,11 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th>Downtime Reason</th>
-            <th>Minutes</th>
-            <th>Frequency</th>
-            <th>Job</th>
-            <th>Last Entry</th>
+            <th  scope="col">Downtime Reason</th>
+            <th  scope="col">Min</th>
+            <th  scope="col">Freq</th>
+            <th  scope="col" style="font-size:0.8vw;">Job</th>
+            <th  scope="col" style="font-size:0.8vw;">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -140,8 +140,8 @@
                 {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
             <td>{{ pareto_item.minutes }}</td>
             <td>{{ pareto_item.frequency }}</td>
-            <td>{{ pareto_item.job }}</td>
-            <td>{{ pareto_item.datetime|date:"H:i" }}</td>
+            <td style="font-size:0.8vw;">{{ pareto_item.job }}</td>
+            <td style="font-size:0.8vw;">{{ pareto_item.datetime|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -162,10 +162,10 @@
             <table class="table table-hover">
         <thead>
         <tr>
-            <th>Scrap Reason</th>
-            <th>Quantity</th>
-            <th>Job</th>
-            <th>Last Entry</th>
+            <th scope="col">Scrap Reason</th>
+            <th scope="col">Quantity</th>
+            <th  scope="col" style="font-size:0.8vw;">Job</th>
+            <th  scope="col" style="font-size:0.8vw; vertical-align:center;">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -178,14 +178,14 @@
                  <td><a href="{% url 'gemba_app:scrap-detail-view' pk=pareto_item.pk %}">
                      {{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
                  <td>{{ pareto_item.qty }}</td>
-                 <td>{{ pareto_item.job }}</td>
-                 <td>{{ pareto_item.datetime|date:"H:i" }}</td>
+                 <td style="font-size:0.8vw;">{{ pareto_item.job }}</td>
+                 <td style="font-size:0.8vw;" >{{ pareto_item.datetime|date:"H:i" }}</td>
              </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td> </td>
             <td><b>{{ total_scrap }}</b></td>
+            <td> </td>
             <td> </td>
         </tr>
         </tbody>

@@ -11,10 +11,10 @@ class ScrapDetailAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "datetime", "scrap", "job", "qty", "user", "completed"],
+            "fields": ["id", "pareto_id", "datetime", "pareto_date", "scrap", "job", "qty", "user", "completed"],
         }),
     ]
-    readonly_fields = ["id", "user"]
+    readonly_fields = ["id", "user", "datetime"]
 
 
 class DowntimeDetailAdmin(admin.ModelAdmin):
@@ -27,34 +27,34 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "datetime", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "pareto_id", "datetime", "pareto_date", "downtime", "job", "minutes", "user", "completed"],
         }),
     ]
-    readonly_fields = ["id", "user"]
+    readonly_fields = ["id", "user", "datetime"]
 
 
 class ParetoDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "job", "output", "good", "scrap", "pareto_id", "completed", )
+    list_display = ("id", "pareto_date", "datetime", "job", "output", "good", "scrap", "takt_time", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "job", "output", "good", "scrap", "user", "completed"],
+            "fields": ["id", "pareto_id", "pareto_date", "datetime", "job", "output", "good", "scrap", "takt_time", "user", "completed"],
         }),
     ]
-    readonly_fields = ["id", "user"]
+    readonly_fields = ["id", "user", "datetime"]
 
 
 class ParetoAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "user", "shift", "hours", "ops", "not_scheduled_to_run",
+    list_display = ("id", "pareto_date", "user", "line", "shift", "hours", "ops", "not_scheduled_to_run",
                     "availability", "performance", "quality", "oee", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run",
+            "fields": ["id", "line", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run",
                        "availability", "performance", "quality", "oee", "jobs", "job_otg", "downtimes", "scrap",
                        "ops", "completed"],
         }),
@@ -140,12 +140,38 @@ class JobModelAdmin2(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
+class LineHourModelAdmin(admin.ModelAdmin):
+    ordering = ("line",)
+    list_display = ("line", "start", "shift", "id", )
+    list_display_links = ("line",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "line", "start", "shift"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
+class LineModelAdmin(admin.ModelAdmin):
+    ordering = ("name",)
+    list_display = ("name", "id", "code", "description", )
+    list_display_links = ("name",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "code", "name", "description"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
 admin.site.register(Pareto, ParetoAdmin)
 admin.site.register(ParetoDetail, ParetoDetailAdmin)
 admin.site.register(DowntimeModel, DowntimeModelAdmin)
 admin.site.register(DowntimeDetail, DowntimeDetailAdmin)
 admin.site.register(HourModel)
-admin.site.register(LineHourModel)
+admin.site.register(LineHourModel, LineHourModelAdmin)
 admin.site.register(ScrapModel, ScrapModelAdmin)
 admin.site.register(ScrapDetail, ScrapDetailAdmin)
 admin.site.register(DowntimeUser, DowntimeUserModelAdmin)
@@ -154,4 +180,4 @@ admin.site.register(ScrapUser, ScrapUserModelAdmin)
 admin.site.register(JobModel2, JobModelAdmin2)
 admin.site.register(Editors)
 admin.site.register(LineUser)
-admin.site.register(Line)
+admin.site.register(Line, LineModelAdmin)

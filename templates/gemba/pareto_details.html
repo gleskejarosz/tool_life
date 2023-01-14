@@ -6,7 +6,7 @@
 <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Line / User</th>
+            <th scope="col">Line</th>
             <th scope="col">Date</th>
             <th scope="col">Shift</th>
             <th scope="col">Available time</th>
@@ -19,7 +19,7 @@
         </thead>
         <tbody>
         <tr>
-            <td><b>{{ pareto_list.user }}</b></td>
+            <td><b>{{ pareto_list.line}}</b></td>
             <td>{{ pareto_list.pareto_date|date:"d-m-Y" }}</td>
             <td>{{ pareto_list.shift }}</td>
             <td>{{ report_list.available_time }} min</td>
@@ -35,35 +35,33 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Id</th>
             <th scope="col">Jobs</th>
             <th scope="col">Output</th>
             <th scope="col">Good</th>
             <th scope="col">Scrap</th>
-            <th scope="col">Target</th>
             <th scope="col">Takt time</th>
+            <th scope="col">Last entry</th>
         </tr>
         </thead>
         <tbody>
         <tr>
        {% for pareto_item in pareto_list.jobs.all %}
-            <td>{{ pareto_item.id }}</td>
             <td>{{ pareto_item.job.name }}</td>
             <td>{{ pareto_item.output }}</td>
             <td>{{ pareto_item.good }}</td>
             <td>{{ pareto_item.scrap }}</td>
-            <td>{{ pareto_item.job.target }}</td>
-            <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
+            <td>{{ pareto_item.takt_time }}</td>
+            <td>{{ pareto_item.datetime|date:'d-m-Y H:i' }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td> </td>
             <td> <b>{{ report_list.output }}</b> </td>
             <td> <b>{{ report_list.good }}</b> </td>
             <td> <b>{{ report_list.output|sub:report_list.good}}</b> </td>
             <td> </td>
             <td> </td>
+             <td> </td>
         </tr>
         </tbody>
     </table>
@@ -74,26 +72,26 @@
     <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Last entry</th>
             <th scope="col">Downtime</th>
-            <th scope="col">Minutes</th>
-            <th scope="col">Frequency</th>
+            <th scope="col">Min</th>
+            <th scope="col">Freq</th>
             <th scope="col">Job</th>
+            <th scope="col">Last entry</th>
         </tr>
         </thead>
         <tbody>
              <tr>{% for pareto_item in pareto_list.downtimes.all %}
-                 <td>{{ pareto_item.datetime|date:"H:i" }}</td>
             <td>{{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</td>
             <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.frequency }}</td>
                  <td>{{ pareto_item.job }}</td>
+                 <td>{{ pareto_item.datetime|date:'d-m-Y H:i' }}</td>
              </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td> </td>
             <td><b>{{ report_list.downtime }}</b> </td>
+            <td> </td>
             <td> </td>
             <td> </td>
         </tr>
@@ -105,24 +103,24 @@
             <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Id</th>
             <th scope="col">Scrap</th>
             <th scope="col">Quantity</th>
             <th scope="col">Job</th>
+            <th scope="col">Last entry</th>
         </tr>
         </thead>
         <tbody>
              <tr>{% for pareto_item in pareto_list.scrap.all %}
-                 <td>{{ pareto_item.id }}</td>
-            <td>{{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</td>
-            <td>{{ pareto_item.qty }}</td>
+                 <td>{{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</td>
+                 <td>{{ pareto_item.qty }}</td>
                  <td>{{ pareto_item.job }}</td>
+                 <td>{{ pareto_item.datetime|date:'d-m-Y H:i' }}</td>
              </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td> </td>
             <td><b>{{ report_list.scrap }}</b></td>
+            <td> </td>
             <td> </td>
         </tr>
         </tbody>
@@ -134,6 +132,9 @@
 
 <div class = "row">
   <div class = "col">
+<p><a href="{% url 'gemba_app:open-pareto' pareto_list.id %}">
+<button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Open Pareto
+</button></a></p>
 <p><a href="{% url 'gemba_app:tableau' pk=pareto_list.id %}">
 <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Export Tableau file
 </button></a></p>

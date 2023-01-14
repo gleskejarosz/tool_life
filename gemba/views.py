@@ -1,5 +1,6 @@
 import csv
 import xlwt
+from django.core.paginator import Paginator
 from xlwt import XFStyle, Font
 from datetime import datetime, timezone, timedelta
 
@@ -12,11 +13,10 @@ from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 from django.db.models import Q
 
-from gemba.filters import ParetoDetailFilter
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS
+    DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser
 
 
 class GembaIndex(TemplateView):
@@ -25,25 +25,51 @@ class GembaIndex(TemplateView):
 
 def downtimes_view(request):
     downtimes = DowntimeDetail.objects.all().order_by("-datetime")
-    today_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
+    last_week_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
         "-datetime")
+    paginator = Paginator(last_week_downtimes, 100)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return render(request,
                   template_name="gemba/downtimes_view.html",
                   context={
                       "filter": downtimes,
-                      "today_downtimes": today_downtimes,
+                      "page_obj": page_obj,
                   })
 
 
 def scraps_view(request):
     scraps = ScrapDetail.objects.all().order_by("-datetime")
-    today_scraps = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
+    last_week_scraps = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
         "-datetime")
+    paginator = Paginator(last_week_scraps, 100)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     return render(request,
                   template_name="gemba/scraps_view.html",
                   context={
                       "filter": scraps,
-                      "today_scraps": today_scraps,
+                      "page_obj": page_obj,
+                  })
+
+
+def pareto_details_view(request):
+    pareto_details = ParetoDetail.objects.all().order_by("-datetime")
+    last_week_pareto_details = ParetoDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)
+                                                           ).order_by("-datetime")
+    paginator = Paginator(last_week_pareto_details, 100)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request,
+                  template_name="gemba/pareto_details_view.html",
+                  context={
+                      "filter": pareto_details,
+                      "page_obj": page_obj,
                   })
 
 
@@ -59,7 +85,7 @@ def downtime_detail_create(request, pk):
 
     if downtime_qs.exists():
         downtime_id = downtime_qs[0].id
-        downtime = get_object_or_404(DowntimeDetail, id=downtime_id)
+        downtime = DowntimeDetail.objects.get(id=downtime_id)
         old_time = downtime.minutes
         form = DowntimeMinutes(request.POST or None)
         if form.is_valid():
@@ -128,6 +154,9 @@ def pareto_detail_create(request):
     if job is None:
         return redirect("gemba_app:pareto-summary")
 
+    job_id = pareto.job_otg_id
+    job_obj = JobModel2.objects.get(id=job_id)
+    takt_time = round(60 / job_obj.target, ndigits=5)
     pareto_details_qs = ParetoDetail.objects.filter(user=user, completed=False, job=job)
 
     total_output = 0
@@ -163,7 +192,7 @@ def pareto_detail_create(request):
             else:
                 pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
                                                           pareto_id=pareto_id,
-                                                          pareto_date=pareto_date, scrap=scrap)
+                                                          pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                 pareto.jobs.add(pareto_item)
                 return redirect("gemba_app:pareto-summary")
 
@@ -206,7 +235,7 @@ def pareto_detail_create(request):
             else:
                 pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=cal_good,
                                                           pareto_id=pareto_id,
-                                                          pareto_date=pareto_date, scrap=scrap)
+                                                          pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                 pareto.jobs.add(pareto_item)
                 return redirect("gemba_app:pareto-summary")
 
@@ -255,7 +284,8 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             quality = quality_cal(good=total_good, output=total_output)
 
-            down_qs = DowntimeDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by("datetime")
+            down_qs = DowntimeDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by(
+                "datetime")
             total_down = 0
             if down_qs.exists():
                 for down in down_qs:
@@ -285,9 +315,6 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             oee = oee_cal(availability=availability, performance=performance, quality=quality)
 
-            down_group = DowntimeGroup.objects.get(user=user)
-            calc_option = down_group.calculation
-
             return render(self.request,
                           template_name='gemba/pareto.html',
                           context={
@@ -307,8 +334,6 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "total_output": total_output,
                               "total_good": total_good,
                               "total_scrap_cal": total_scrap_cal,
-                              "calc_option": calc_option,
-                              "TC": TC,
                           },
                           )
         else:
@@ -417,6 +442,7 @@ def pareto_detail_view(request, pk):
                   )
 
 
+# when depends on the status
 def oee_calculation(pareto):
     hours = pareto.hours
     not_scheduled_to_run = pareto.not_scheduled_to_run
@@ -425,7 +451,6 @@ def oee_calculation(pareto):
 
     available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
                                         not_scheduled_to_run=not_scheduled_to_run)
-
     calculation = {}
 
     output = 0
@@ -437,7 +462,7 @@ def oee_calculation(pareto):
     for detail in pareto.jobs.all():
         output += detail.output
         good += detail.good
-        performance_numerator += (detail.output * (60 / detail.job.target))
+        performance_numerator += (detail.output * detail.takt_time)
 
     if status is True:
         quality = pareto.quality
@@ -460,11 +485,7 @@ def oee_calculation(pareto):
                                       downtime=downtime)
     calculation["performance"] = performance
 
-    if status is True:
-        availability = pareto.availability
-    else:
-        availability = availability_cal(available_time=available_time, downtime=downtime)
-
+    availability = availability_cal(available_time=available_time, downtime=downtime)
     calculation["availability"] = availability
 
     if status is True:
@@ -482,10 +503,60 @@ def oee_calculation(pareto):
     return calculation
 
 
+# when status not completed, but wants to see how it will be saved
+def final_oee_calculation(pareto):
+    hours = pareto.hours
+    not_scheduled_to_run = pareto.not_scheduled_to_run
+
+    available_time = int(hours) * 60 - not_scheduled_to_run
+
+    calculation = {}
+
+    output = 0
+    good = 0
+    performance_numerator = 0
+
+    calculation["available_time"] = available_time
+
+    for detail in pareto.jobs.all():
+        output += detail.output
+        good += detail.good
+        performance_numerator += (detail.output * detail.takt_time)
+
+    quality = quality_cal(good=good, output=output)
+    calculation["quality"] = quality
+    calculation["good"] = good
+
+    downtime = 0
+    for down_elem in pareto.downtimes.all():
+        downtime += down_elem.minutes
+
+    calculation["output"] = output
+    calculation["downtime"] = downtime
+
+    performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
+                                  downtime=downtime)
+    calculation["performance"] = performance
+
+    availability = availability_cal(available_time=available_time, downtime=downtime)
+    calculation["availability"] = availability
+
+    oee = oee_cal(availability=availability, performance=performance, quality=quality)
+
+    calculation["oee"] = oee
+    scrap = 0
+    for scrap_elem in pareto.scrap.all():
+        scrap += scrap_elem.qty
+
+    calculation["scrap"] = scrap
+
+    return calculation
+
+
 def before_close_pareto(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
 
-    calculation = oee_calculation(pareto)
+    calculation = final_oee_calculation(pareto)
 
     available_time = calculation["available_time"]
     output = calculation["output"]
@@ -526,7 +597,7 @@ def final_confirmation_before_close_pareto(request):
 def close_pareto(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
 
-    calculation = oee_calculation(pareto)
+    calculation = final_oee_calculation(pareto)
 
     availability = calculation["availability"]
     quality = calculation["quality"]
@@ -558,6 +629,7 @@ def close_pareto(request):
     return redirect("gemba_app:index")
 
 
+# more than one pareto
 def get_details_to_display(object_list):
     """
     Organizing data to be displayed in the form of a list of dictionaries, taking into account OEE calculations.
@@ -569,6 +641,7 @@ def get_details_to_display(object_list):
         id = pareto.id
         shift = pareto.shift
         user = pareto.user.username
+        line = pareto.line
         status = pareto.completed
         hours = pareto.hours
         time_stamp = pareto.time_stamp
@@ -584,7 +657,7 @@ def get_details_to_display(object_list):
         for detail in pareto.jobs.all():
             output += detail.output
             good += detail.good
-            performance_numerator += (detail.output * (60 / detail.job.target))
+            performance_numerator += (detail.output * detail.takt_time)
 
         if status is True:
             quality = pareto.quality
@@ -621,6 +694,7 @@ def get_details_to_display(object_list):
             "shift": shift,
             "job_otg": job_otg,
             "user": user,
+            "line": line,
             "availability": availability,
             "performance": performance,
             "quality": quality,
@@ -667,7 +741,7 @@ def tableau_export(request, pk):
 
     response = HttpResponse(content_type="application/ms-excel")
     filename = f"{date} - {shift} - {user.username}.xls"
-    #dest = ('\\').join(source.split('\\')[:1})
+    # dest = ('\\').join(source.split('\\')[:1})
     response["Content-Disposition"] = 'attachment; filename= "{}"'.format(filename)
 
     wb = xlwt.Workbook(encoding="utf-8")
@@ -840,13 +914,17 @@ START_CHOICES = (
 @login_required
 def pareto_create_new(request):
     user = request.user
+    line_user_qs = LineUser.objects.filter(user=user)
+    if line_user_qs.exists():
+        line = line_user_qs[0]
+
     pareto_date = datetime.now(timezone.utc).date()
     form = NewPareto(request.POST or None)
     if form.is_valid():
         shift = form.cleaned_data["shift"]
         hours = form.cleaned_data["hours"]
         ops = form.cleaned_data["ops"]
-        time_start_qs = LineHourModel.objects.filter(user=user, shift=shift)
+        time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
 
         if time_start_qs.exists():
             time_stamp_obj = time_start_qs[0].start
@@ -859,8 +937,11 @@ def pareto_create_new(request):
             else:
                 time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
 
+        if not line_user_qs.exists():
+            line = ""
+
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                              time_stamp=time_stamp, ops=ops)
+                              time_stamp=time_stamp, ops=ops, line=line)
         return redirect("gemba_app:pareto-summary")
 
     return render(
@@ -1044,38 +1125,58 @@ def select_job(request, pk):
     return redirect("gemba_app:pareto-summary")
 
 
-class SearchResultsView(ListView):
+class DowntimeSearchResultsView(ListView):
     model = DowntimeDetail
     template_name = "gemba/downtimes_search.html"
+    paginate_by = 100
 
     def get_queryset(self):
         query = self.request.GET.get("q")
-        object_list = DowntimeDetail.objects.filter(
+        page_obj = DowntimeDetail.objects.filter(
             Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
             Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
             Q(minutes__icontains=query) | Q(job__name__icontains=query) |
             Q(pareto_id__icontains=query)
-        ).order_by('-id')
-        return object_list
+        ).order_by('-datetime')
+        return page_obj
 
 
 class ScrapSearchResultsView(ListView):
     model = ScrapDetail
     template_name = "gemba/scraps_search.html"
+    paginate_by = 100
 
     def get_queryset(self):
         query = self.request.GET.get("q")
-        object_list = ScrapDetail.objects.filter(
+        page_obj = ScrapDetail.objects.filter(
             Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
             Q(scrap__code__icontains=query) | Q(scrap__description__icontains=query) |
             Q(qty__icontains=query) | Q(job__name__icontains=query) |
             Q(pareto_id__icontains=query)
-        ).order_by('-id')
-        return object_list
+        ).order_by('-datetime')
+        return page_obj
 
 
+class ParetoDetailsSearchResultsView(ListView):
+    model = ParetoDetail
+    template_name = "gemba/pareto_details_search.html"
+    paginate_by = 100
+
+    def get_queryset(self):
+        query = self.request.GET.get("q")
+        page_obj = ParetoDetail.objects.filter(
+            Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
+            Q(good__icontains=query) | Q(output__icontains=query) |
+            Q(scrap__icontains=query) | Q(job__name__icontains=query) |
+            Q(pareto_id__icontains=query) | Q(datetime__icontains=query) |
+            Q(takt_time__icontains=query)
+        ).order_by('-datetime')
+        return page_obj
+
+
+# alter to Quarantine id
 def quarantine_view(request):
-    quarantine_qs = ScrapDetail.objects.filter(scrap=8).order_by("-id")
+    quarantine_qs = ScrapDetail.objects.filter(scrap=18).order_by("-datetime")
 
     return render(
         request,
@@ -1176,27 +1277,6 @@ class ParetoNSUpdateView(UpdateView):
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
 
-def pareto_details_query(request):
-    details = ParetoDetail.objects.all().order_by("-pareto_date").order_by("-id")
-    details_filter = ParetoDetailFilter(request.GET, queryset=details)
-
-    details_list = details_filter.qs
-    total_output = 0
-    total_good = 0
-    for detail in details_list:
-        total_output += detail.output
-        total_good += detail.good
-    return render(
-        request,
-        template_name="gemba/pareto_details_view.html",
-        context={
-            "filter": details_filter,
-            "total_output": total_output,
-            "total_good": total_good,
-        },
-    )
-
-
 class EditorChartView(TemplateView):
     template_name = 'gemba/chart.html'
 
@@ -1204,3 +1284,33 @@ class EditorChartView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["qs"] = Editors.objects.all()
         return context
+
+
+@login_required
+def open_pareto(request, pk):
+    pareto = Pareto.objects.get(pk=pk)
+    user = request.user
+
+    down_items = pareto.downtimes.all()
+    down_items.update(completed=False)
+    down_items.update(user=user)
+    for item in down_items:
+        item.save()
+
+    scrap_items = pareto.scrap.all()
+    scrap_items.update(completed=False)
+    scrap_items.update(user=user)
+    for item in scrap_items:
+        item.save()
+
+    details_item = pareto.jobs.all()
+    details_item.update(completed=False)
+    details_item.update(user=user)
+    for item in details_item:
+        item.save()
+
+    pareto.user = user
+    pareto.completed = False
+    pareto.save()
+
+    return redirect("gemba_app:pareto-summary")

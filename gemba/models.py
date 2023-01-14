@@ -52,6 +52,7 @@ class Pareto(models.Model):
     oee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     not_scheduled_to_run = models.PositiveIntegerField(default=0)
     job_otg = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="job5", blank=True, null=True)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines2", blank=True, null=True)
 
     def __str__(self):
         return f"{self.pareto_date}"
@@ -70,6 +71,8 @@ class ParetoDetail(models.Model):
     pareto_id = models.PositiveIntegerField(default=0)
     datetime = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
+    takt_time = models.DecimalField(max_digits=10, decimal_places=5, default=0)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines3", blank=True, null=True)
 
     def __str__(self):
         return f"{self.job}"
@@ -90,7 +93,7 @@ class DowntimeModel(models.Model):
         return f"{self.code} - {self.description}"
 
     class Meta:
-        verbose_name = "Downtime"
+        verbose_name = "Downtime Reason"
 
 
 class DowntimeDetail(models.Model):
@@ -104,6 +107,7 @@ class DowntimeDetail(models.Model):
     pareto_date = models.DateField(blank=True, null=True)
     datetime = models.DateTimeField(auto_now_add=True, blank=True)
     frequency = models.PositiveIntegerField(default=1)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines4", blank=True, null=True)
 
     def __str__(self):
         return f"{self.downtime}"
@@ -164,12 +168,13 @@ class ScrapDetail(models.Model):
     pareto_id = models.PositiveIntegerField(default=0)
     datetime = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines5", blank=True, null=True)
 
     def __str__(self):
         return f"{self.scrap}"
 
     class Meta:
-        verbose_name = "Scrap detail"
+        verbose_name = "Scrap Detail"
 
     def save(self, *args, **kwargs):
         self.datetime = datetime.now()
@@ -191,6 +196,7 @@ class ScrapUser(models.Model):
         verbose_name = "Scrap vs Group"
 
 
+# to remove
 class HourModel(models.Model):
     start = models.TimeField()
 
@@ -202,21 +208,20 @@ class HourModel(models.Model):
 
 
 class LineHourModel(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=True)
-    start = models.ForeignKey(HourModel, on_delete=models.CASCADE, related_name="starts", blank=False,
-                              null=False)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines1", blank=True, null=True)
+    start = models.TimeField()
     shift = models.CharField(max_length=32, choices=SHIFT_CHOICES, blank=False, null=False)
 
     def __str__(self):
         return f"{self.start}"
 
     class Meta:
-        verbose_name = "Line start hour"
+        verbose_name = "Line Start Hour"
 
 
 class JobModel2(models.Model):
     name = models.CharField(max_length=64)
-    target = models.IntegerField(default=1615)
+    target = models.IntegerField(default=0)
     inner_size = models.PositiveSmallIntegerField(default=1)
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=True,
                               null=True)
@@ -254,7 +259,7 @@ class Line(models.Model):
     description = models.CharField(max_length=64, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.code} - {self.name}"
+        return self.name
 
 
 class LineUser(models.Model):
@@ -264,3 +269,5 @@ class LineUser(models.Model):
     def __str__(self):
         return f"{self.user} - {self.line}"
 
+    class Meta:
+        verbose_name = "User vs Line"

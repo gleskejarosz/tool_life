@@ -48,7 +48,7 @@
             <td>{{ pareto_item.output }}</td>
             <td>{{ pareto_item.good }}</td>
             <td>{{ pareto_item.scrap }}</td>
-            <td>{{ 60|div:pareto_item.job.target|floatformat:5 }}</td>
+            <td>{{ pareto_item.takt_time }}</td>
         </tr>
         {% endfor %}
         <tr>
