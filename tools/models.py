@@ -89,10 +89,6 @@ class OperationModel(models.Model):
 
     tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=False, default="")
     tool_type = models.CharField(max_length=64, choices=TOOL_CHOICES, default=TOOL)
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines", blank=True,
-                                null=True)
-    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations", blank=True,
-                                null=True)
     start_date = models.DateField(blank=False, null=False)
     finish_date = models.DateField(blank=True, null=True)
     status = models.BooleanField(default=False)

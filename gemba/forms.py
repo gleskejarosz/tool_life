@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import DateInput, TimeInput
+from django.forms import DateInput, TimeInput, Select, TextInput
 
 from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto
 
@@ -26,7 +26,7 @@ class ParetoTotalQtyDetailForm(forms.Form):
 
 class DowntimeAdd(forms.Form):
     downtime = forms.ModelChoiceField(queryset=DowntimeModel.objects.all().order_by("code"))
-    minutes = forms.IntegerField()
+    minutes = forms.IntegerField(min_value=0)
 
 
 class DowntimeMinutes(forms.Form):
@@ -40,7 +40,7 @@ class ScrapQuantity(forms.Form):
 class NewPareto(forms.Form):
     shift = forms.ChoiceField(choices=SHIFT_CHOICES)
     hours = forms.ChoiceField(choices=HOUR_CHOICES)
-    ops = forms.IntegerField()
+    ops = forms.IntegerField(min_value=1)
 
 
 class ParetoUpdateForm(forms.ModelForm):

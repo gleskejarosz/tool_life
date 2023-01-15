@@ -1,7 +1,7 @@
 import django_filters
 from django.forms import DateInput
 
-from tools.models import JobUpdate, OperationModel
+from tools.models import JobUpdate, OperationModel, JobStationModel
 
 
 class JobFilter(django_filters.FilterSet):
@@ -44,3 +44,13 @@ class OperationFilter(django_filters.FilterSet):
     class Meta:
         model = OperationModel
         fields = "__all__"
+
+
+class ToolFilter(django_filters.FilterSet):
+    machine = django_filters.CharFilter(field_name='machine_id__name', label="Machine", lookup_expr="contains")
+    station = django_filters.CharFilter(field_name='station_id__name', label="Station", lookup_expr="contains")
+    tool = django_filters.CharFilter(field_name='tool_id__name', label="Tool", lookup_expr="contains")
+
+    class Meta:
+        model = JobStationModel
+        fields = ("machine", "station", "tool", )

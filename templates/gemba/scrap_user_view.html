@@ -12,7 +12,7 @@
     <table class="table table-bordered">
         <thead>
         <tr>
-            <th scope="col">Code & Description</th>
+            <th scope="col">Code - Description</th>
             <th scope="col"></th>
             <th scope="col"></th>
             <th scope="col"></th>
@@ -52,6 +52,56 @@
     </tr>
         <tr>
     {% for item in items_list|slice:"25:30" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"30:35" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"35:40" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"40:45" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"45:50" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"50:55" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"55:60" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"60:65" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"65:70" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"70:75" %}
+    <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
+    {% endfor %}
+    </tr>
+        <tr>
+    {% for item in items_list|slice:"75:80" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>

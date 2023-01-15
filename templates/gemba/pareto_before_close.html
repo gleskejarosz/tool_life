@@ -18,8 +18,8 @@
     Good: {{ good }} = {{ scrap }}?! Should be {{ scrap|add:scrap_compare }}. Go back to Pareto sheet and fix it. {% endif %}</h5>
 <h5>{% if performance > 100 %} There is a mistake in your Pareto: {{ performance }} > 100%.
     Please go back to Pareto sheet and fix it.{% endif %}</h5>
-<h5>{% if performance < 80 %} Possibly, there is a mistake in your Pareto: {{ performance }} < 80%.
-    Please go back to Pareto sheet and check it.{% endif %}</h5>
+<h5>{% if performance < 80 %} Possibly, there is a mistake in your Pareto: Your Performance ({{ performance }}%)
+    is too low. Please go back to Pareto sheet and check it.{% endif %}</h5>
 <h5>{% if quality == 100 %} Possibly, there is a mistake in your Pareto: {{quality }} == 100%.
     Please go back to Pareto sheet and check it.{% endif %}</h5>
 

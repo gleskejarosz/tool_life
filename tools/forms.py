@@ -48,9 +48,9 @@ class OperationAddForm(forms.Form):
     )
     SPARE = "Spare"
 
-    machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
-    station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
-    tool = forms.ModelChoiceField(queryset=ToolModel.objects.filter(tool_status=SPARE).order_by("name"))
+    # machine = forms.ModelChoiceField(queryset=MachineModel.objects.all().order_by("name"))
+    # station = forms.ModelChoiceField(queryset=StationModel.objects.all().order_by("name"))
+    # tool = forms.ModelChoiceField(queryset=ToolModel.objects.filter(tool_status=SPARE).order_by("name"))
     tool_type = forms.ChoiceField(choices=TOOL_CHOICES)
     start_date = forms.DateField(
         required=True,

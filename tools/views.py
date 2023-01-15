@@ -9,7 +9,7 @@ from django.urls import reverse_lazy
 from django.views.generic import FormView, DetailView, ListView, DeleteView
 
 from gemba.models import JobModel2
-from tools.filters import JobFilter, OperationFilter
+from tools.filters import JobFilter, OperationFilter, ToolFilter
 from tools.forms import JobAddForm, JobUpdateForm, OperationAddForm
 from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel, MachineModel,\
     StationModel, PRODUCTIVE
@@ -81,92 +81,116 @@ def search(request):
     return render(request, "tools/filter_list.html", {"filter": items_filter})
 
 
-class OperationFormView(LoginRequiredMixin, FormView):
-    template_name = 'form.html'
-    form_class = OperationAddForm
-    success_url = reverse_lazy("tools_app:returning")
+@login_required
+def change_tool(request, tool_id):
+    tool_obj = JobStationModel.objects.get(pk=tool_id)
+    tool = tool_obj.tool
+    station = tool_obj.station.name
+    machine = tool_obj.machine.name
 
-    def form_valid(self, form):
-        tool = form.cleaned_data["tool"]
+    form = OperationAddForm(request.POST or None)
+
+    if form.is_valid():
         tool_type = form.cleaned_data["tool_type"]
-        machine = form.cleaned_data["machine"]
-        station = form.cleaned_data["station"]
         start_date = form.cleaned_data["start_date"]
-        OperationModel.objects.create(tool=tool, tool_type=tool_type, machine=machine, station=station,
-                                      start_date=start_date)
+
+        OperationModel.objects.create(tool=tool, tool_type=tool_type, start_date=start_date)
 
         tool_availability = ToolModel.objects.get(name=tool)
         tool_availability.tool_status = "In use"
         tool_availability.save()
 
-        tools = OperationModel.objects.filter(
-            machine=machine).filter(station=station).filter(status=False).values("id", "tool", "tool_type",
-                                                                                 "status", "finish_date")
-
-        max_id = 0
-        if len(tools) > 1:
-            for tool_dict in tools:
-                tool_id = tool_dict["id"]
-                if tool_id > max_id:
-                    max_id = tool_id
-
-            for tool_dict in tools:
-                tool_id = tool_dict["id"]
-                if tool_id != max_id:
-                    tool = OperationModel.objects.get(id=tool_id)
-                    if tool.tool_type == tool_type:
-                        tool.status = True
-                        tool.finish_date = start_date
-                        tool.save()
-                        print(tool)
-                        tool_availability = ToolModel.objects.get(name=tool)
-                        tool_availability.tool_status = "Spare"
-                        tool_availability.save()
-
-        return super().form_valid(form)
+        tools = OperationModel.objects.filter(status=False)
 
 
-def select_machine(request):
-    machine_qs = MachineModel.objects.all().order_by("name")
-    return render(request, "tools/machine.html", {"machine_qs": machine_qs})
+
+        # max_id = 0
+        # if len(tools) > 1:
+        #     for tool_dict in tools:
+        #         tool_id = tool_dict["id"]
+        #         if tool_id > max_id:
+        #             max_id = tool_id
+        #
+        #     for tool_dict in tools:
+        #         tool_id = tool_dict["id"]
+        #         if tool_id != max_id:
+        #             tool = OperationModel.objects.get(id=tool_id)
+        #             if tool.tool_type == tool_type:
+        #                 tool.status = True
+        #                 tool.finish_date = start_date
+        #                 tool.save()
+        #                 print(tool)
+        #                 tool_availability = ToolModel.objects.get(name=tool)
+        #                 tool_availability.tool_status = "Spare"
+        #                 tool_availability.save()
+
+        return redirect("tools_app:returning")
+
+    return render(
+        request,
+        template_name="tools/tool_form.html",
+        context={
+            "form": form,
+            "tool": tool_obj,
+        }
+    )
 
 
-def select_station(request, machine_id):
-    machine = get_object_or_404(MachineModel, pk=machine_id)
-    machine_name = machine.name
-    station_qs = StationModel.objects.filter(machine=machine).order_by("num")
-    return render(request,
-                  template_name="tools/station.html",
-                  context={
-                      "machine_name": machine_name,
-                      "station_qs": station_qs,
-                  })
+
+# class OperationFormView(LoginRequiredMixin, FormView):
+#     template_name = 'tool_form.html'
+#     form_class = OperationAddForm
+#     success_url = reverse_lazy("tools_app:returning")
+#
+#     def form_valid(self, form):
+#         # tool = form.cleaned_data["tool"]
+#         tool_type = form.cleaned_data["tool_type"]
+#         # machine = form.cleaned_data["machine"]
+#         # station = form.cleaned_data["station"]
+#         start_date = form.cleaned_data["start_date"]
+#         OperationModel.objects.create(tool=tool, tool_type=tool_type, machine=machine, station=station,
+#                                       start_date=start_date)
+#
+#         tool_availability = ToolModel.objects.get(name=tool)
+#         tool_availability.tool_status = "In use"
+#         tool_availability.save()
+#
+#         tools = OperationModel.objects.filter(
+#             machine=machine).filter(station=station).filter(status=False).values("id", "tool", "tool_type",
+#                                                                                  "status", "finish_date")
+#
+#         max_id = 0
+#         if len(tools) > 1:
+#             for tool_dict in tools:
+#                 tool_id = tool_dict["id"]
+#                 if tool_id > max_id:
+#                     max_id = tool_id
+#
+#             for tool_dict in tools:
+#                 tool_id = tool_dict["id"]
+#                 if tool_id != max_id:
+#                     tool = OperationModel.objects.get(id=tool_id)
+#                     if tool.tool_type == tool_type:
+#                         tool.status = True
+#                         tool.finish_date = start_date
+#                         tool.save()
+#                         print(tool)
+#                         tool_availability = ToolModel.objects.get(name=tool)
+#                         tool_availability.tool_status = "Spare"
+#                         tool_availability.save()
+#
+#         return super().form_valid(form)
 
 
-def select_tool(request, station_id):
-    obj = get_object_or_404(StationModel, pk=station_id)
-    station_name = obj.name
-
-    tool_qs = JobStationModel.objects.filter(station=station_id)
+def select_tool(request):
+    tools_qs = JobStationModel.objects.filter(machine__machine_status=PRODUCTIVE).order_by("machine__name",
+                                                                                           "station__num")
+    tools_filter = ToolFilter(request.GET, queryset=tools_qs)
 
     return render(request,
                   template_name="tools/tool.html",
                   context={
-                      "station_id": station_id,
-                      "station_name": station_name,
-                      "tool_qs": tool_qs,
-                  })
-
-
-def change_tool(request, tool_id):
-    obj = JobStationModel.object.get(pk=tool_id)
-
-    tool_name = obj.tool.name
-
-    return render(request,
-                  template_name="tools/change_tool.html",
-                  context={
-                      "tool_name": tool_name,
+                      "filter": tools_filter,
                   })
 
 

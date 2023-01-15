@@ -1,18 +1,45 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 {% block content %}
-<p><a href="{% url 'tools_app:select-machine' %}">Go back</a></p>
-<h4>Select tool:</h4>
+<h4>Select new tool:</h4>
+<form method="get">
+    <div class="well">
+        <p><a href="{% url 'tools_app:select-tool' %}">Clear all filters</a></p>
+        <div class="row">
 
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.machine.label_tag }}
+          {% render_field filter.form.machine class="form-control" %}
+        </div>
+          <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.station.label_tag }}
+          {% render_field filter.form.station class="form-control" %}
+        </div>
+          <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.tool.label_tag }}
+          {% render_field filter.form.tool class="form-control" %}
+        </div>
+
+        </div>
+        <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+</form>
 <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col"></th>
+            <th scope="col">Machine</th>
+            <th scope="col">Station</th>
+            <th scope="col">Tool</th>
         </tr>
         </thead>
         <tbody>
-        {% for object in tool_qs %}
+        {% for object in filter.qs %}
             <tr>
-                <td><a href="{% url 'tools_app:select-tool' tool_id=object.pk %}">{{ object.tool }}</a></td>
+                <td>{{ object.machine }}</td>
+                <td>{{ object.station }}</td>
+                <td><a href="{% url 'tools_app:change-tool' tool_id=object.pk %}">{{ object.tool }}</a></td>
             </tr>
         {% endfor %}
         </tbody>

@@ -1,6 +1,28 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
+<head>
+    <style>
+        .smaller_font{
+            font-size:0.7vw ;
+            vertical-align: center;
+            text-align: center;
+      }
+        .bigger_font{
+            font-size:1.5vw;
+            font-weight: bold;
+        }
+        .bigger_font_right{
+            font-size:1.5vw;
+            font-weight: bold;
+            text-align: right;
+        }
+        .central_pos{
+            vertical-align: center;
+            text-align: center;
+        }
+    </style>
+</head>
 
 <div>{% if pareto_status == "Not exist" %}
     <a href="{% url 'gemba_app:pareto-start-new' %}">
@@ -8,13 +30,13 @@
     </button></a>
     {% else %}
     <a href="{% url 'gemba_app:pareto-details-create-view' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add Pareto line
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>+ Pareto line
     </button></a>
     <a href="{% url 'gemba_app:downtime-user-view' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add downtime
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>+ Downtime
     </button></a>
     <a href="{% url 'gemba_app:scrap-user-view' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add scrap
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>+ Scrap
     </button></a>
     <a href="{% url 'gemba_app:pareto-update-view' pk=pareto_list.pk %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update Pareto
@@ -26,6 +48,7 @@
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
     </button></a>
     {% endif %}
+    <span style="float:right; font-size:1.5vw; font-weight: bold; text-decoration: underline">{{ pareto_list.line }}</span>
     </div>
     <br/>
     {% if message_status == "Display" %}
@@ -33,11 +56,16 @@
     <strong>Info!</strong> You should <a href="{% url 'gemba_app:job-user-view' %}" class="alert-link">choose a job first!</a>
     </div>
     {% endif %}
-    <br/>
-<h2 style="text-align:left;">PARETO  Date: {{ pareto_list.pareto_date|date:"d-m-Y" }}
-    {% if pareto_list.job_otg is None %} Job: Please select! {% else %} Job: {{ pareto_list.job_otg }}{% endif %}
-    <span style="float:right;">Line: {{ pareto_list.line }}</span></h2>
-    <p>Shift started: {{ pareto_list.time_stamp|time:"h:i a" }} - {{ pareto_list.shift }} - {{ pareto_list.hours }} hours -
+    <div class = "row">
+    <div class = "col">
+        <p class="bigger_font">{% if pareto_list.job_otg is None %} Current job: Please select! {% else %} Current job:
+        {{ pareto_list.job_otg }}{% endif %}</p></div>
+    <div class = "col">
+        <p class="bigger_font_right">{{ pareto_list.pareto_date|date:"d M Y" }}</p>
+    </div>
+
+    </div>
+    <p>Shift started at: {{ pareto_list.time_stamp|time:"h:i a" }} ({{ pareto_list.shift }}) - {{ pareto_list.hours }} hours -
         Operators: {{ pareto_list.ops }} - Time available until now: {{ available_time }} min - Not scheduled to run:
         {{ pareto_list.not_scheduled_to_run}} min</p>
 
@@ -48,11 +76,11 @@
         <thead>
         <tr>
             <th scope="col">Job</th>
-            <th scope="col">Output</th>
-            <th scope="col">Good</th>
-            <th scope="col">Scrap</th>
-            <th scope="col" style="font-size:0.8vw;">Takt time</th>
-            <th style="font-size:0.8vw;">Last Entry</th>
+            <th scope="col" class="central_pos">Output</th>
+            <th scope="col" class="central_pos">Good</th>
+            <th scope="col" class="central_pos">Scrap</th>
+            <th scope="col" class="smaller_font">Takt time</th>
+            <th scope="col" class="smaller_font">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -65,18 +93,18 @@
         <tr>
             <td><a href="{% url 'gemba_app:pareto-details-view' pk=pareto_item.pk %}">
                 {{ pareto_item.job.name }}</a></td>
-            <td>{{ pareto_item.output }}</td>
-            <td>{{ pareto_item.good }}</td>
-            <td>{{ pareto_item.scrap }}</td>
-            <td style="font-size:0.8vw;">{{ pareto_item.takt_time }}</td>
-            <td style="font-size:0.8vw;">{{ pareto_item.datetime|date:"H:i" }}</td>
+            <td class="central_pos">{{ pareto_item.output }}</td>
+            <td class="central_pos">{{ pareto_item.good }}</td>
+            <td class="central_pos">{{ pareto_item.scrap }}</td>
+            <td class="smaller_font">{{ pareto_item.takt_time }}</td>
+            <td class="smaller_font">{{ pareto_item.datetime|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td> <b>{{ total_output }}</b> </td>
-            <td> <b>{{ total_good }}</b> </td>
-            <td> <b>{{ total_scrap_cal }}</b> </td>
+            <td class="central_pos"> <b>{{ total_output }}</b> </td>
+            <td class="central_pos"> <b>{{ total_good }}</b> </td>
+            <td class="central_pos"> <b>{{ total_scrap_cal }}</b> </td>
             <td> </td>
             <td> </td>
         </tr>
@@ -122,10 +150,10 @@
         <thead>
         <tr>
             <th  scope="col">Downtime Reason</th>
-            <th  scope="col">Min</th>
-            <th  scope="col">Freq</th>
-            <th  scope="col" style="font-size:0.8vw;">Job</th>
-            <th  scope="col" style="font-size:0.8vw;">Last Entry</th>
+            <th  scope="col" class="central_pos">Min</th>
+            <th  scope="col" class="central_pos">Freq</th>
+            <th  scope="col" class="smaller_font">Job</th>
+            <th  scope="col" class="smaller_font">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -138,15 +166,15 @@
         <tr>
             <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">
                 {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
-            <td>{{ pareto_item.minutes }}</td>
-            <td>{{ pareto_item.frequency }}</td>
-            <td style="font-size:0.8vw;">{{ pareto_item.job }}</td>
-            <td style="font-size:0.8vw;">{{ pareto_item.datetime|date:"H:i" }}</td>
+            <td class="central_pos">{{ pareto_item.minutes }}</td>
+            <td class="central_pos">{{ pareto_item.frequency }}</td>
+            <td class="smaller_font">{{ pareto_item.job }}</td>
+            <td class="smaller_font">{{ pareto_item.datetime|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td><b>{{ total_down }}</b> </td>
+            <td class="central_pos"><b>{{ total_down }}</b> </td>
             <td> </td>
             <td> </td>
             <td> </td>
@@ -163,9 +191,9 @@
         <thead>
         <tr>
             <th scope="col">Scrap Reason</th>
-            <th scope="col">Quantity</th>
-            <th  scope="col" style="font-size:0.8vw;">Job</th>
-            <th  scope="col" style="font-size:0.8vw; vertical-align:center;">Last Entry</th>
+            <th scope="col" class="central_pos">Quantity</th>
+            <th scope="col" class="smaller_font">Job</th>
+            <th scope="col" class="smaller_font">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -177,14 +205,14 @@
              <tr>{% for pareto_item in scrap_qs %}
                  <td><a href="{% url 'gemba_app:scrap-detail-view' pk=pareto_item.pk %}">
                      {{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
-                 <td>{{ pareto_item.qty }}</td>
-                 <td style="font-size:0.8vw;">{{ pareto_item.job }}</td>
-                 <td style="font-size:0.8vw;" >{{ pareto_item.datetime|date:"H:i" }}</td>
+                 <td class="central_pos">{{ pareto_item.qty }}</td>
+                 <td class="smaller_font">{{ pareto_item.job }}</td>
+                 <td class="smaller_font">{{ pareto_item.datetime|date:"H:i" }}</td>
              </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
-            <td><b>{{ total_scrap }}</b></td>
+            <td class="central_pos"><b>{{ total_scrap }}</b></td>
             <td> </td>
             <td> </td>
         </tr>

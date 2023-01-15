@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h4>Selected tool:</h4>
+</br>
+<h4>{{ tool.tool }} used on the {{ tool.station }} / {{ tool.machine }}</h4>
+</br>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Submit">
+</form>
+
+{% endblock %}
