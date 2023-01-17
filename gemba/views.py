@@ -757,7 +757,7 @@ def tableau_export(request, pk):
     ops = pareto.ops
 
     response = HttpResponse(content_type="application/ms-excel")
-    filename = f"{date} - {shift} - {user.username}.xlsx"
+    filename = f"{date} - {shift} - {user.username}.xls"
     # dest = ('\\').join(source.split('\\')[:1})
     response["Content-Disposition"] = 'attachment; filename= "{}"'.format(filename)
 
@@ -861,7 +861,7 @@ def export_daily_oee_report_xls(request):
     object_list = get_details_to_display(object_list=report_list)
 
     response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Daily_OEE_Report.xlsx"'
+    response["Content-Disposition"] = 'attachment; filename="Daily_OEE_Report.xls"'
 
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("Report")
@@ -1123,7 +1123,7 @@ def downtime_user_list(request):
 
     if group_qs.exists():
         group = group_qs[0]
-        items_list = DowntimeUser.objects.filter(group=group).order_by("order")
+        items_list = DowntimeUser.objects.filter(group=group).filter(order__gt=0).order_by("order")
     else:
         items_list = {}
 
@@ -1149,7 +1149,7 @@ def scrap_user_list(request):
 
     if group_qs.exists():
         group = group_qs[0]
-        items_list = ScrapUser.objects.filter(group=group).order_by("order")
+        items_list = ScrapUser.objects.filter(group=group).filter(order__gt=0).order_by("order")
     else:
         items_list = {}
 
@@ -1305,7 +1305,7 @@ def export_downtimes_xls(request):
     ).order_by('id')
 
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xlsx"'
+    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xls"'
 
     wb = xlwt.Workbook(encoding='utf-8')
     ws = wb.add_sheet('Report')
