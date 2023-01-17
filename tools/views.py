@@ -248,7 +248,7 @@ def tool_in_use(request):
 
 
 def tools_update(job, output, target, created):
-    minutes = int(round(output / target) * 60)
+    minutes = int(round((output / target) * 60))
 
     tools = set()
     tools_qs = ToolJobModel.objects.filter(job=job)
