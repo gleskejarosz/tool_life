@@ -105,16 +105,16 @@ def change_tool(request, tool_id):
         tools_qs = OperationModel.objects.filter(machine=machine,
                                                  station=station,
                                                  tool_type=tool_type).order_by("-start_date")
+        if tools_qs.exists():
+            tool_old = tools_qs[1]
+            tool_old_id = tool_old.id
+            tool_old.status = True
+            tool_old.finish_date = start_date
+            tool_old.save()
 
-        tool_old = tools_qs[1]
-        tool_old_id = tool_old.id
-        tool_old.status = True
-        tool_old.finish_date = start_date
-        tool_old.save()
-
-        old_tool_availability = ToolModel.objects.get(id=tool_old_id)
-        old_tool_availability.tool_status = SPARE
-        old_tool_availability.save()
+            old_tool_availability = ToolModel.objects.get(id=tool_old_id)
+            old_tool_availability.tool_status = SPARE
+            old_tool_availability.save()
 
         return redirect("tools_app:tool-actions")
 
@@ -248,7 +248,7 @@ def tool_in_use(request):
 
 
 def tools_update(job, output, target, created):
-    minutes = int((output / target) * 60)
+    minutes = int(round(output / target) * 60)
 
     tools = set()
     tools_qs = ToolJobModel.objects.filter(job=job)
@@ -260,7 +260,7 @@ def tools_update(job, output, target, created):
 
     for action in actions_qs:
         tool = action.tool.name
-        print(tool)
+
         if tool in tools:
             action.minutes += minutes
             if action.minutes < 0:

@@ -16,22 +16,22 @@
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"11:20" %}
+    {% for item in job_list|slice:"10:20" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"21:30" %}
+    {% for item in job_list|slice:"20:30" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"31:40" %}
+    {% for item in job_list|slice:"30:40" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"41:50" %}
+    {% for item in job_list|slice:"40:50" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>

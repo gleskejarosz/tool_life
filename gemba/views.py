@@ -757,7 +757,7 @@ def tableau_export(request, pk):
     ops = pareto.ops
 
     response = HttpResponse(content_type="application/ms-excel")
-    filename = f"{date} - {shift} - {user.username}.xls"
+    filename = f"{date} - {shift} - {user.username}.xlsx"
     # dest = ('\\').join(source.split('\\')[:1})
     response["Content-Disposition"] = 'attachment; filename= "{}"'.format(filename)
 
@@ -861,7 +861,7 @@ def export_daily_oee_report_xls(request):
     object_list = get_details_to_display(object_list=report_list)
 
     response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Daily_OEE_Report.xls"'
+    response["Content-Disposition"] = 'attachment; filename="Daily_OEE_Report.xlsx"'
 
     wb = xlwt.Workbook(encoding="utf-8")
     ws = wb.add_sheet("Report")
@@ -1305,7 +1305,7 @@ def export_downtimes_xls(request):
     ).order_by('id')
 
     response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xls"'
+    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xlsx"'
 
     wb = xlwt.Workbook(encoding='utf-8')
     ws = wb.add_sheet('Report')
