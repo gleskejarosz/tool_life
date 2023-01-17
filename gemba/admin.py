@@ -6,15 +6,15 @@ from gemba.models import DowntimeDetail, DowntimeModel, HourModel, LineHourModel
 
 class ScrapDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "datetime", "scrap", "user", "job", "qty", "pareto_id", "completed", )
+    list_display = ("id", "line", "pareto_date", "modified", "scrap", "user", "job", "qty", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "datetime", "pareto_date", "scrap", "job", "qty", "user", "completed"],
+            "fields": ["id", "line", "pareto_id", "modified", "pareto_date", "scrap", "job", "qty", "user", "completed"],
         }),
     ]
-    readonly_fields = ["id", "user", "datetime"]
+    readonly_fields = ["id", "user", "modified"]
 
 
 class DowntimeDetailAdmin(admin.ModelAdmin):
@@ -22,28 +22,30 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     def admin_downtimes(self, obj):
         return obj.pareto_date.strftime('%d-%m-%Y')
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "datetime", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
+    list_display = ("id", "line", "pareto_date", "modified", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "datetime", "pareto_date", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "line", "pareto_id", "pareto_date", "modified", "downtime", "job", "minutes", "user", "completed"],
         }),
     ]
-    readonly_fields = ["id", "user", "datetime"]
+    readonly_fields = ["id", "user", "modified"]
 
 
 class ParetoDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "datetime", "job", "output", "good", "scrap", "takt_time", "pareto_id", "completed", )
+    list_display = ("id", "line", "pareto_date", "created", "modified", "job", "output", "good", "scrap", "takt_time",
+                    "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "pareto_id", "pareto_date", "datetime", "job", "output", "good", "scrap", "takt_time", "user", "completed"],
+            "fields": ["id", "line", "pareto_id", "pareto_date", "created", "modified", "job", "output", "good", "scrap",
+                       "takt_time", "user", "completed"],
         }),
     ]
-    readonly_fields = ["id", "user", "datetime"]
+    readonly_fields = ["id", "user", "created", "modified"]
 
 
 class ParetoAdmin(admin.ModelAdmin):

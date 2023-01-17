@@ -69,7 +69,8 @@ class ParetoDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
-    datetime = models.DateTimeField(auto_now_add=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True, blank=True)
+    modified = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
     takt_time = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines3", blank=True, null=True)
@@ -81,7 +82,7 @@ class ParetoDetail(models.Model):
         verbose_name = "Pareto Detail"
 
     def save(self, *args, **kwargs):
-        self.datetime = datetime.now()
+        self.modified = datetime.now()
         super().save(*args, **kwargs)
 
 
@@ -105,7 +106,7 @@ class DowntimeDetail(models.Model):
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     pareto_date = models.DateField(blank=True, null=True)
-    datetime = models.DateTimeField(auto_now_add=True, blank=True)
+    modified = models.DateTimeField(auto_now_add=True, blank=True)
     frequency = models.PositiveIntegerField(default=1)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines4", blank=True, null=True)
 
@@ -116,7 +117,7 @@ class DowntimeDetail(models.Model):
         verbose_name = "Downtime Detail"
 
     def save(self, *args, **kwargs):
-        self.datetime = datetime.now()
+        self.modified = datetime.now()
         super().save(*args, **kwargs)
 
 
@@ -166,7 +167,7 @@ class ScrapDetail(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
-    datetime = models.DateTimeField(auto_now_add=True, blank=True)
+    modified = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines5", blank=True, null=True)
 
@@ -177,7 +178,7 @@ class ScrapDetail(models.Model):
         verbose_name = "Scrap Detail"
 
     def save(self, *args, **kwargs):
-        self.datetime = datetime.now()
+        self.modified = datetime.now()
         super().save(*args, **kwargs)
 
 
@@ -259,7 +260,7 @@ class Line(models.Model):
     description = models.CharField(max_length=64, blank=True, null=True)
 
     def __str__(self):
-        return self.name
+        return f"{self.name}"
 
 
 class LineUser(models.Model):
@@ -267,7 +268,7 @@ class LineUser(models.Model):
     line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name="lines", blank=False, null=False)
 
     def __str__(self):
-        return f"{self.user} - {self.line}"
+        return f"{self.line}"
 
     class Meta:
         verbose_name = "User vs Line"

@@ -2,7 +2,7 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    <p>Do you really want to delete record: Output {{ object.qty }} - Good {{ object.good }} parts for job {{ object.job }}</p>
-    <input type="submit" value="Delete">
+    <p>Do you really want to delete record: Output {{ object.output }} - Good {{ object.good }} parts for job {{ object.job }}</p>
+    <input type="submit" value="Submit">
 </form>
 {% endblock %}

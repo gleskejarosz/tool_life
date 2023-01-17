@@ -1,4 +1,5 @@
 import csv
+
 import xlwt
 from django.core.paginator import Paginator
 from xlwt import XFStyle, Font
@@ -14,9 +15,10 @@ from django.views.generic import TemplateView, UpdateView, DeleteView, DetailVie
 from django.db.models import Q
 
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
-    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm
+    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     DowntimeGroup, ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser
+from tools.views import tools_update
 
 
 class GembaIndex(TemplateView):
@@ -24,9 +26,9 @@ class GembaIndex(TemplateView):
 
 
 def downtimes_view(request):
-    downtimes = DowntimeDetail.objects.all().order_by("-datetime")
+    downtimes = DowntimeDetail.objects.all().order_by("-modified")
     last_week_downtimes = DowntimeDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
-        "-datetime")
+        "-modified")
     paginator = Paginator(last_week_downtimes, 100)
 
     page_number = request.GET.get('page')
@@ -40,9 +42,9 @@ def downtimes_view(request):
 
 
 def scraps_view(request):
-    scraps = ScrapDetail.objects.all().order_by("-datetime")
+    scraps = ScrapDetail.objects.all().order_by("-modified")
     last_week_scraps = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).order_by(
-        "-datetime")
+        "-modified")
     paginator = Paginator(last_week_scraps, 100)
 
     page_number = request.GET.get('page')
@@ -57,9 +59,9 @@ def scraps_view(request):
 
 
 def pareto_details_view(request):
-    pareto_details = ParetoDetail.objects.all().order_by("-datetime")
+    pareto_details = ParetoDetail.objects.all().order_by("-modified")
     last_week_pareto_details = ParetoDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)
-                                                           ).order_by("-datetime")
+                                                           ).order_by("-modified")
     paginator = Paginator(last_week_pareto_details, 100)
 
     page_number = request.GET.get('page')
@@ -81,6 +83,7 @@ def downtime_detail_create(request, pk):
     pareto_id = pareto.id
     pareto_date = pareto.pareto_date
     job = pareto.job_otg
+    line = pareto.line
     downtime_qs = DowntimeDetail.objects.filter(user=request.user, completed=False, downtime_id=pk, job=job)
 
     if downtime_qs.exists():
@@ -101,7 +104,7 @@ def downtime_detail_create(request, pk):
             minutes = form.cleaned_data["minutes"]
             user = request.user
             downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job,
-                                                          pareto_id=pareto_id, pareto_date=pareto_date)
+                                                          pareto_id=pareto_id, pareto_date=pareto_date, line=line)
             pareto.downtimes.add(downtime_elem)
             return redirect("gemba_app:pareto-summary")
 
@@ -120,6 +123,7 @@ def scrap_detail_create(request, pk):
     pareto_id = pareto.id
     pareto_date = pareto.pareto_date
     job = pareto.job_otg
+    line = pareto.line
 
     form = ScrapQuantity(request.POST or None)
     if form.is_valid():
@@ -134,7 +138,7 @@ def scrap_detail_create(request, pk):
             return redirect("gemba_app:pareto-summary")
         else:
             scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job,
-                                                    pareto_id=pareto_id, pareto_date=pareto_date)
+                                                    pareto_id=pareto_id, pareto_date=pareto_date, line=line)
             pareto.scrap.add(scrap_elem)
             return redirect("gemba_app:pareto-summary")
 
@@ -151,12 +155,14 @@ def pareto_detail_create(request):
     pareto_qs = Pareto.objects.filter(user=user, completed=False)
     pareto = pareto_qs[0]
     job = pareto.job_otg
+    line = pareto.line
     if job is None:
         return redirect("gemba_app:pareto-summary")
 
     job_id = pareto.job_otg_id
     job_obj = JobModel2.objects.get(id=job_id)
-    takt_time = round(60 / job_obj.target, ndigits=5)
+    target = job_obj.target
+    takt_time = round(60 / target, ndigits=5)
     pareto_details_qs = ParetoDetail.objects.filter(user=user, completed=False, job=job)
 
     total_output = 0
@@ -183,17 +189,28 @@ def pareto_detail_create(request):
 
             if pareto_details_qs.exists():
                 pareto_elem = ParetoDetail.objects.get(user=user, job=job, pareto_id=pareto_id)
+                created = pareto_elem.created
                 pareto_elem.output += new_output
                 pareto_elem.good += new_good
                 pareto_elem.scrap = scrap
                 pareto_elem.save()
+
+                # tools update
+                tools_update(job=job, output=new_output, target=target, created=created)
+
                 return redirect("gemba_app:pareto-summary")
 
             else:
                 pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
-                                                          pareto_id=pareto_id,
+                                                          pareto_id=pareto_id, line=line,
                                                           pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
+                created = pareto_item.created
+
                 pareto.jobs.add(pareto_item)
+
+                # tools update
+                tools_update(job=job, output=output, target=target, created=created)
+
                 return redirect("gemba_app:pareto-summary")
 
         return render(
@@ -234,7 +251,7 @@ def pareto_detail_create(request):
                 return redirect("gemba_app:pareto-summary")
             else:
                 pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=cal_good,
-                                                          pareto_id=pareto_id,
+                                                          pareto_id=pareto_id, line=line,
                                                           pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                 pareto.jobs.add(pareto_item)
                 return redirect("gemba_app:pareto-summary")
@@ -285,7 +302,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             quality = quality_cal(good=total_good, output=total_output)
 
             down_qs = DowntimeDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by(
-                "datetime")
+                "modified")
             total_down = 0
             if down_qs.exists():
                 for down in down_qs:
@@ -294,7 +311,7 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             availability = availability_cal(available_time=available_time, downtime=total_down)
 
-            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by("datetime")
+            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by("modified")
             total_scrap = 0
             for scrap_elem in scrap_qs:
                 qty = scrap_elem.qty
@@ -915,8 +932,9 @@ START_CHOICES = (
 def pareto_create_new(request):
     user = request.user
     line_user_qs = LineUser.objects.filter(user=user)
+
     if line_user_qs.exists():
-        line = line_user_qs[0]
+        line = line_user_qs[0].line
 
     pareto_date = datetime.now(timezone.utc).date()
     form = NewPareto(request.POST or None)
@@ -999,17 +1017,59 @@ class ParetoDetailView(DetailView):
     template_name = "gemba/pareto_detail_view.html"
 
 
-class ParetoDetailUpdateView(UpdateView):
-    model = ParetoDetail
-    fields = ("job", "output", "good", "scrap",)
-    template_name = "form.html"
-    success_url = reverse_lazy("gemba_app:pareto-summary")
+@login_required
+def pareto_detail_update(request, pk):
+    pareto_detail_obj = ParetoDetail.objects.get(pk=pk)
+    form = ParetoDetailUpdateForm(instance=pareto_detail_obj)
+
+    old_job = pareto_detail_obj.job
+    target = pareto_detail_obj.job.target
+    old_output = pareto_detail_obj.output * -1
+    created = pareto_detail_obj.created
+
+    if request.method == "POST":
+        form = ParetoDetailUpdateForm(request.POST, instance=pareto_detail_obj)
+        if form.is_valid():
+            job = form.cleaned_data["job"]
+            output = form.cleaned_data["output"]
+            good = form.cleaned_data["good"]
+            scrap = form.cleaned_data["scrap"]
+
+            ParetoDetail.objects.update(job=job, output=output, good=good, scrap=scrap)
+
+            # tools update
+            tools_update(job=old_job, output=old_output, target=target, created=created)
+            tools_update(job=job, output=output, target=target, created=created)
+
+            return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+        )
 
 
-class ParetoDetailDeleteView(DeleteView):
-    model = ParetoDetail
-    template_name = "gemba/delete_detail.html"
-    success_url = reverse_lazy("gemba_app:pareto-summary")
+@login_required
+def pareto_detail_delete(request, pk):
+    pareto_detail_obj = ParetoDetail.objects.get(pk=pk)
+
+    old_job = pareto_detail_obj.job
+    target = pareto_detail_obj.job.target
+    old_output = pareto_detail_obj.output * -1
+    created = pareto_detail_obj.created
+
+    if request.method == "POST":
+        pareto_detail_obj.delete()
+        # tools update
+        tools_update(job=old_job, output=old_output, target=target, created=created)
+        return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="gemba/delete_detail.html",
+        context={"object": pareto_detail_obj}
+    )
 
 
 @login_required
@@ -1137,7 +1197,7 @@ class DowntimeSearchResultsView(ListView):
             Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
             Q(minutes__icontains=query) | Q(job__name__icontains=query) |
             Q(pareto_id__icontains=query)
-        ).order_by('-datetime')
+        ).order_by('-modified')
         return page_obj
 
 
@@ -1153,7 +1213,7 @@ class ScrapSearchResultsView(ListView):
             Q(scrap__code__icontains=query) | Q(scrap__description__icontains=query) |
             Q(qty__icontains=query) | Q(job__name__icontains=query) |
             Q(pareto_id__icontains=query)
-        ).order_by('-datetime')
+        ).order_by('-modified')
         return page_obj
 
 
@@ -1168,15 +1228,15 @@ class ParetoDetailsSearchResultsView(ListView):
             Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
             Q(good__icontains=query) | Q(output__icontains=query) |
             Q(scrap__icontains=query) | Q(job__name__icontains=query) |
-            Q(pareto_id__icontains=query) | Q(datetime__icontains=query) |
+            Q(pareto_id__icontains=query) | Q(modified__icontains=query) |
             Q(takt_time__icontains=query)
-        ).order_by('-datetime')
+        ).order_by('-modified')
         return page_obj
 
 
 # alter to Quarantine id
 def quarantine_view(request):
-    quarantine_qs = ScrapDetail.objects.filter(scrap=18).order_by("-datetime")
+    quarantine_qs = ScrapDetail.objects.filter(scrap=18).order_by("-modified")
 
     return render(
         request,

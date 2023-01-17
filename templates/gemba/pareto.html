@@ -97,7 +97,7 @@
             <td class="central_pos">{{ pareto_item.good }}</td>
             <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="smaller_font">{{ pareto_item.takt_time }}</td>
-            <td class="smaller_font">{{ pareto_item.datetime|date:"H:i" }}</td>
+            <td class="smaller_font">{{ pareto_item.modified|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -169,7 +169,7 @@
             <td class="central_pos">{{ pareto_item.minutes }}</td>
             <td class="central_pos">{{ pareto_item.frequency }}</td>
             <td class="smaller_font">{{ pareto_item.job }}</td>
-            <td class="smaller_font">{{ pareto_item.datetime|date:"H:i" }}</td>
+            <td class="smaller_font">{{ pareto_item.modified|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -207,7 +207,7 @@
                      {{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
                  <td class="central_pos">{{ pareto_item.qty }}</td>
                  <td class="smaller_font">{{ pareto_item.job }}</td>
-                 <td class="smaller_font">{{ pareto_item.datetime|date:"H:i" }}</td>
+                 <td class="smaller_font">{{ pareto_item.modified|date:"H:i" }}</td>
              </tr>
         {% endfor %}
         <tr>

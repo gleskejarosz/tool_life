@@ -8,7 +8,7 @@
         <thead>
         <tr>
             <th scope="col">Last Entry</th>
-            <th scope="col">User / Line</th>
+            <th scope="col">Line</th>
             <th scope="col">Scrap Reason</th>
             <th scope="col">Qty</th>
             <th scope="col">Job</th>
@@ -19,8 +19,8 @@
         <tbody>
         {% for object in page_obj %}
             <tr>
-                <td>{{ object.datetime|date:'d-m-Y H:i'}}</td>
-                <td>{{ object.user }}</td>
+                <td>{{ object.modified|date:'d-m-Y H:i'}}</td>
+                <td>{{ object.line }}</td>
                 <td>{{ object.scrap }}</td>
                 <td>{{ object.qty }}</td>
                 <td>{{ object.job }}</td>

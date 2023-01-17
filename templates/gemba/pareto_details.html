@@ -51,7 +51,7 @@
             <td>{{ pareto_item.good }}</td>
             <td>{{ pareto_item.scrap }}</td>
             <td>{{ pareto_item.takt_time }}</td>
-            <td>{{ pareto_item.datetime|date:'d-m-Y H:i' }}</td>
+            <td>{{ pareto_item.modified|date:'d-m-Y H:i' }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -85,7 +85,7 @@
             <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.frequency }}</td>
                  <td>{{ pareto_item.job }}</td>
-                 <td>{{ pareto_item.datetime|date:'d-m-Y H:i' }}</td>
+                 <td>{{ pareto_item.modified|date:'d-m-Y H:i' }}</td>
              </tr>
         {% endfor %}
         <tr>
@@ -114,7 +114,7 @@
                  <td>{{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</td>
                  <td>{{ pareto_item.qty }}</td>
                  <td>{{ pareto_item.job }}</td>
-                 <td>{{ pareto_item.datetime|date:'d-m-Y H:i' }}</td>
+                 <td>{{ pareto_item.modified|date:'d-m-Y H:i' }}</td>
              </tr>
         {% endfor %}
         <tr>

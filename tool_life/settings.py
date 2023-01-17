@@ -115,7 +115,7 @@ USE_I18N = True
 
 USE_L10N = False
 
-# dd/mm/yyyy and dd/mm/yy date & datetime input field settings
+# dd/mm/yyyy and dd/mm/yy date & modified input field settings
 DATE_INPUT_FORMATS = ('%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%d/%m/%y', '%d %b %Y',
                       '%d %b, %Y', '%d %b %Y', '%d %b, %Y', '%d %B, %Y',
                       '%d %B %Y', '%d.%m.%Y')

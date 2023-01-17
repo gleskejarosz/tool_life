@@ -5,7 +5,7 @@
         <thead>
         <tr>
             <th scope="col">Last entry</th>
-            <th scope="col">User / Line</th>
+            <th scope="col">Line</th>
             <th scope="col">Qty</th>
             <th scope="col">Job</th>
             <th scope="col">Pareto ID</th>
@@ -16,7 +16,7 @@
         {% for object in quarantine_qs %}
             <tr>
                 <td>{{ object.datetime|date:'d-m-Y H:i' }}</td>
-                <td>{{ object.user }}</td>
+                <td>{{ object.line }}</td>
                 <td>{{ object.qty }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.pareto_id }}</td>

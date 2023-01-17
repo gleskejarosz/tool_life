@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import DateInput, TimeInput, Select, TextInput
 
-from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto
+from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto, ParetoDetail
 
 TODAY = datetime.today().strftime('%d-%m-%Y')
 
@@ -64,3 +64,15 @@ class NotScheduledToRunUpdateForm(forms.ModelForm):
         model = Pareto
         fields = ["not_scheduled_to_run"]
 
+
+class ParetoDetailUpdateForm(forms.ModelForm):
+    class Meta:
+        model = ParetoDetail
+        fields = ("job", "output", "good", "scrap",)
+
+    def clean(self):
+        result = super().clean()
+        if not self.errors:
+            if result["good"] + result["scrap"] != result["output"]:
+                raise ValidationError("Good plus scrap should equal output. Please fix it before submitting",
+                                      code='invalid')
