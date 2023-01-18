@@ -247,7 +247,7 @@ def tool_in_use(request):
 #     return redirect("tools_app:search-form")
 
 
-def tools_update(job, output, target, created):
+def tools_update(job, output, target, modified):
     minutes = int(round((output / target) * 60))
 
     tools = set()
@@ -256,7 +256,7 @@ def tools_update(job, output, target, created):
         tool_name = tool_obj.tool.name
         tools.add(tool_name)
 
-    actions_qs = OperationModel.objects.exclude(start_date__gt=created).exclude(finish_date__lt=created)
+    actions_qs = OperationModel.objects.exclude(start_date__gt=modified).exclude(finish_date__lt=modified)
 
     for action in actions_qs:
         tool = action.tool.name
