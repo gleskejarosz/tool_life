@@ -1392,9 +1392,11 @@ def open_pareto(request, pk):
 def scrap_rate_report_by_week(request):
     # delta 3003 group = 3
     # scrap_qs = ScrapDetail.objects.filter(created__week=datetime.today().isocalendar()[1])
-    scrap_qs = ScrapDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45")
-    total_output_dict = ParetoDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45").\
-        aggregate(Sum("output"))
+    # scrap_qs = ScrapDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45")
+    scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7))
+    # total_output_dict = ParetoDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45").\
+    #     aggregate(Sum("output"))
+    total_output_dict = ParetoDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).aggregate(Sum("output"))
     total_output = total_output_dict['output__sum']
 
     report = []
