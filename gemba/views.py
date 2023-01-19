@@ -1396,8 +1396,7 @@ def scrap_rate_report_by_week(request):
     scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7))
     # total_output_dict = ParetoDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45").\
     #     aggregate(Sum("output"))
-    total_output_dict = ParetoDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7)).aggregate(Sum("output"))
-    total_output = total_output_dict['output__sum']
+    total_output_qs = ParetoDetail.objects.filter(pareto_date__gte=datetime.now() - timedelta(days=7))
 
     report = []
     scrap_list = []
@@ -1422,6 +1421,11 @@ def scrap_rate_report_by_week(request):
 
         report[pos]["qty"] = total
         total = 0
+
+    total_output = 0
+    for obj in total_output_qs:
+        output_obj = obj.output
+        total_output += output_obj
 
     for idx, elem in enumerate(report):
         scrap_qty = report[idx]["qty"]
