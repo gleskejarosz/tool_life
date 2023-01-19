@@ -13,7 +13,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
@@ -1389,6 +1389,56 @@ def open_pareto(request, pk):
     return redirect("gemba_app:pareto-summary")
 
 
+def scrap_rate_report_by_week(request):
+    # delta 3003 group = 3
+    # scrap_qs = ScrapDetail.objects.filter(created__week=datetime.today().isocalendar()[1])
+    scrap_qs = ScrapDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45")
+    total_output_dict = ParetoDetail.objects.filter(created__gte="2023-01-15 21:45", created__lt="2023-01-22 21:45").\
+        aggregate(Sum("output"))
+    total_output = total_output_dict['output__sum']
+
+    report = []
+    scrap_list = []
+    scrap_names_qs = ScrapUser.objects.filter(group=3).order_by("gemba")
+    for obj in scrap_names_qs:
+        scrap_name = obj.scrap.description
+        scrap_list.append(scrap_name)
+        report.append({
+            "scrap": scrap_name,
+            "qty": 0,
+            "scrap_rate": 0,
+        })
+
+    total = 0
+    total_weekly = 0
+    for obj in scrap_qs:
+        obj_name = obj.scrap.description
+        pos = scrap_list.index(obj_name)
+        qty = obj.qty
+        total += qty
+        total_weekly += qty
+
+        report[pos]["qty"] = total
+        total = 0
+
+    for idx, elem in enumerate(report):
+        scrap_qty = report[idx]["qty"]
+        scrap_rate = round((scrap_qty / total_output) * 100, ndigits=2)
+        report[idx]["scrap_rate"] = scrap_rate
+
+    overall_scrap_rate = round((total_weekly / total_output) * 100, ndigits=2)
+
+    return render(
+        request,
+        template_name="gemba/scrap_rate.html",
+        context={
+            "report": report,
+            "total_weekly": total_weekly,
+            "total_output": total_output,
+            "overall_scrap_rate": overall_scrap_rate,
+        },
+    )
+
 import pandas as pd
 import openpyxl
 from pathlib import Path
@@ -1515,7 +1565,7 @@ def export_to_gemba(request):
     path_to_download_folder = str(os.path.join(Path.home(), "Downloads"))
 
     file_name = f"{path_to_download_folder}\\{query} - GembaData.xlsx"
-
+    print(file_name)
     raw_data = {"code": col_a,
                 "desc": col_b,
                 "min": col_c,
@@ -1526,3 +1576,4 @@ def export_to_gemba(request):
     df.to_excel(file_name, sheet_name="data")
 
     return redirect("gemba_app:index")
+

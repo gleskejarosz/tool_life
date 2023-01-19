@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Scrap rate by week:</h4>
+This week + Delta 3003 for now
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Scrap</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Scrap Rate</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in report %}
+            <tr>
+                <td>{{ object.scrap }}</td>
+                <td>{% if object.qty == 0 %} {% else %} {{ object.qty }} {% endif %}</td>
+                <td>{% if object.scrap_rate == 0 %} {% else %}{{ object.scrap_rate }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+        <tr>
+            <td> <b>Total scraps</b> </td>
+            <td><b>{{ total_weekly }}</b></td>
+            <td><b> {{ overall_scrap_rate }}</b> </td>
+        </tr>
+         <tr>
+            <td> <b>Total Made</b> </td>
+            <td><b>{{ total_output }}</b></td>
+            <td> </td>
+        </tr>
+        </tbody>
+    </table>
+{% endblock %}
