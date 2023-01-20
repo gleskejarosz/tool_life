@@ -1522,11 +1522,11 @@ def scrap_rate_report_by_week(request, line_id):
 
     totals["total_all_output"] = total_all_output
     for elem in report:
-        total_by_scrap = elem["total"]
+        total_by_scrap_type = elem["total"]
         if total_all_weeks == 0:
             total_scrap_rate = 0.00
         else:
-            total_scrap_rate = round((total_by_scrap / total_all_weeks) * 100, ndigits=2)
+            total_scrap_rate = round((total_by_scrap_type / total_all_output) * 100, ndigits=2)
         elem["total_scrap_rate"] = total_scrap_rate
     totals["total_all_weeks"] = total_all_weeks
     if total_all_output == 0:
