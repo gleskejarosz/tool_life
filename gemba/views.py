@@ -1,6 +1,7 @@
 import csv
 import os
 
+import pytz
 import xlwt
 from django.core.paginator import Paginator
 from xlwt import XFStyle, Font
@@ -1391,10 +1392,9 @@ def open_pareto(request, pk):
 
 def scrap_rate_report_by_week(request):
     # delta 3003 group = 3
-    today = datetime.today()
-    year = today.year
+    today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+
     report = []
-    totals = {}
     user = 2
 
     scrap_list = []
@@ -1435,7 +1435,6 @@ def scrap_rate_report_by_week(request):
         "total_output_4": 0,
         "overall_scrap_rate_4": 0.00,
     }
-
 
     for week_num in range(5):
         this_monday = today - timedelta(days=today.weekday())
@@ -1487,7 +1486,7 @@ def scrap_rate_report_by_week(request):
         else:
             overall_scrap_rate = round((total_weekly / total_output) * 100, ndigits=2)
         totals[key_rate] = overall_scrap_rate
-    print(totals)
+
     return render(
         request,
         template_name="gemba/scrap_rate.html",
