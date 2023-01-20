@@ -63,5 +63,6 @@ urlpatterns = [
     path("export_to_gemba/", views.export_to_gemba, name="export-to-gemba"),
     path("tableau/<pk>/", views.tableau_export, name="tableau"),
     path("chart/", views.EditorChartView.as_view(), name="chart"),
-    path("scrap_rate_report/", views.scrap_rate_report_by_week, name="scrap-rate-report"),
+    path("lines/", views.lines, name="lines"),
+    path("scrap_rate_report/<line_id>/", views.scrap_rate_report_by_week, name="scrap-rate-report"),
     ]

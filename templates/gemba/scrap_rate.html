@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% block content %}
+<head>
+    <style>
+        .central_pos{
+            vertical-align: center;
+            text-align: center;
+        }
+    </style>
+</head>
 <h4>Scrap rate by week:</h4>
 
 <table class="table table-hover">
         <thead>
         <tr>
             <td></td>
-            <td colspan="2"><b>Week 0</b></td>
-             <td colspan="2"><b>Week -1</b></td>
-             <td colspan="2"><b>Week -2</b></td>
-             <td colspan="2"><b>Week -3</b></td>
-             <td colspan="2"><b>Week -4</b></td>
+            <td colspan="2" class="central_pos"><b>Recent Week</b></td>
+             <td colspan="2" class="central_pos"><b>Week -1</b></td>
+             <td colspan="2" class="central_pos"><b>Week -2</b></td>
+             <td colspan="2" class="central_pos"><b>Week -3</b></td>
+             <td colspan="2" class="central_pos"><b>Week -4</b></td>
+            <td colspan="2" class="central_pos"><b>Total</b></td>
         </tr>
         <tr>
             <th scope="col">Scrap</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Scrap Rate</th>
             <th scope="col">Qty</th>
             <th scope="col">Scrap Rate</th>
             <th scope="col">Qty</th>
@@ -41,28 +52,33 @@
                 <td>{% if object.scrap_rate_3 == 0 %} {% else %}{{ object.scrap_rate_3 }}%{% endif %}</td>
                 <td>{% if object.qty_4 == 0 %} {% else %} {{ object.qty_4 }} {% endif %}</td>
                 <td>{% if object.scrap_rate_4 == 0 %} {% else %}{{ object.scrap_rate_4 }}%{% endif %}</td>
+                <td class="central_pos"><b>{{ object.total }}</b></td>
+                <td class="central_pos"><b>{{ object.total_scrap_rate }}</b></td>
             </tr>
         {% endfor %}
         <tr>
             <td> <b>Total scraps</b> </td>
-            <td><b>{{ totals.total_weekly_0 }}</b></td>
-            <td><b> {{ totals.overall_scrap_rate_0 }}</b> </td>
-            <td><b>{{ totals.total_weekly_1 }}</b></td>
-            <td><b> {{ totals.overall_scrap_rate_1 }}</b> </td>
-            <td><b>{{ totals.total_weekly_2 }}</b></td>
-            <td><b> {{ totals.overall_scrap_rate_2 }}</b> </td>
-            <td><b>{{ totals.total_weekly_3 }}</b></td>
-            <td><b> {{ totals.overall_scrap_rate_3 }}</b> </td>
-            <td><b>{{ totals.total_weekly_4 }}</b></td>
-            <td><b> {{ totals.overall_scrap_rate_4 }}</b> </td>
+            <td><b>{% if totals.total_weekly_0 == 0 %}{% else %}{{ totals.total_weekly_0 }}{% endif %}</b></td>
+            <td><b>{% if totals.overall_scrap_rate_0 == 0 %}{% else %}{{ totals.overall_scrap_rate_0 }}{% endif %}</b> </td>
+            <td><b>{% if totals.total_weekly_1 == 0 %}{% else %}{{ totals.total_weekly_1 }}{% endif %}</b></td>
+            <td><b>{% if totals.overall_scrap_rate_1 == 0 %}{% else %}{{ totals.overall_scrap_rate_1 }}{% endif %}</b></td>
+            <td><b>{% if totals.total_weekly_2 == 0 %}{% else %}{{ totals.total_weekly_2 }}{% endif %}</b></td>
+            <td><b>{% if totals.overall_scrap_rate_2 == 0 %}{% else %} {{ totals.overall_scrap_rate_2 }}{% endif %}</b></td>
+            <td><b>{% if totals.total_weekly_3 == 0 %}{% else %}{{ totals.total_weekly_3 }}{% endif %}</b></td>
+            <td><b>{% if totals.overall_scrap_rate_3 == 0 %}{% else %}{{ totals.overall_scrap_rate_3 }}{% endif %}</b></td>
+            <td><b>{% if totals.total_weekly_4 == 0 %}{% else %}{{ totals.total_weekly_4 }}{% endif %}</b></td>
+            <td><b>{% if totals.overall_scrap_rate_4 == 0 %}{% else %}{{ totals.overall_scrap_rate_4 }}{% endif %}</b></td>
+            <td class="central_pos"><b>{{ totals.total_all_weeks }}</b></td>
+            <td class="central_pos"><b>{{ totals.all_scrap_rate }}</b></td>
         </tr>
          <tr>
             <td> <b>Total Made</b> </td>
-            <td colspan="2"><b>{{ totals.total_output_0 }}</b></td>
-             <td colspan="2"><b>{{ totals.total_output_1 }}</b></td>
-             <td colspan="2"><b>{{ totals.total_output_2 }}</b></td>
-             <td colspan="2"><b>{{ totals.total_output_3 }}</b></td>
-             <td colspan="2"><b>{{ totals.total_output_4 }}</b></td>
+            <td colspan="2"><b>{% if totals.total_output_0 == 0 %}{% else %}{{ totals.total_output_0 }}{% endif %}</b></td>
+             <td colspan="2"><b>{% if totals.total_output_1 == 0 %}{% else %}{{ totals.total_output_1 }}{% endif %}</b></td>
+             <td colspan="2"><b>{% if totals.total_output_2 == 0 %}{% else %}{{ totals.total_output_2 }}{% endif %}</b></td>
+             <td colspan="2"><b>{% if totals.total_output_3 == 0 %}{% else %}{{ totals.total_output_3 }}{% endif %}</b></td>
+             <td colspan="2"><b>{% if totals.total_output_4 == 0 %}{% else %}{{ totals.total_output_4 }}{% endif %}</b></td>
+             <td colspan="2" class="central_pos"><b> {{ totals.total_all_output }}</b></td>
         </tr>
         </tbody>
     </table>
