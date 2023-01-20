@@ -1478,7 +1478,7 @@ def scrap_rate_report_by_week(request, line_id):
             total += qty
             total_weekly += qty
 
-            report[pos][key_qty] = total
+            report[pos][key_qty] += total
             total = 0
 
         key_total = "total_weekly_" + str(week_num)
