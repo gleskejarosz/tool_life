@@ -12,7 +12,7 @@
         }
     </style>
 </head>
-<h4>Scrap rate by week</h4>
+<h4>Downtime rate by week</h4>
 Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
 <table class="table table-bordered">
         <thead>
@@ -43,7 +43,7 @@ Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
             <td colspan="2" class="central_pos"><b>Total</b></td>
         </tr>
         <tr style="central_pos; font-size:0.7vw;">
-            <th scope="col" style="text-align:left;">Scrap</th>
+            <th scope="col" style="text-align:left;">Downtime</th>
             <th scope="col">Qty</th>
             <th scope="col">%</th>
             <th scope="col">Qty</th>
@@ -70,72 +70,72 @@ Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
         <tbody>
         {% for object in report %}
             <tr style="central_pos; font-size:0.7vw;">
-                <td>{{ object.scrap }}</td>
+                <td>{{ object.down }}</td>
                 <td>{% if object.qty_0 == 0 %} {% else %} {{ object.qty_0 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_0 == 0 %} {% elif object.scrap_rate_0 > 2 %}
-                    <div class="high">{{ object.scrap_rate_0 }}%</div>{% else %}{{ object.scrap_rate_0 }}%{% endif %}</td>
+                <td>{% if object.down_rate_0 == 0 %} {% elif object.down_rate_0 > 5 %}
+                    <div class="high">{{ object.down_rate_0 }}%</div>{% else %}{{ object.down_rate_0 }}%{% endif %}</td>
                 <td>{% if object.qty_1 == 0 %} {% else %} {{ object.qty_1 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_1 == 0 %} {% elif object.scrap_rate_1 > 2 %}
-                    <div class="high">{{ object.scrap_rate_1 }}%</div>{% else %}{{ object.scrap_rate_1 }}%{% endif %}</td>
+                <td>{% if object.down_rate_1 == 0 %} {% elif object.down_rate_1 > 5 %}
+                    <div class="high">{{ object.down_rate_1 }}%</div>{% else %}{{ object.down_rate_1 }}%{% endif %}</td>
                 <td>{% if object.qty_2 == 0 %} {% else %} {{ object.qty_2 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_2 == 0 %} {% elif object.scrap_rate_2 > 2 %}
-                    <div class="high">{{ object.scrap_rate_2 }}%</div>{% else %}{{ object.scrap_rate_2 }}%{% endif %}</td>
+                <td>{% if object.down_rate_2 == 0 %} {% elif object.down_rate_2 > 5 %}
+                    <div class="high">{{ object.down_rate_2 }}%</div>{% else %}{{ object.down_rate_2 }}%{% endif %}</td>
                 <td>{% if object.qty_3 == 0 %} {% else %} {{ object.qty_3 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_3 == 0 %} {% elif object.scrap_rate_3 > 2 %}
-                    <div class="high">{{ object.scrap_rate_3 }}%</div>{% else %}{{ object.scrap_rate_3 }}%{% endif %}</td>
+                <td>{% if object.down_rate_3 == 0 %} {% elif object.down_rate_3 > 5 %}
+                    <div class="high">{{ object.down_rate_3 }}%</div>{% else %}{{ object.down_rate_3 }}%{% endif %}</td>
                 <td>{% if object.qty_4 == 0 %} {% else %} {{ object.qty_4 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_4 == 0 %} {% elif object.scrap_rate_4 > 2 %}
-                    <div class="high">{{ object.scrap_rate_4 }}%</div>{% else %}{{ object.scrap_rate_4 }}%{% endif %}</td>
+                <td>{% if object.down_rate_4 == 0 %} {% elif object.down_rate_4 > 5 %}
+                    <div class="high">{{ object.down_rate_4 }}%</div>{% else %}{{ object.down_rate_4 }}%{% endif %}</td>
                 <td>{% if object.qty_5 == 0 %} {% else %} {{ object.qty_5 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_5 == 0 %} {% elif object.scrap_rate_5 > 2 %}
-                    <div class="high">{{ object.scrap_rate_5 }}%</div>{% else %}{{ object.scrap_rate_5 }}%{% endif %}</td>
+                <td>{% if object.down_rate_5 == 0 %} {% elif object.down_rate_5 > 5 %}
+                    <div class="high">{{ object.down_rate_5 }}%</div>{% else %}{{ object.down_rate_5 }}%{% endif %}</td>
                 <td>{% if object.qty_6 == 0 %} {% else %} {{ object.qty_6 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_6 == 0 %} {% elif object.scrap_rate_6 > 2 %}
-                    <div class="high">{{ object.scrap_rate_6 }}%</div>{% else %}{{ object.scrap_rate_6 }}%{% endif %}</td>
+                <td>{% if object.down_rate_6 == 0 %} {% elif object.down_rate_6 > 5 %}
+                    <div class="high">{{ object.down_rate_6 }}%</div>{% else %}{{ object.down_rate_6 }}%{% endif %}</td>
                 <td>{% if object.qty_7 == 0 %} {% else %} {{ object.qty_7 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_7 == 0 %} {% elif object.scrap_rate_7 > 2 %}
-                    <div class="high">{{ object.scrap_rate_7 }}%</div>{% else %}{{ object.scrap_rate_7 }}%{% endif %}</td>
+                <td>{% if object.down_rate_7 == 0 %} {% elif object.down_rate_7 > 5 %}
+                    <div class="high">{{ object.down_rate_7 }}%</div>{% else %}{{ object.down_rate_7 }}%{% endif %}</td>
                 <td>{% if object.qty_8 == 0 %} {% else %} {{ object.qty_8 }} {% endif %}</td>
-                <td>{% if object.scrap_rate_8 == 0 %} {% elif object.scrap_rate_8 > 2 %}
-                    <div class="high">{{ object.scrap_rate_8 }}%</div>{% else %}{{ object.scrap_rate_8 }}%{% endif %}</td>
+                <td>{% if object.down_rate_8 == 0 %} {% elif object.down_rate_8 > 5 %}
+                    <div class="high">{{ object.down_rate_8 }}%</div>{% else %}{{ object.down_rate_8 }}%{% endif %}</td>
                 <td><b>{{ object.total }}</b></td>
-                <td><b>{{ object.total_scrap_rate }}%</b></td>
+                <td><b>{{ object.total_down_rate }}%</b></td>
             </tr>
         {% endfor %}
         <tr style="central_pos; font-size:0.7vw;">
-            <td style="text-align:left;"><b>Total scraps</b></td>
+            <td style="text-align:left;"><b>Total downtimes</b></td>
             <td><b>{% if totals.total_weekly_0 == 0 %}{% else %}{{ totals.total_weekly_0 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_0 == 0 %}{% else %}{{ totals.overall_scrap_rate_0 }}%{% endif %}</b> </td>
+            <td><b>{% if totals.overall_down_rate_0 == 0 %}{% else %}{{ totals.overall_down_rate_0 }}%{% endif %}</b> </td>
             <td><b>{% if totals.total_weekly_1 == 0 %}{% else %}{{ totals.total_weekly_1 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_1 == 0 %}{% else %}{{ totals.overall_scrap_rate_1 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_1 == 0 %}{% else %}{{ totals.overall_down_rate_1 }}%{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_2 == 0 %}{% else %}{{ totals.total_weekly_2 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_2 == 0 %}{% else %} {{ totals.overall_scrap_rate_2 }%}{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_2 == 0 %}{% else %} {{ totals.overall_down_rate_2 }%}{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_3 == 0 %}{% else %}{{ totals.total_weekly_3 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_3 == 0 %}{% else %}{{ totals.overall_scrap_rate_3 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_3 == 0 %}{% else %}{{ totals.overall_down_rate_3 }}%{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_4 == 0 %}{% else %}{{ totals.total_weekly_4 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_4 == 0 %}{% else %}{{ totals.overall_scrap_rate_4 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_4 == 0 %}{% else %}{{ totals.overall_down_rate_4 }}%{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_5 == 0 %}{% else %}{{ totals.total_weekly_5 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_5 == 0 %}{% else %}{{ totals.overall_scrap_rate_5 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_5 == 0 %}{% else %}{{ totals.overall_down_rate_5 }}%{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_6 == 0 %}{% else %}{{ totals.total_weekly_6 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_6 == 0 %}{% else %}{{ totals.overall_scrap_rate_6 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_6 == 0 %}{% else %}{{ totals.overall_down_rate_6 }}%{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_7 == 0 %}{% else %}{{ totals.total_weekly_7 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_7 == 0 %}{% else %}{{ totals.overall_scrap_rate_7 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_7 == 0 %}{% else %}{{ totals.overall_down_rate_7 }}%{% endif %}</b></td>
             <td><b>{% if totals.total_weekly_8 == 0 %}{% else %}{{ totals.total_weekly_8 }}{% endif %}</b></td>
-            <td><b>{% if totals.overall_scrap_rate_8 == 0 %}{% else %}{{ totals.overall_scrap_rate_8 }}%{% endif %}</b></td>
+            <td><b>{% if totals.overall_down_rate_8 == 0 %}{% else %}{{ totals.overall_down_rate_8 }}%{% endif %}</b></td>
             <td><b>{{ totals.total_all_weeks }}</b></td>
-            <td><b>{{ totals.all_scrap_rate }}%</b></td>
+            <td><b>{{ totals.all_down_rate }}%</b></td>
         </tr>
          <tr style="font-size:0.7vw;">
-            <td style="text-align:left;"><b>Total Made</b></td>
-            <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_0 == 0 %}{% else %}{{ totals.total_output_0 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_1 == 0 %}{% else %}{{ totals.total_output_1 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_2 == 0 %}{% else %}{{ totals.total_output_2 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_3 == 0 %}{% else %}{{ totals.total_output_3 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_4 == 0 %}{% else %}{{ totals.total_output_4 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_5 == 0 %}{% else %}{{ totals.total_output_5 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_6 == 0 %}{% else %}{{ totals.total_output_6 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_7 == 0 %}{% else %}{{ totals.total_output_7 }}{% endif %}</b></td>
-             <td colspan="2" style="text-align:center;"><b>{% if totals.total_output_8 == 0 %}{% else %}{{ totals.total_output_8 }}{% endif %}</b></td>
+            <td style="text-align:left;"><b>Total Available Time</b></td>
+            <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_0 == 0 %}{% else %}{{ totals.total_available_time_0 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_1 == 0 %}{% else %}{{ totals.total_available_time_1 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_2 == 0 %}{% else %}{{ totals.total_available_time_2 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_3 == 0 %}{% else %}{{ totals.total_available_time_3 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_4 == 0 %}{% else %}{{ totals.total_available_time_4 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_5 == 0 %}{% else %}{{ totals.total_available_time_5 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_6 == 0 %}{% else %}{{ totals.total_available_time_6 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_7 == 0 %}{% else %}{{ totals.total_available_time_7 }}{% endif %}</b></td>
+             <td colspan="2" style="text-align:center;"><b>{% if totals.total_available_time_8 == 0 %}{% else %}{{ totals.total_available_time_8 }}{% endif %}</b></td>
              <td colspan="2" style="text-align:center;"><b> {{ totals.total_all_output }}</b></td>
         </tr>
         </tbody>

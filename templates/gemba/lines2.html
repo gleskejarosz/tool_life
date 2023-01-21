@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Select line:</h4>
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Line Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in lines_qs %}
+            <tr>
+                <td><a href="{% url 'gemba_app:downtime-rate-report' line_id=object.pk %}">{{ object.name }}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}

@@ -92,12 +92,12 @@ class DowntimeModelAdmin(admin.ModelAdmin):
 
 class DowntimeGroupModelAdmin(admin.ModelAdmin):
     ordering = ("user",)
-    list_display = ("user", "name", "description", "calculation", )
+    list_display = ("user", "line", "name", "description", "calculation", )
     list_display_links = ("user",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["user", "name", "description", "calculation"],
+            "fields": ["user", "line", "name", "description", "calculation"],
         }),
     ]
     readonly_fields = []

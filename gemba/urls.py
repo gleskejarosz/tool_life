@@ -50,9 +50,13 @@ urlpatterns = [
     # downtimes report
     path("downtimes_view/", views.downtimes_view, name="downtimes-view"),
     path("downtime_search_result/", views.DowntimeSearchResultsView.as_view(), name="search-result"),
+    path("lines/", views.lines_2, name="lines-2"),
+    path("downtime_rate_report/<line_id>/", views.downtime_rate_report_by_week, name="downtime-rate-report"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("scrap_search_result/", views.ScrapSearchResultsView.as_view(), name="scrap-search-result"),
+    path("lines/", views.lines, name="lines"),
+    path("scrap_rate_report/<line_id>/", views.scrap_rate_report_by_week, name="scrap-rate-report"),
     # quarantine report
     path("quarantine_view/", views.quarantine_view, name="quarantine-view"),
     # exports and other
@@ -63,6 +67,4 @@ urlpatterns = [
     path("export_to_gemba/", views.export_to_gemba, name="export-to-gemba"),
     path("tableau/<pk>/", views.tableau_export, name="tableau"),
     path("chart/", views.EditorChartView.as_view(), name="chart"),
-    path("lines/", views.lines, name="lines"),
-    path("scrap_rate_report/<line_id>/", views.scrap_rate_report_by_week, name="scrap-rate-report"),
     ]

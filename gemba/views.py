@@ -1395,14 +1395,19 @@ def lines(request):
     return render(request, "gemba/lines.html", {"lines_qs": lines_qs})
 
 
+def lines_2(request):
+    lines_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines2.html", {"lines_qs": lines_qs})
+
+
 def scrap_rate_report_by_week(request, line_id):
     line = Line.objects.get(pk=line_id)
-    today = datetime.now(tz=pytz.UTC).replace(hour=00, minute=00, second=0, microsecond=0)
+    today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
 
     report = []
-    user_qs = LineUser.objects.filter(line=line)
-    if user_qs.exists():
-        user = user_qs[0].user
+    group_qs = DowntimeGroup.objects.filter(line=line)
+    if group_qs.exists():
+        group = group_qs[0].id
     else:
         totals = {}
         return render(
@@ -1413,14 +1418,14 @@ def scrap_rate_report_by_week(request, line_id):
                 "totals": totals,
             },
         )
-    group = DowntimeGroup.objects.get(user=user)
 
     scrap_list = []
     scrap_names_qs = ScrapUser.objects.filter(group=group).order_by("gemba")
-
+    scrap_row_qty = []
     for obj in scrap_names_qs:
         scrap_name = obj.scrap.description
         scrap_list.append(scrap_name)
+        scrap_row_qty.append(0)
 
         report.append({
             "scrap": scrap_name,
@@ -1434,6 +1439,14 @@ def scrap_rate_report_by_week(request, line_id):
             "scrap_rate_3": 0.00,
             "qty_4": 0,
             "scrap_rate_4": 0.00,
+            "qty_5": 0,
+            "scrap_rate_5": 0.00,
+            "qty_6": 0,
+            "scrap_rate_6": 0.00,
+            "qty_7": 0,
+            "scrap_rate_7": 0.00,
+            "qty_8": 0,
+            "scrap_rate_8": 0.00,
             "total": 0,
             "total_scrap_rate": 0.00,
         })
@@ -1442,57 +1455,84 @@ def scrap_rate_report_by_week(request, line_id):
         "total_weekly_0": 0,
         "total_output_0": 0,
         "overall_scrap_rate_0": 0.00,
+        "start_monday_0": "",
         "total_weekly_1": 0,
         "total_output_1": 0,
         "overall_scrap_rate_1": 0.00,
+        "start_monday_1": "",
         "total_weekly_2": 0,
         "total_output_2": 0,
         "overall_scrap_rate_2": 0.00,
+        "start_monday_2": "",
         "total_weekly_3": 0,
         "total_output_3": 0,
         "overall_scrap_rate_3": 0.00,
+        "start_monday_3": "",
         "total_weekly_4": 0,
         "total_output_4": 0,
         "overall_scrap_rate_4": 0.00,
+        "start_monday_4": "",
+        "total_weekly_5": 0,
+        "total_output_5": 0,
+        "overall_scrap_rate_5": 0.00,
+        "start_monday_5": "",
+        "total_weekly_6": 0,
+        "total_output_6": 0,
+        "overall_scrap_rate_6": 0.00,
+        "start_monday_6": "",
+        "total_weekly_7": 0,
+        "total_output_7": 0,
+        "overall_scrap_rate_7": 0.00,
+        "start_monday_7": "",
+        "total_weekly_8": 0,
+        "total_output_8": 0,
+        "overall_scrap_rate_8": 0.00,
+        "start_monday_8": "",
         "total_all_weeks": 0,
         "total_all_output": 0,
         "all_scrap_rate": 0.00,
     }
     total_all_output = 0
-    for week_num in range(5):
-        this_monday = today - timedelta(days=today.weekday())
-        start_monday = this_monday - timedelta(days=week_num * 7)
-        end_monday = start_monday + timedelta(days=7)
-        scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(created__gte=start_monday, created__lt=end_monday)
-        total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(created__gte=start_monday,
-                                                                           created__lt=end_monday)
+    total_all_weeks = 0
+    for week_num in range(9):
+        this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        key_monday = "start_monday_" + str(week_num)
+        totals[key_monday] = start_sunday + timedelta(days=1)
+        end_sunday = start_sunday + timedelta(days=7)
+        scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
+        total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(created__gte=start_sunday,
+                                                                           created__lt=end_sunday)
 
-        total = 0
         total_weekly = 0
         key_qty = "qty_" + str(week_num)
 
+        # total scrap per reason, for week, period summary total, row sum up
         for obj in scrap_qs:
             obj_name = obj.scrap.description
             pos = scrap_list.index(obj_name)
             qty = obj.qty
-            total += qty
             total_weekly += qty
+            total_all_weeks += qty
+            report[pos]["total"] += qty
+            report[pos][key_qty] += qty
 
-            report[pos][key_qty] += total
-            total = 0
-
+        # assigning total weekly scrap qty to totals
         key_total = "total_weekly_" + str(week_num)
         totals[key_total] = total_weekly
 
+        # counting output per week
         total_output = 0
         for obj in total_output_qs:
             output_obj = obj.output
             total_output += output_obj
 
+        # assigning total weekly output to totals and counting period summary total output
         key_output = "total_output_" + str(week_num)
         totals[key_output] = total_output
         total_all_output += total_output
 
+        # counting scrap rate
         key_scrap = "scrap_rate_" + str(week_num)
         for idx, elem in enumerate(report):
             scrap_qty = elem[key_qty]
@@ -1502,6 +1542,7 @@ def scrap_rate_report_by_week(request, line_id):
                 scrap_rate = round((scrap_qty / total_output) * 100, ndigits=2)
             elem[key_scrap] = scrap_rate
 
+        # counting weekly scrap rate
         key_rate = "overall_scrap_rate_" + str(week_num)
         if total_output == 0:
             overall_scrap_rate = 0
@@ -1509,17 +1550,7 @@ def scrap_rate_report_by_week(request, line_id):
             overall_scrap_rate = round((total_weekly / total_output) * 100, ndigits=2)
         totals[key_rate] = overall_scrap_rate
 
-    total_all_weeks = 0
-    for elem in report:
-        qty_0 = elem["qty_0"]
-        qty_1 = elem["qty_1"]
-        qty_2 = elem["qty_2"]
-        qty_3 = elem["qty_3"]
-        qty_4 = elem["qty_4"]
-        total_by_scrap = qty_0 + qty_1 + qty_2 + qty_3 + qty_4
-        total_all_weeks += total_by_scrap
-        elem["total"] = total_by_scrap
-
+    # counting total scrap rate by row
     totals["total_all_output"] = total_all_output
     for elem in report:
         total_by_scrap_type = elem["total"]
@@ -1528,6 +1559,8 @@ def scrap_rate_report_by_week(request, line_id):
         else:
             total_scrap_rate = round((total_by_scrap_type / total_all_output) * 100, ndigits=2)
         elem["total_scrap_rate"] = total_scrap_rate
+
+    # counting total scrap rate
     totals["total_all_weeks"] = total_all_weeks
     if total_all_output == 0:
         all_scrap_rate = 0
@@ -1543,6 +1576,189 @@ def scrap_rate_report_by_week(request, line_id):
             "totals": totals,
         },
     )
+
+
+def downtime_rate_report_by_week(request, line_id):
+    line = Line.objects.get(pk=line_id)
+    today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+
+    report = []
+    group_qs = DowntimeGroup.objects.filter(line=line)
+    if group_qs.exists():
+        group = group_qs[0].id
+    else:
+        totals = {}
+        return render(
+            request,
+            template_name="gemba/downtime_rate.html",
+            context={
+                "report": report,
+                "totals": totals,
+            },
+        )
+
+    down_list = []
+    down_names_qs = DowntimeUser.objects.filter(group=group).order_by("gemba")
+    down_row_qty = []
+    for obj in down_names_qs:
+        down_name = obj.downtime.description
+        down_list.append(down_name)
+        down_row_qty.append(0)
+
+        report.append({
+            "down": down_name,
+            "qty_0": 0,
+            "down_rate_0": 0.00,
+            "qty_1": 0,
+            "down_rate_1": 0.00,
+            "qty_2": 0,
+            "down_rate_2": 0.00,
+            "qty_3": 0,
+            "down_rate_3": 0.00,
+            "qty_4": 0,
+            "down_rate_4": 0.00,
+            "qty_5": 0,
+            "down_rate_5": 0.00,
+            "qty_6": 0,
+            "down_rate_6": 0.00,
+            "qty_7": 0,
+            "down_rate_7": 0.00,
+            "qty_8": 0,
+            "down_rate_8": 0.00,
+            "total": 0,
+            "total_scrap_rate": 0.00,
+        })
+
+    totals = {
+        "total_weekly_0": 0,
+        "total_available_time_0": 0,
+        "overall_down_rate_0": 0.00,
+        "start_monday_0": "",
+        "total_weekly_1": 0,
+        "total_available_time_1": 0,
+        "overall_down_rate_1": 0.00,
+        "start_monday_1": "",
+        "total_weekly_2": 0,
+        "total_available_time_2": 0,
+        "overall_down_rate_2": 0.00,
+        "start_monday_2": "",
+        "total_weekly_3": 0,
+        "total_available_time_3": 0,
+        "overall_down_rate_3": 0.00,
+        "start_monday_3": "",
+        "total_weekly_4": 0,
+        "total_available_time_4": 0,
+        "overall_down_rate_4": 0.00,
+        "start_monday_4": "",
+        "total_weekly_5": 0,
+        "total_available_time_5": 0,
+        "overall_down_rate_5": 0.00,
+        "start_monday_5": "",
+        "total_weekly_6": 0,
+        "total_available_time_6": 0,
+        "overall_down_rate_6": 0.00,
+        "start_monday_6": "",
+        "total_weekly_7": 0,
+        "total_available_time_7": 0,
+        "overall_down_rate_7": 0.00,
+        "start_monday_7": "",
+        "total_weekly_8": 0,
+        "total_available_time_8": 0,
+        "overall_down_rate_8": 0.00,
+        "start_monday_8": "",
+        "total_all_weeks": 0,
+        "total_all_output": 0,
+        "all_down_rate": 0.00,
+    }
+    total_all_output = 0
+    total_all_weeks = 0
+    for week_num in range(9):
+        this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        key_monday = "start_monday_" + str(week_num)
+        totals[key_monday] = start_sunday + timedelta(days=1)
+        end_sunday = start_sunday + timedelta(days=7)
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
+
+        # counting available time
+        paretos_id = set()
+        total_available_time = 0
+        for obj in down_qs:
+            pareto_id = obj.pareto_id
+            paretos_id.add(pareto_id)
+
+        for elem_id in paretos_id:
+            pareto = Pareto.objects.get(id=elem_id)
+            hours = pareto.hours
+            total_available_time += int(hours) * 60
+
+        total_weekly = 0
+        key_qty = "qty_" + str(week_num)
+
+        # total downtime per reason, for week, period summary total, row sum up
+        for obj in down_qs:
+            obj_name = obj.downtime.description
+            pos = down_list.index(obj_name)
+            minutes = obj.minutes
+            total_weekly += minutes
+            total_all_weeks += minutes
+            report[pos]["total"] += minutes
+            report[pos][key_qty] += minutes
+
+        # assigning total weekly downtime minutes to totals
+        key_total = "total_weekly_" + str(week_num)
+        totals[key_total] = total_weekly
+
+        # assigning total weekly output to totals and counting period summary total output
+        key_output = "total_available_time_" + str(week_num)
+        totals[key_output] = total_available_time
+        total_all_output += total_available_time
+
+        # counting downtime rate
+        key_scrap = "down_rate_" + str(week_num)
+        for idx, elem in enumerate(report):
+            down_qty = elem[key_qty]
+            if total_available_time == 0:
+                down_rate = 0
+            else:
+                down_rate = round((down_qty / total_available_time) * 100, ndigits=2)
+            elem[key_scrap] = down_rate
+
+        # counting weekly downtime rate
+        key_rate = "overall_down_rate_" + str(week_num)
+        if total_available_time == 0:
+            overall_down_rate = 0
+        else:
+            overall_down_rate = round((total_weekly / total_available_time) * 100, ndigits=2)
+        totals[key_rate] = overall_down_rate
+
+    # counting total downtime rate by row
+    totals["total_all_output"] = total_all_output
+    for elem in report:
+        total_by_down_type = elem["total"]
+        if total_all_weeks == 0:
+            total_down_rate = 0.00
+        else:
+            total_down_rate = round((total_by_down_type / total_all_output) * 100, ndigits=2)
+        elem["total_down_rate"] = total_down_rate
+
+    # counting total downtime rate
+    totals["total_all_weeks"] = total_all_weeks
+    if total_all_output == 0:
+        all_down_rate = 0
+    else:
+        all_down_rate = round((total_all_weeks / total_all_output) * 100, ndigits=2)
+    totals["all_down_rate"] = all_down_rate
+
+    return render(
+        request,
+        template_name="gemba/downtime_rate.html",
+        context={
+            "report": report,
+            "totals": totals,
+        },
+    )
+
 
 import pandas as pd
 import openpyxl
@@ -1653,7 +1869,6 @@ def export_to_gemba(request):
                 col_a[pos + offset_b] = scrap_code
                 col_b[pos] = scrap_name
                 col_b[pos + offset_b] = scrap_name
-                print(jobs)
                 scraps_exist_qs = ScrapDetail.objects.filter(pareto_id=pareto_id).filter(scrap=scrap_id)
                 if scraps_exist_qs.exists():
                     for elem in scraps_exist_qs:
@@ -1667,11 +1882,9 @@ def export_to_gemba(request):
                             # product B
                             col_c[pos + offset_b] += qty
 
-    path_to_download_folder = str(os.path.join(Path.home(), "Downloads"))
-    path_to_download_folder = "C:\\temp"
-
+    # path_to_download_folder = str(os.path.join(Path.home(), "Downloads"))
+    path_to_download_folder = os.path.join(os.path.join(os.environ['USERPROFILE']), "Downloads")
     file_name = f"{path_to_download_folder}\\{query} - GembaData.xlsx"
-    print(file_name)
     raw_data = {"code": col_a,
                 "desc": col_b,
                 "min": col_c,

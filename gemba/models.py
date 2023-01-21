@@ -126,6 +126,7 @@ class DowntimeGroup(models.Model):
     name = models.CharField(max_length=10, blank=False, null=False)
     description = models.CharField(max_length=64, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, unique=True)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines6", blank=True, null=True)
     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
 
     def __str__(self):
