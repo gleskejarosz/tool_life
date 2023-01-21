@@ -238,15 +238,15 @@ class JobModel2(models.Model):
         verbose_name = "Job"
 
 
-class CalculationModel(models.Model):
-    code = models.CharField(max_length=10, blank=False, null=False)
-    description = models.CharField(max_length=64, blank=False, null=False)
-
-    def __str__(self):
-        return f"{self.code} - {self.description}"
-
-    class Meta:
-        verbose_name = "Hourly Calculation"
+# class CalculationModel(models.Model):
+#     code = models.CharField(max_length=10, blank=False, null=False)
+#     description = models.CharField(max_length=64, blank=False, null=False)
+#
+#     def __str__(self):
+#         return f"{self.code} - {self.description}"
+#
+#     class Meta:
+#         verbose_name = "Hourly Calculation"
 
 
 class Editors(models.Model):
@@ -275,3 +275,16 @@ class LineUser(models.Model):
 
     class Meta:
         verbose_name = "User vs Line"
+
+
+class Timer(models.Model):
+    start = models.DateTimeField(auto_now_add=True, blank=True)
+    end = models.DateTimeField(blank=True, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=False, null=False)
+    completed = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.start}"
+
+    class Meta:
+        verbose_name = "Timer"

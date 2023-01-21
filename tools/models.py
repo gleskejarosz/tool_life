@@ -94,7 +94,7 @@ class OperationModel(models.Model):
                                 null=True)
     tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=False, null=False)
     tool_type = models.CharField(max_length=64, choices=TOOL_CHOICES, default=TOOL)
-    start_date = models.DateTimeField(default=datetime.datetime.now())
+    start_date = models.DateTimeField()
     finish_date = models.DateTimeField(blank=True, null=True)
     status = models.BooleanField(default=False)
     minutes = models.PositiveSmallIntegerField(default=0)

@@ -32,6 +32,8 @@ urlpatterns = [
     path("pareto_ns_update_view/<pk>/", views.ParetoNSUpdateView.as_view(), name="pareto-ns-update-view"),
     path("downtime_update_view/<pk>/", views.DowntimeUpdateView.as_view(), name="downtime-update-view"),
     path("downtime_delete_view/<pk>/", views.DowntimeDeleteView.as_view(), name="downtime-delete-view"),
+    path("timer/", views.timer, name="timer"),
+    path("reset_timer/", views.reset_timer, name="reset-timer"),
     # pareto scrap
     path("scrap_user_view/", views.scrap_user_list, name="scrap-user-view"),
     path("scrap_detail_add/<pk>/", views.scrap_detail_create, name="scrap-detail-create"),

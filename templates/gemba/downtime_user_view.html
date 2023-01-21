@@ -9,6 +9,9 @@
 {% endif %}
 <p><a href="{% url 'gemba_app:pareto-ns-update-view' pk=pareto.pk %}">
         Not scheduled to run </a>- {{ pareto.not_scheduled_to_run }} min</p>
+<p>{% if timer_obj == "" %}<a href="{% url 'gemba_app:timer' %}">Start timer </a> {% else %} Downtime length:
+    {{ down_length }} min <a href="{% url 'gemba_app:reset-timer' %}">Reset timer </a>{% endif %}
+</p>
 <div>
     <br/>
     <table class="table table-bordered">
