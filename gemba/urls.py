@@ -50,7 +50,7 @@ urlpatterns = [
     # downtimes report
     path("downtimes_view/", views.downtimes_view, name="downtimes-view"),
     path("downtime_search_result/", views.DowntimeSearchResultsView.as_view(), name="search-result"),
-    path("lines/", views.lines_2, name="lines-2"),
+    path("lines_2/", views.lines_2, name="lines-2"),
     path("downtime_rate_report/<line_id>/", views.downtime_rate_report_by_week, name="downtime-rate-report"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),

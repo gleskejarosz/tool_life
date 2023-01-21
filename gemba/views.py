@@ -1396,8 +1396,8 @@ def lines(request):
 
 
 def lines_2(request):
-    lines_qs = Line.objects.all().order_by("name")
-    return render(request, "gemba/lines2.html", {"lines_qs": lines_qs})
+    lines2_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines2.html", {"lines2_qs": lines2_qs})
 
 
 def scrap_rate_report_by_week(request, line_id):
