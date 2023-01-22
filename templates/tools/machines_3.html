@@ -10,7 +10,7 @@
         <tbody>
         {% for object in machine_qs %}
             <tr>
-                <td><a href="{% url 'tools_app:tools-vs-jobs' machine_id=object.pk %}">{{ object.name }}</a></td>
+                <td><a href="{% url 'tools_app:tools-vs-jobs-table' machine_id=object.pk %}">{{ object.name }}</a></td>
             </tr>
         {% endfor %}
         </tbody>

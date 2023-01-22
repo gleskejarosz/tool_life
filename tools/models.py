@@ -1,8 +1,6 @@
-import datetime
-
 from django.db import models
 
-from gemba.models import JobModel2
+from gemba.models import JobModel2, Line
 from tools.utils import minutes_recalculate
 
 NOT_IN_USE = "Not in use"
@@ -29,8 +27,7 @@ class MachineModel(models.Model):
 
 class StationModel(models.Model):
     name = models.CharField(max_length=64)
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines2", blank=True,
-                                null=True)
+    machine = models.ForeignKey(Line, on_delete=models.CASCADE, related_name="lines9", blank=True, null=True)
     num = models.PositiveSmallIntegerField(default=1)
 
     def __str__(self):
@@ -53,26 +50,32 @@ class ToolModel(models.Model):
         return f"{self.name}"
 
     class Meta:
-        verbose_name = "Tool"
+        verbose_name = "Tool to delete"
 
 
-class JobStationModel(models.Model):
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines1", blank=False,
-                                null=False)
+class ToolStationModel(models.Model):
+    TOOL_STATUS = (
+        (SPARE, "Spare"),
+        (USE, "In use"),
+        (SCRAPPED, "Scrapped"),
+    )
+    machine = models.ForeignKey(Line, on_delete=models.CASCADE, related_name="lines10", blank=False, null=False)
     station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations1", blank=False,
                                 null=False)
-    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools2", blank=True, null=True)
+    tool = models.CharField(max_length=64)
+    tool_status = models.CharField(max_length=64, choices=TOOL_STATUS, default=SPARE)
 
     def __str__(self):
         return f"{self.tool}"
 
     class Meta:
-        verbose_name = "Tool Station"
+        verbose_name = "Tool"
 
 
 class ToolJobModel(models.Model):
     job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs_3", blank=False, null=False)
-    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools1", blank=False, null=False)
+    tool = models.ForeignKey(ToolStationModel, on_delete=models.CASCADE, related_name="tools1", blank=False, null=False)
+    status = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.job}"
@@ -88,11 +91,9 @@ class OperationModel(models.Model):
         (TOOL, "Tool"),
         (RUBBER, "Rubber"),
     )
-    machine = models.ForeignKey(MachineModel, on_delete=models.CASCADE, related_name="machines3", blank=True,
-                                null=True)
-    station = models.ForeignKey(StationModel, on_delete=models.CASCADE, related_name="stations2", blank=True,
-                                null=True)
-    tool = models.ForeignKey(ToolModel, on_delete=models.CASCADE, related_name="tools", blank=False, null=False)
+    machine = models.CharField(max_length=64, blank=True, null=True)
+    station = models.CharField(max_length=64, blank=True, null=True)
+    tool = models.ForeignKey(ToolStationModel, on_delete=models.CASCADE, related_name="tools5", blank=True, null=True)
     tool_type = models.CharField(max_length=64, choices=TOOL_CHOICES, default=TOOL)
     start_date = models.DateTimeField()
     finish_date = models.DateTimeField(blank=True, null=True)
@@ -106,21 +107,21 @@ class OperationModel(models.Model):
         verbose_name = "Tool change"
 
 
-class JobUpdate(models.Model):
-    date = models.DateField(blank=False, null=False)
-    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
-    parts = models.PositiveSmallIntegerField(default=0)
-    minutes = models.PositiveSmallIntegerField(default=0)
-
-    def __str__(self):
-        return f"{self.date} - {self.job} - {self.parts}"
-
-    class Meta:
-        verbose_name = "Job update"
-
-    def save(self, *args, **kwargs):
-        self.minutes = minutes_recalculate(self.parts, self.job)
-        super().save(*args, **kwargs)
+# class JobUpdate(models.Model):
+#     date = models.DateField(blank=False, null=False)
+#     job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="jobs2", blank=False, null=False)
+#     parts = models.PositiveSmallIntegerField(default=0)
+#     minutes = models.PositiveSmallIntegerField(default=0)
+#
+#     def __str__(self):
+#         return f"{self.date} - {self.job} - {self.parts}"
+#
+#     class Meta:
+#         verbose_name = "Job update"
+#
+#     def save(self, *args, **kwargs):
+#         self.minutes = minutes_recalculate(self.parts, self.job)
+#         super().save(*args, **kwargs)
 
 
 # class MachineLine(models.Model):

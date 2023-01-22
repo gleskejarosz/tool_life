@@ -39,9 +39,8 @@
             <tr>
                 <td>{{ object.machine }}</td>
                 <td>{{ object.station }}</td>
-                <td><a href="{% url 'tools_app:change-tool' tool_id=object.pk %}">
-                    {% if object.tool.tool_status == "In use" %} {{ object.tool }} &#8592;OTG {% else %}
-                    {{ object.tool }} {% endif %}</a></td>
+                <td><a href="{% url 'tools_app:change-tool' tool_id=object.id %}">{% if object.tool_status == "In use"%}
+                    {{ object.tool }}&#8592;OTG {% else %} {{ object.tool }} {% endif %}</a></td>
             </tr>
         {% endfor %}
         </tbody>

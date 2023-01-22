@@ -229,6 +229,7 @@ class JobModel2(models.Model):
     inner_size = models.PositiveSmallIntegerField(default=1)
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=True,
                               null=True)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines11", blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):

@@ -1,21 +1,7 @@
 import django_filters
 from django.forms import DateInput
 
-from tools.models import JobUpdate, OperationModel, JobStationModel
-
-
-class JobFilter(django_filters.FilterSet):
-    date = django_filters.DateFilter()
-    date_gte = django_filters.DateFilter(label="Date after...", field_name='date',
-                                               lookup_expr='gte', widget=DateInput(attrs={'type': 'date'}))
-    date_lte = django_filters.DateFilter(label="Date before...", field_name='date',
-                                               lookup_expr='lte', widget=DateInput(attrs={'type': 'date'}))
-    job = django_filters.CharFilter(field_name='job_id__name', label="Job", lookup_expr="contains")
-    parts = django_filters.CharFilter(lookup_expr="contains", label="Parts")
-
-    class Meta:
-        model = JobUpdate
-        fields = "__all__"
+from tools.models import OperationModel, ToolStationModel
 
 
 class OperationFilter(django_filters.FilterSet):
@@ -23,9 +9,9 @@ class OperationFilter(django_filters.FilterSet):
         (True, "Used"),
         (False, "In use"),
     )
-
-    station = django_filters.CharFilter(field_name='station_id__name', label="Station", lookup_expr="contains")
-    tool = django_filters.CharFilter(field_name='tool_id__name', label="Tool", lookup_expr="contains")
+    machine = django_filters.CharFilter(field_name='machine', label="Machine", lookup_expr="contains")
+    station = django_filters.CharFilter(field_name='station', label="Station", lookup_expr="contains")
+    tool = django_filters.CharFilter(field_name='tool_id__tool', label="Tool", lookup_expr="contains")
     start_date = django_filters.DateFilter()
     start_date_gte = django_filters.DateFilter(label="Start Date after...", field_name='start_date',
                                                lookup_expr='gte', widget=DateInput(attrs={'type': 'date'}))
@@ -49,8 +35,8 @@ class OperationFilter(django_filters.FilterSet):
 class ToolFilter(django_filters.FilterSet):
     machine = django_filters.CharFilter(field_name='machine_id__name', label="Machine", lookup_expr="contains")
     station = django_filters.CharFilter(field_name='station_id__name', label="Station", lookup_expr="contains")
-    tool = django_filters.CharFilter(field_name='tool_id__name', label="Tool", lookup_expr="contains")
+    tool = django_filters.CharFilter(field_name='tool', label="Tool", lookup_expr="contains")
 
     class Meta:
-        model = JobStationModel
+        model = ToolStationModel
         fields = ("machine", "station", "tool", )

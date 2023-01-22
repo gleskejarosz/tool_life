@@ -1,19 +1,14 @@
 import csv
 
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
-from django.template.response import TemplateResponse
-from django.urls import reverse_lazy
-from django.views.generic import FormView, DetailView, ListView, DeleteView
+from django.urls import reverse
 
-from gemba.models import JobModel2
-from tools.filters import JobFilter, OperationFilter, ToolFilter
-from tools.forms import ToolChangeForm
-from tools.models import JobUpdate, OperationModel, JobStationModel, ToolModel, ToolJobModel, MachineModel, \
-    StationModel, PRODUCTIVE, SPARE, USE
-from tools.utils import minutes_recalculate
+from gemba.models import JobModel2, Line
+from tools.filters import OperationFilter, ToolFilter
+from tools.forms import ToolChangeForm, AddTool
+from tools.models import OperationModel, ToolStationModel, ToolModel, ToolJobModel, PRODUCTIVE, SPARE, USE
 
 
 def index(request):
@@ -23,71 +18,12 @@ def index(request):
     )
 
 
-# class JobFormView(LoginRequiredMixin, FormView):
-#     template_name = 'form.html'
-#     form_class = JobAddForm
-#     success_url = reverse_lazy("tools_app:search-form")
-#
-#     def form_valid(self, form):
-#         date = form.cleaned_data["date"]
-#         job = form.cleaned_data["job"]
-#         parts = form.cleaned_data["parts"]
-#
-#         new_job = JobUpdate.objects.create(date=date, job=job, parts=parts)
-#         new_job_id = new_job.id
-#
-#         new_job_obj = JobUpdate.objects.get(id=new_job_id)
-#         new_minutes = new_job_obj.minutes
-#
-#         operations_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
-#
-#         # operations_qs = operations1_qs.difference(operations2_qs)
-#
-#         for operation in operations_qs:
-#             station = operation.station
-#             machine = operation.machine
-#             tool = operation.tool
-#             start_date = operation.start_date
-#             finish_date = operation.finish_date
-#             used_minutes = operation.minutes
-#             status = operation.status
-#
-#             tools_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
-#
-#             for tool_elem in tools_qs:
-#                 tool_id = tool_elem.tool_id
-#                 tool_name = ToolModel.objects.get(id=tool_id)
-#                 if tool == tool_name:
-#                     jobs_qs = ToolJobModel.objects.filter(tool=tool)
-#                     for job_elem in jobs_qs:
-#                         job_id = job_elem.job_id
-#                         job_name = JobModel2.objects.get(id=job_id)
-#                         if job == job_name:
-#                             if start_date == date or finish_date == date:
-#                                 if status is True:
-#                                     print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
-#                                     operation.minutes += new_minutes
-#                                     operation.save()
-#                             else:
-#                                 print(f"Tool minutes: {used_minutes} + new minutes {new_minutes}")
-#                                 operation.minutes += new_minutes
-#                                 operation.save()
-#
-#         return super().form_valid(form)
-#
-#
-# def search(request):
-#     items_list = JobUpdate.objects.all().order_by("-date")
-#     items_filter = JobFilter(request.GET, queryset=items_list)
-#     return render(request, "tools/filter_list.html", {"filter": items_filter})
-
-
 @login_required
 def change_tool(request, tool_id):
-    tool_obj = JobStationModel.objects.get(pk=tool_id)
-    tool = tool_obj.tool
-    station = tool_obj.station
-    machine = tool_obj.machine
+    tool_obj = ToolStationModel.objects.get(id=tool_id)
+
+    station = tool_obj.station.name
+    machine = tool_obj.machine.name
 
     form = ToolChangeForm(request.POST or None)
 
@@ -95,26 +31,22 @@ def change_tool(request, tool_id):
         tool_type = form.cleaned_data["tool_type"]
         start_date = form.cleaned_data["start_date"]
 
-        OperationModel.objects.create(machine=machine, station=station, tool=tool, tool_type=tool_type,
+        OperationModel.objects.create(machine=machine, station=station, tool=tool_obj, tool_type=tool_type,
                                       start_date=start_date)
 
-        new_tool_availability = ToolModel.objects.get(id=tool.id)
-        new_tool_availability.tool_status = USE
-        new_tool_availability.save()
+        tool_obj.tool_status = USE
+        tool_obj.save()
 
-        tools_qs = OperationModel.objects.filter(machine=machine,
-                                                 station=station,
-                                                 tool_type=tool_type).order_by("-start_date")
-        if tools_qs.exists():
-            tool_old = tools_qs[1]
-            tool_old_id = tool_old.id
-            tool_old.status = True
-            tool_old.finish_date = start_date
-            tool_old.save()
-
-            old_tool_availability = ToolModel.objects.get(id=tool_old_id)
-            old_tool_availability.tool_status = SPARE
-            old_tool_availability.save()
+        operation_qs = OperationModel.objects.filter(machine=machine, station=station,
+                                                     tool_type=tool_type).order_by("-start_date")
+        len_operation_qs = len(operation_qs)
+        if len_operation_qs > 1:
+            operation_obj = operation_qs[1]
+            operation_obj.status = True
+            operation_obj.finish_date = start_date
+            operation_obj.tool.tool_status = SPARE
+            operation_obj.save()
+            operation_obj.tool.save()
 
         return redirect("tools_app:tool-actions")
 
@@ -129,8 +61,7 @@ def change_tool(request, tool_id):
 
 
 def select_tool(request):
-    tools_qs = JobStationModel.objects.filter(machine__machine_status=PRODUCTIVE).order_by("machine__name",
-                                                                                           "station__num")
+    tools_qs = ToolStationModel.objects.all().order_by("machine__name", "station__num")
     tools_filter = ToolFilter(request.GET, queryset=tools_qs)
 
     return render(request,
@@ -153,9 +84,9 @@ def export_csv(request):
     response["Content-Disposition"] = 'attachment; filename="Operations.csv"'
     writer = csv.writer(response)
     writer.writerow(["Machine", "Station", "Tool", "Minutes", "Start Date", "Finish Date", "Status"])
-    for e in search_result.values_list("machine_id__name",
-                                       "station_id__name",
-                                       "tool_id__name",
+    for e in search_result.values_list("machine",
+                                       "station",
+                                       "tool__tool",
                                        "minutes",
                                        "start_date",
                                        "finish_date",
@@ -164,87 +95,9 @@ def export_csv(request):
     return response
 
 
-# def export_csv2(request):
-#     jobs = JobUpdate.objects.all()
-#     search_result = JobFilter(request.GET, queryset=jobs).qs
-#     response = HttpResponse(content_type="text/csv")
-#     response["Content-Disposition"] = 'attachment; filename="Completed_jobs.csv"'
-#     writer = csv.writer(response)
-#     writer.writerow(["Date", "Job", "Parts", "Minutes"])
-#     for e in search_result.values_list("date",
-#                                        "job_id__name",
-#                                        "parts",
-#                                        "minutes"):
-#         writer.writerow(e)
-#     return response
-
-
 def tool_in_use(request):
-    tools_in_use = OperationModel.objects.filter(status=False).order_by("station__num")
+    tools_in_use = OperationModel.objects.filter(status=False).order_by("station")
     return render(request, template_name="tools/in_use.html", context={"tools_list": tools_in_use})
-
-
-# class JobDetailView(DetailView):
-#     model = JobUpdate
-#     template_name = "tools/completed_job_details.html"
-#
-#
-# class JobListView(ListView):
-#     template_name = "tools/job_list.html"
-#     model = JobUpdate
-#
-#     def get_ordering(self):
-#         ordering = self.request.GET.get('-date')
-#         return ordering
-
-
-# def jobs(request):
-#     items_list = JobUpdate.objects.all().order_by("-date")
-#     return render(
-#         request,
-#         template_name='tools/job_list.html',
-#         context={'object_list': items_list},
-#     )
-
-
-# def update_parts(pk, old_minutes):
-#     changed_job = JobUpdate.objects.get(pk=pk)
-#     date = changed_job.date
-#     job = changed_job.job
-#     new_minutes = changed_job.minutes
-#
-#     operations1_qs = OperationModel.objects.exclude(start_date__gt=date).exclude(finish_date__lt=date)
-#     print(operations1_qs)
-#     operations2_qs = OperationModel.objects.filter(start_date=date).filter(status=False)
-#     print(operations2_qs)
-#     operations_qs = operations1_qs.difference(operations2_qs)
-#     print(operations_qs)
-#
-#     for operation in operations_qs:
-#         station = operation.station
-#         machine = operation.machine
-#         new_id = operation.id
-#         used_minutes = operation.minutes
-#         tool = operation.tool
-#
-#         tools_qs = JobStationModel.objects.filter(machine=machine).filter(station=station)
-#         for tool_elem in tools_qs:
-#             tool_id = tool_elem.tool_id
-#             tool_name = ToolModel.objects.get(id=tool_id)
-#             if tool == tool_name:
-#                 jobs_qs = ToolJobModel.objects.filter(tool=tool)
-#                 for job_elem in jobs_qs:
-#                     job_id = job_elem.job_id
-#                     job_name = JobModel2.objects.get(id=job_id)
-#                     if job == job_name:
-#                         updated_object = OperationModel.objects.get(id=new_id)
-#                         print(new_id)
-#                         new_used_minutes = new_minutes - old_minutes
-#                         print(f"Tool minutes: {used_minutes} + (Difference: {new_minutes} - {old_minutes})")
-#                         updated_object.minutes += new_used_minutes
-#                         updated_object.save()
-#
-#     return redirect("tools_app:search-form")
 
 
 def tools_update(job, output, target, modified):
@@ -253,13 +106,13 @@ def tools_update(job, output, target, modified):
     tools = set()
     tools_qs = ToolJobModel.objects.filter(job=job)
     for tool_obj in tools_qs:
-        tool_name = tool_obj.tool.name
+        tool_name = tool_obj.tool.tool
         tools.add(tool_name)
 
     actions_qs = OperationModel.objects.exclude(start_date__gt=modified).exclude(finish_date__lt=modified)
 
     for action in actions_qs:
-        tool = action.tool.name
+        tool = action.tool.tool
 
         if tool in tools:
             action.minutes += minutes
@@ -268,47 +121,50 @@ def tools_update(job, output, target, modified):
             action.save()
 
 
-# @login_required
-# def job_update(request, pk):
-#     job_to_update = get_object_or_404(JobUpdate, pk=pk)
-#     old_minutes = job_to_update.minutes
-#
-#     form = JobUpdateForm(instance=job_to_update)
-#     if request.method == "POST":
-#         form = JobUpdateForm(request.POST, instance=job_to_update)
-#
-#     if form.is_valid():
-#         form.save()
-#
-#         update_parts(pk=pk, old_minutes=old_minutes)
-#         return redirect("tools_app:search-form")
-#
-#     return render(
-#         request,
-#         template_name="form.html",
-#         context={"form": form}
-#     )
-
-
-# class JobDeleteView(LoginRequiredMixin, DeleteView):
-#     model = JobUpdate
-#     template_name = "tools/delete_scrap.html"
-#     success_url = reverse_lazy("tools_app:search-form")
-
-
 def machines_view(request):
-    machine_qs = MachineModel.objects.filter(machine_status=PRODUCTIVE).order_by("name")
+    machine_qs = Line.objects.order_by("name")
     return render(request, "tools/machines.html", {"machine_qs": machine_qs})
 
 
-def tools_vs_jobs_table(request, machine_id):
-    machine = MachineModel.objects.get(pk=machine_id)
+def machines_view_3(request):
+    machine_qs = Line.objects.order_by("name")
+    return render(request, "tools/machines_3.html", {"machine_qs": machine_qs})
 
-    tools_qs = JobStationModel.objects.filter(machine=machine).order_by("station__num")
+
+def tools_vs_jobs(request, machine_id):
+    # machine = Line.objects.get(pk=machine_id)
+    tools_qs = ToolJobModel.objects.all().order_by("job")
+
+    jobs_list = []
+    jobs_qs = JobModel2.objects.filter(line=machine_id).order_by("name")
+    for job_elem in jobs_qs:
+        job_id = job_elem.id
+        job = JobModel2.objects.get(id=job_id)
+        job_name = job.name
+        if job not in jobs_list:
+            jobs_list.append(job_name)
+
+    new_tools_qs = []
+    for tool_obj in tools_qs:
+        job = tool_obj.job.name
+        if job in jobs_list:
+            new_tools_qs.append(tool_obj)
+
+    return render(
+        request,
+        template_name="tools/tools_vs_jobs.html",
+        context={"new_tools_qs": new_tools_qs},
+    )
+
+
+def tools_vs_jobs_table(request, machine_id):
+    machine = Line.objects.get(pk=machine_id)
+
+    tools_qs = ToolStationModel.objects.filter(machine=machine).order_by("station__num")
 
     jobs_list = []
     for tool_obj in tools_qs:
-        tool_id = tool_obj.tool_id
+        tool_id = tool_obj.id
         jobs_qs = ToolJobModel.objects.filter(tool=tool_id)
         for job_elem in jobs_qs:
             job_id = job_elem.job_id
@@ -325,6 +181,7 @@ def tools_vs_jobs_table(request, machine_id):
     for idx, tool_elem in enumerate(tools_qs):
         station = tool_elem.station.name
         tool = tool_elem.tool
+        tool_id = tool_elem.id
         table_qs.append({
             "Station": station,
             "Tool": tool,
@@ -333,7 +190,7 @@ def tools_vs_jobs_table(request, machine_id):
             table_elem = table_qs[idx]
             table_elem[job] = 0
 
-        tool_jobs_qs = ToolJobModel.objects.filter(tool=tool).order_by("job")
+        tool_jobs_qs = ToolJobModel.objects.filter(tool=tool_id).order_by("job")
         for job_elem in tool_jobs_qs:
             job_id = job_elem.job_id
             job_item = JobModel2.objects.get(id=job_id)
@@ -348,25 +205,70 @@ def tools_vs_jobs_table(request, machine_id):
     )
 
 
+def update_tool_vs_job(request, pk):
+    tool_job_obj = ToolJobModel.objects.get(pk=pk)
+    tool_id = tool_job_obj.tool_id
+    tool = ToolStationModel.objects.get(id=tool_id)
+    machine_id = tool.machine_id
+
+    if tool_job_obj.status is True:
+        tool_job_obj.status = False
+    else:
+        tool_job_obj.status = True
+    tool_job_obj.save()
+    return HttpResponseRedirect(reverse('tools_app:tools-vs-jobs', kwargs={'machine_id': machine_id}))
+
+
 def machines_view2(request):
-    machine_qs = MachineModel.objects.filter(machine_status=PRODUCTIVE).order_by("name")
+    machine_qs = Line.objects.order_by("name")
     return render(request, "tools/tools_machines.html", {"machine_qs": machine_qs})
 
 
 def tools_on_the_machine(request, machine_id):
-    machine = get_object_or_404(MachineModel, pk=machine_id)
+    machine = get_object_or_404(Line, pk=machine_id)
     machine_name = machine.name
 
-    qs = JobStationModel.objects.filter(machine=machine_id).order_by("station__num")
+    qs = ToolStationModel.objects.filter(machine=machine_id).order_by("station__num")
 
     return render(
         request,
         template_name="tools/tools.html",
         context={
             "qs": qs,
+            "machine_id": machine_id,
             "machine_name": machine_name,
         },
     )
+
+
+def add_tool(request, machine_id):
+    machine = get_object_or_404(Line, pk=machine_id)
+
+    form = AddTool(request.POST or None)
+
+    if form.is_valid():
+        station = form.cleaned_data["station"]
+        tool = form.cleaned_data["tool"]
+
+        tool_obj = ToolStationModel.objects.create(machine=machine, station=station, tool=tool)
+
+        jobs_qs = JobModel2.objects.filter(line=machine)
+
+        for job_obj in jobs_qs:
+            job_id = job_obj.id
+            job = JobModel2.objects.get(id=job_id)
+            ToolJobModel.objects.create(job=job, tool=tool_obj)
+
+        return HttpResponseRedirect(reverse('tools_app:tools', kwargs={'machine_id': machine_id}))
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
+
+
+
 
 
 

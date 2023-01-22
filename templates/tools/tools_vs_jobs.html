@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Tools vs jobs:</h4>
+<div>
+    {% regroup new_tools_qs by job as job_list %}
+    {% for job in job_list %}
+        <br>
+        <div>
+            <b>{{ job.grouper }}</b>
+        </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Tool Name</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for object in job.list %}
+            <tr>
+                <td>{{ object.tool.tool }}</td>
+                <td><a href="{% url 'tools_app:update-tools-vs-jobs' pk=object.pk %}">
+                    {% if object.status is True %} &#10003; {% else %} x {% endif %}</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% endfor %}
+{% endblock %}
