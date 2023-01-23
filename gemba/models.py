@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import pytz
 from django.conf import settings
 from django.db import models
 
@@ -126,25 +127,23 @@ class DowntimeDetail(models.Model):
         super().save(*args, **kwargs)
 
 
-class DowntimeGroup(models.Model):
-    name = models.CharField(max_length=10, blank=False, null=False)
-    description = models.CharField(max_length=64, blank=False, null=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, unique=True)
-    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines6", blank=True, null=True)
-    calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
-
-    def __str__(self):
-        return f"{self.name}"
-
-    class Meta:
-        verbose_name = "User Group Name"
+# class DowntimeGroup(models.Model):
+#     name = models.CharField(max_length=10, blank=False, null=False)
+#     description = models.CharField(max_length=64, blank=False, null=False)
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, unique=True)
+#     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines6", blank=True, null=True)
+#     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
+#
+#     def __str__(self):
+#         return f"{self.name}"
+#
+#     class Meta:
+#         verbose_name = "User Group Name"
 
 
 class DowntimeUser(models.Model):
     downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime_user", blank=False,
                                  null=False)
-    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="downtime_group", blank=True,
-                              null=True)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines13", blank=True, null=True)
     order = models.PositiveIntegerField(blank=True, null=True)
     gemba = models.PositiveIntegerField(blank=True, null=True)
@@ -186,14 +185,12 @@ class ScrapDetail(models.Model):
         verbose_name = "Scrap Detail"
 
     def save(self, *args, **kwargs):
-        self.modified = datetime.now()
+        self.modified = datetime.now(tz=pytz.UTC)
         super().save(*args, **kwargs)
 
 
 class ScrapUser(models.Model):
     scrap = models.ForeignKey(ScrapModel, on_delete=models.CASCADE, related_name="scrap_user", blank=False,
-                              null=False)
-    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="scrap_group", blank=False,
                               null=False)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines14", blank=True, null=True)
     order = models.PositiveIntegerField(blank=True, null=True)
@@ -233,8 +230,6 @@ class JobModel2(models.Model):
     name = models.CharField(max_length=64)
     target = models.IntegerField(default=0)
     inner_size = models.PositiveSmallIntegerField(default=1)
-    group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="job_group", blank=True,
-                              null=True)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines11", blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 

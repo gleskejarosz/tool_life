@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import DateInput, TimeInput, Select, TextInput
+from django.forms import DateInput, TimeInput
 
 from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto, ParetoDetail
 

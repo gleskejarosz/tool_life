@@ -56,6 +56,11 @@
     <strong>Info!</strong> You should <a href="{% url 'gemba_app:job-user-view' %}" class="alert-link">choose a job first!</a>
     </div>
     {% endif %}
+    {% if total_scrap_cal != total_scrap  %}
+    <div class="alert alert-primary">
+    <strong>Info!</strong> Balance the amount of scraps!
+    </div>
+    {% endif %}
     <div class = "row">
     <div class = "col">
         <p class="bigger_font">{% if pareto_list.job_otg is None %} Current job: Please select! {% else %} Current job:

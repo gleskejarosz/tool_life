@@ -17,7 +17,7 @@
         <tbody>
         {% for object in page_obj %}
             <tr>
-                <td>{{ object.modified|date:'d-m-Y H:i'}}</td>
+                <td>{{ object.created|date:'d-m-Y H:i'}}</td>
                 <td>{{ object.line }}</td>
                 <td>{{ object.downtime }}</td>
                 <td>{{ object.minutes }}</td>

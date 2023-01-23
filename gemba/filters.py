@@ -1,6 +1,6 @@
 import django_filters
 from django.forms import DateInput
-from gemba.models import Pareto, ParetoDetail
+from gemba.models import Pareto
 
 
 class DailyParetoFilter(django_filters.FilterSet):
