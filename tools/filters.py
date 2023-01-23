@@ -12,6 +12,7 @@ class OperationFilter(django_filters.FilterSet):
     machine = django_filters.CharFilter(field_name='machine', label="Machine", lookup_expr="contains")
     station = django_filters.CharFilter(field_name='station', label="Station", lookup_expr="contains")
     tool = django_filters.CharFilter(field_name='tool_id__tool', label="Tool", lookup_expr="contains")
+    tool_type = django_filters.CharFilter(field_name='tool_type', label="Tool Type", lookup_expr="contains")
     start_date = django_filters.DateFilter()
     start_date_gte = django_filters.DateFilter(label="Start Date after...", field_name='start_date',
                                                lookup_expr='gte', widget=DateInput(attrs={'type': 'date'}))

@@ -13,8 +13,8 @@ from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, TemplateView, UpdateView, DeleteView, DetailView, ListView
-from django.db.models import Q, Sum
+from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
+from django.db.models import Q
 
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
@@ -186,8 +186,8 @@ def pareto_detail_create(request):
 
     pareto_id = pareto.id
     pareto_date = pareto.pareto_date
-    down_group = DowntimeGroup.objects.get(user=user)
-    calc_option = down_group.calculation
+    line_qs = Line.objects.filter(name=line)
+    calc_option = line_qs[0].calculation
 
     if calc_option == TC:
         form = ParetoTotalQtyDetailForm(request.POST or None)
@@ -201,26 +201,25 @@ def pareto_detail_create(request):
 
             if pareto_details_qs.exists():
                 pareto_elem = ParetoDetail.objects.get(user=user, job=job, pareto_id=pareto_id)
-                modified = pareto_elem.modified
                 pareto_elem.output += new_output
                 pareto_elem.good += new_good
                 pareto_elem.scrap = scrap
                 pareto_elem.save()
 
                 # tools update
+                modified = pareto_elem.modified
                 tools_update(job=job, output=new_output, target=target, modified=modified)
 
                 return redirect("gemba_app:pareto-summary")
 
             else:
-                pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
+                pareto_elem = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
                                                           pareto_id=pareto_id, line=line,
                                                           pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
-                modified = pareto_item.modified
-
-                pareto.jobs.add(pareto_item)
+                pareto.jobs.add(pareto_elem)
 
                 # tools update
+                modified = pareto_elem.modified
                 tools_update(job=job, output=output, target=target, modified=modified)
 
                 return redirect("gemba_app:pareto-summary")
@@ -767,6 +766,7 @@ def tableau_export(request, pk):
     availability = pareto.availability / 100
     oee = pareto.oee / 100
     ops = pareto.ops
+    line = pareto.line_id
 
     response = HttpResponse(content_type="application/ms-excel")
     filename = f"{date} - {shift} - {user.username}.xls"
@@ -821,8 +821,7 @@ def tableau_export(request, pk):
         ws.write(3, col, elem_good)
         col += 1
 
-    group = DowntimeGroup.objects.get(user=user)
-    scrap_qs = ScrapUser.objects.filter(group=group).order_by("gemba")
+    scrap_qs = ScrapUser.objects.filter(line=line).order_by("gemba")
 
     vector = 4  # start scrap reasons from row 5
 
@@ -839,7 +838,7 @@ def tableau_export(request, pk):
             qty = elem.qty
             ws.write(vector + idx, column, qty)
 
-    down_qs = DowntimeUser.objects.filter(group=group).order_by("gemba")
+    down_qs = DowntimeUser.objects.filter(line=line).order_by("gemba")
 
     for idx, down_obj in enumerate(down_qs):
         down_id = down_obj.downtime.id
@@ -1142,7 +1141,7 @@ def reset_timer(request):
 
 def downtime_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
-    group_qs = DowntimeGroup.objects.filter(user=request.user)
+    line = pareto.line
     message_status = ""
     job_otg = pareto.job_otg
 
@@ -1167,11 +1166,7 @@ def downtime_user_list(request):
         down_length = 0
         timer_obj = ""
 
-    if group_qs.exists():
-        group = group_qs[0]
-        items_list = DowntimeUser.objects.filter(group=group).filter(order__gt=0).order_by("order")
-    else:
-        items_list = {}
+    items_list = DowntimeUser.objects.filter(line=line).filter(order__gt=0).order_by("order")
 
     return render(
         request,
@@ -1188,18 +1183,14 @@ def downtime_user_list(request):
 
 def scrap_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
-    group_qs = DowntimeGroup.objects.filter(user=request.user)
+    line = pareto.line
     message_status = ""
     job_otg = pareto.job_otg
 
     if job_otg is None:
         message_status = "Display"
 
-    if group_qs.exists():
-        group = group_qs[0]
-        items_list = ScrapUser.objects.filter(group=group).filter(order__gt=0).order_by("order")
-    else:
-        items_list = {}
+    items_list = ScrapUser.objects.filter(line=line).filter(order__gt=0).order_by("order")
 
     return render(
         request,
@@ -1213,8 +1204,9 @@ def scrap_user_list(request):
 
 
 def job_user_list(request):
-    group = DowntimeGroup.objects.get(user=request.user)
-    job_qs = JobModel2.objects.filter(group=group).order_by("name")
+    pareto = Pareto.objects.get(user=request.user, completed=False)
+    line = pareto.line
+    job_qs = JobModel2.objects.filter(line=line).order_by("name")
 
     return render(
         request,
@@ -1435,26 +1427,12 @@ def lines_2(request):
 
 
 def scrap_rate_report_by_week(request, line_id):
-    line = Line.objects.get(pk=line_id)
     today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
 
     report = []
-    group_qs = DowntimeGroup.objects.filter(line=line)
-    if group_qs.exists():
-        group = group_qs[0].id
-    else:
-        totals = {}
-        return render(
-            request,
-            template_name="gemba/scrap_rate.html",
-            context={
-                "report": report,
-                "totals": totals,
-            },
-        )
 
     scrap_list = []
-    scrap_names_qs = ScrapUser.objects.filter(group=group).order_by("gemba")
+    scrap_names_qs = ScrapUser.objects.filter(line=line_id).order_by("gemba")
     scrap_row_qty = []
     for obj in scrap_names_qs:
         scrap_name = obj.scrap.description
@@ -1613,26 +1591,14 @@ def scrap_rate_report_by_week(request, line_id):
 
 
 def downtime_rate_report_by_week(request, line_id):
-    line = Line.objects.get(pk=line_id)
+    # line = Line.objects.get(pk=line_id)
     today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
 
     report = []
-    group_qs = DowntimeGroup.objects.filter(line=line)
-    if group_qs.exists():
-        group = group_qs[0].id
-    else:
-        totals = {}
-        return render(
-            request,
-            template_name="gemba/downtime_rate.html",
-            context={
-                "report": report,
-                "totals": totals,
-            },
-        )
 
     down_list = []
-    down_names_qs = DowntimeUser.objects.filter(group=group).order_by("gemba")
+    down_names_qs = DowntimeUser.objects.filter(line=line_id).order_by("gemba")
+
     down_row_qty = []
     for obj in down_names_qs:
         down_name = obj.downtime.description
@@ -1831,6 +1797,7 @@ def export_to_gemba(request):
             user = pareto.user
             ops = pareto.ops
             hours = pareto.hours
+            line = pareto.line
             ns = pareto.not_scheduled_to_run
             available_time = int(hours) * 60 - ns
             col_c[61 + shift_vector] = available_time
@@ -1864,8 +1831,7 @@ def export_to_gemba(request):
                 col_b[110 + shift_vector] = "Total Bags made(bags)"
                 col_c[110 + shift_vector] = output_values[1]
 
-            group = DowntimeGroup.objects.get(user=user)
-            down_qs = DowntimeUser.objects.filter(group=group).order_by("gemba")
+            down_qs = DowntimeUser.objects.filter(line=line).order_by("gemba")
 
             down_vector = 0
             for idx, down_obj in enumerate(down_qs):
@@ -1889,7 +1855,7 @@ def export_to_gemba(request):
                 col_c[pos] = minutes
                 col_d[pos] = frequency
 
-            scrap_qs = ScrapUser.objects.filter(group=group).order_by("gemba")
+            scrap_qs = ScrapUser.objects.filter(line=line).order_by("gemba")
 
             offset_a = 65
             offset_b = 46

@@ -105,12 +105,12 @@ class DowntimeGroupModelAdmin(admin.ModelAdmin):
 
 class DowntimeUserModelAdmin(admin.ModelAdmin):
     ordering = ("id",)
-    list_display = ("downtime", "group", "order", "gemba", )
+    list_display = ("downtime", "group", "line", "order", "gemba", )
     list_display_links = ("downtime",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "downtime", "group", "order", "gemba"],
+            "fields": ["id", "downtime", "group", "line", "order", "gemba"],
         }),
     ]
     readonly_fields = ["id"]
@@ -118,12 +118,12 @@ class DowntimeUserModelAdmin(admin.ModelAdmin):
 
 class ScrapUserModelAdmin(admin.ModelAdmin):
     ordering = ("id",)
-    list_display = ("scrap", "group", "order", "gemba", )
+    list_display = ("scrap", "group", "line", "order", "gemba", )
     list_display_links = ("scrap",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "scrap", "group", "order", "gemba"],
+            "fields": ["id", "scrap", "group", "line", "order", "gemba"],
         }),
     ]
     readonly_fields = ["id"]
@@ -157,12 +157,12 @@ class LineHourModelAdmin(admin.ModelAdmin):
 
 class LineModelAdmin(admin.ModelAdmin):
     ordering = ("name",)
-    list_display = ("name", "id", "code", "description", )
+    list_display = ("name", "id", "code", "description", "line_status", "calculation", )
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "name", "description"],
+            "fields": ["id", "code", "name", "description", "calculation", "line_status"],
         }),
     ]
     readonly_fields = ["id"]

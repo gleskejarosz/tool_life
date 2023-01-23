@@ -7,20 +7,15 @@ from django.db import models
 AM = "Morning shift"
 PM = "Afternoon shift"
 NS = "Night shift"
+
+NOT_IN_USE = "Not in use"
+PRODUCTIVE = "Productive"
+
 SHIFT_CHOICES = (
     ("--", "No choice"),
     (AM, "Morning shift"),
     (PM, "Afternoon shift"),
     (NS, "Night shift"),
-)
-HOUR_CHOICES = (
-    ("6", "6"),
-    ("7", "7"),
-    ("8", "8"),
-    ("9", "9"),
-    ("10", "10"),
-    ("11", "11"),
-    ("12", "12"),
 )
 
 TC = "Total output, Total good"
@@ -32,6 +27,15 @@ CALCULATION_CHOICES = (
     (HC, "Hourly Good, Scrap items"),
     (MC, "Meter, Scrap items"),
 )
+HOUR_CHOICES = (
+        ("6", "6"),
+        ("7", "7"),
+        ("8", "8"),
+        ("9", "9"),
+        ("10", "10"),
+        ("11", "11"),
+        ("12", "12"),
+    )
 
 
 class Pareto(models.Model):
@@ -141,6 +145,7 @@ class DowntimeUser(models.Model):
                                  null=False)
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="downtime_group", blank=True,
                               null=True)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines13", blank=True, null=True)
     order = models.PositiveIntegerField(blank=True, null=True)
     gemba = models.PositiveIntegerField(blank=True, null=True)
 
@@ -148,7 +153,7 @@ class DowntimeUser(models.Model):
         return f"{self.downtime}"
 
     class Meta:
-        verbose_name = "Downtime vs Group"
+        verbose_name = "Downtime vs Line"
 
 
 class ScrapModel(models.Model):
@@ -190,6 +195,7 @@ class ScrapUser(models.Model):
                               null=False)
     group = models.ForeignKey(DowntimeGroup, on_delete=models.CASCADE, related_name="scrap_group", blank=False,
                               null=False)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines14", blank=True, null=True)
     order = models.PositiveIntegerField(blank=True, null=True)
     gemba = models.PositiveIntegerField(blank=True, null=True)
 
@@ -197,7 +203,7 @@ class ScrapUser(models.Model):
         return f"{self.scrap}"
 
     class Meta:
-        verbose_name = "Scrap vs Group"
+        verbose_name = "Scrap vs Line"
 
 
 # to remove
@@ -257,11 +263,17 @@ class Editors(models.Model):
     def __str__(self):
         return "{}-{}".format(self.editor_name, self.num_users)
 
-
+# line setup as primary key
 class Line(models.Model):
+    LINE_STATUS = (
+        (PRODUCTIVE, "Productive"),
+        (NOT_IN_USE, "Not in use"),
+    )
     code = models.CharField(max_length=8)
     name = models.CharField(max_length=16)
     description = models.CharField(max_length=64, blank=True, null=True)
+    line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
+    calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
 
     def __str__(self):
         return f"{self.name}"
