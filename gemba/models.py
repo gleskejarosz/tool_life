@@ -204,14 +204,14 @@ class ScrapUser(models.Model):
 
 
 # to remove
-class HourModel(models.Model):
-    start = models.TimeField()
-
-    def __str__(self):
-        return f"{self.start}"
-
-    class Meta:
-        verbose_name = "Hour"
+# class HourModel(models.Model):
+#     start = models.TimeField()
+#
+#     def __str__(self):
+#         return f"{self.start}"
+#
+#     class Meta:
+#         verbose_name = "Hour"
 
 
 class LineHourModel(models.Model):

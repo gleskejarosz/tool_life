@@ -56,7 +56,7 @@
     <strong>Info!</strong> You should <a href="{% url 'gemba_app:job-user-view' %}" class="alert-link">choose a job first!</a>
     </div>
     {% endif %}
-    {% if total_scrap_cal != total_scrap  %}
+    {% if total_scrap_cal < total_scrap  %}
     <div class="alert alert-primary">
     <strong>Info!</strong> Balance the amount of scraps!
     </div>

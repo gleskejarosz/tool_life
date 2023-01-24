@@ -10,7 +10,7 @@ from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.views import View
@@ -739,7 +739,7 @@ class DailyParetoSearchResultsView(ListView):
         query = self.request.GET.get("q")
         report_list = Pareto.objects.filter(
             Q(pareto_date__exact=query)
-        ).order_by("-user", "shift")
+        ).order_by("line", "id")
         object_list = get_details_to_display(object_list=report_list)
         return object_list
 
@@ -920,7 +920,7 @@ def export_daily_oee_report_xls(request):
 
 
 def pareto_view(request):
-    today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by("-user", "shift")
+    today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by("line", "id")
 
     report_list = get_details_to_display(object_list=today_pareto)
 
