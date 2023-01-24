@@ -20,7 +20,7 @@ from django.db.models import Q
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer
+    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, PRODUCTIVE
 from tools.views import tools_update
 
 
@@ -1898,37 +1898,29 @@ def export_to_gemba(request):
     return redirect("gemba_app:index")
 
 
-def lines_3(request):
-    lines_qs = Line.objects.all().order_by("name")
-    return render(request, "gemba/lines3.html", {"lines_qs": lines_qs})
-
-
-def dates_choice(request, line_id):
-    line_obj = Line.objects.all()
-
+def report_choices(request):
+    lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     return render(
         request,
-        template_name="gemba/dates_choice.html",
+        template_name="gemba/report_choices.html",
         context={
-          "line_obj": line_obj,
+          "lines_qs": lines_qs,
         },
     )
-    # return HttpResponseRedirect(reverse("gemba_app:dates-choice", kwargs={'line_id': line_id}))
 
 
 def scrap_downtime_compare(request):
+    line_name = request.GET.get("Samples")
+    line_qs = Line.objects.filter(name=line_name)
+    line_id = line_qs[0]
+
     date_from = request.GET.get("from")
     date_to = request.GET.get("to")
-    # if date_from == "" and date_to == "":
-    #     date_to = datetime.now(tz=pytz.UTC)
-    #     date_from = datetime.now(tz=pytz.UTC)
-    # elif date_to == "":
-    #     date_to = datetime.now(tz=pytz.UTC)
-    # elif date_from == "":
-    #     date_from = date_to
 
-    scrap_qs = ScrapDetail.objects.filter(Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
-    down_qs = DowntimeDetail.objects.filter(Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
+    scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(
+        Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
+    down_qs = DowntimeDetail.objects.filter(line=line_id).filter(
+        Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
 
     report = sorted(
         chain(down_qs, scrap_qs),

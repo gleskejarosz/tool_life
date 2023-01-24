@@ -54,14 +54,14 @@ urlpatterns = [
     path("downtime_search_result/", views.DowntimeSearchResultsView.as_view(), name="search-result"),
     path("lines_2/", views.lines_2, name="lines-2"),
     path("downtime_rate_report/<line_id>/", views.downtime_rate_report_by_week, name="downtime-rate-report"),
-    path("lines_3/", views.lines_3, name="lines-3"),
-    path("dates_choice/<line_id>/", views.dates_choice, name="dates-choice"),
-    path("scrap_downtime_compare/", views.scrap_downtime_compare, name="scrap-downtime-compare"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("scrap_search_result/", views.ScrapSearchResultsView.as_view(), name="scrap-search-result"),
     path("lines/", views.lines, name="lines"),
     path("scrap_rate_report/<line_id>/", views.scrap_rate_report_by_week, name="scrap-rate-report"),
+    # downtimes & scrap report
+    path("report_choices/", views.report_choices, name="report-choices"),
+    path("scrap_downtime_compare/", views.scrap_downtime_compare, name="scrap-downtime-compare"),
     # quarantine report
     path("quarantine_view/", views.quarantine_view, name="quarantine-view"),
     # exports and other

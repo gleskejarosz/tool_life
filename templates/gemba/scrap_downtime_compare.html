@@ -16,7 +16,7 @@
         <tbody>
         {% for object in report %}
             <tr>
-                <td>{{ object.created }}</td>
+                <td>{{ object.created|date:'d-m-Y H:i' }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.downtime }}</td>
                 <td>{% if object.min == 0 %} {% else %}{{ object.minutes }} {% endif %}</td>
