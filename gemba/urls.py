@@ -55,7 +55,8 @@ urlpatterns = [
     path("lines_2/", views.lines_2, name="lines-2"),
     path("downtime_rate_report/<line_id>/", views.downtime_rate_report_by_week, name="downtime-rate-report"),
     path("lines_3/", views.lines_3, name="lines-3"),
-    path("scrap_downtime_compare/<line_id>/", views.scrap_downtime_compare, name="scrap-downtime-compare"),
+    path("dates_choice/<line_id>/", views.dates_choice, name="dates-choice"),
+    path("scrap_downtime_compare/", views.scrap_downtime_compare, name="scrap-downtime-compare"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("scrap_search_result/", views.ScrapSearchResultsView.as_view(), name="scrap-search-result"),

@@ -10,9 +10,9 @@ from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 from django.db.models import Q
@@ -1903,9 +1903,32 @@ def lines_3(request):
     return render(request, "gemba/lines3.html", {"lines_qs": lines_qs})
 
 
-def scrap_downtime_compare(request, line_id):
-    scrap_qs = ScrapDetail.objects.filter(line=line_id)
-    down_qs = DowntimeDetail.objects.filter(line=line_id)
+def dates_choice(request, line_id):
+    line_obj = Line.objects.all()
+
+    return render(
+        request,
+        template_name="gemba/dates_choice.html",
+        context={
+          "line_obj": line_obj,
+        },
+    )
+    # return HttpResponseRedirect(reverse("gemba_app:dates-choice", kwargs={'line_id': line_id}))
+
+
+def scrap_downtime_compare(request):
+    date_from = request.GET.get("from")
+    date_to = request.GET.get("to")
+    # if date_from == "" and date_to == "":
+    #     date_to = datetime.now(tz=pytz.UTC)
+    #     date_from = datetime.now(tz=pytz.UTC)
+    # elif date_to == "":
+    #     date_to = datetime.now(tz=pytz.UTC)
+    # elif date_from == "":
+    #     date_from = date_to
+
+    scrap_qs = ScrapDetail.objects.filter(Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
+    down_qs = DowntimeDetail.objects.filter(Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
 
     report = sorted(
         chain(down_qs, scrap_qs),

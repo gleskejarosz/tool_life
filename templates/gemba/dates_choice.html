@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h5>Select a date range:</h5>
+ <form action="{% url 'gemba_app:scrap-downtime-compare' %}" method="get">
+    From <input name="from" type="date"> to
+     <input name="to" type="date">
+     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
+    </button>
+ </form>
+
+{% endblock %}
