@@ -1,5 +1,6 @@
 import csv
 import os
+from itertools import chain
 
 import pytz
 import xlwt
@@ -1232,10 +1233,10 @@ class DowntimeSearchResultsView(ListView):
     def get_queryset(self):
         query = self.request.GET.get("q")
         page_obj = DowntimeDetail.objects.filter(
-            Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
+            Q(pareto_date__icontains=query) | Q(line__name__icontains=query) |
             Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
             Q(minutes__icontains=query) | Q(job__name__icontains=query) |
-            Q(pareto_id__icontains=query)
+            Q(pareto_id__icontains=query) | Q(created__icontains=query)
         ).order_by('-modified')
         return page_obj
 
@@ -1503,6 +1504,7 @@ def scrap_rate_report_by_week(request, line_id):
         "total_all_output": 0,
         "all_scrap_rate": 0.00,
     }
+
     total_all_output = 0
     total_all_weeks = 0
     for week_num in range(9):
@@ -1895,3 +1897,24 @@ def export_to_gemba(request):
 
     return redirect("gemba_app:index")
 
+
+def lines_3(request):
+    lines_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines3.html", {"lines_qs": lines_qs})
+
+
+def scrap_downtime_compare(request, line_id):
+    scrap_qs = ScrapDetail.objects.filter(line=line_id)
+    down_qs = DowntimeDetail.objects.filter(line=line_id)
+
+    report = sorted(
+        chain(down_qs, scrap_qs),
+        key=lambda obj: obj.created)
+
+    return render(
+        request,
+        template_name="gemba/scrap_downtime_compare.html",
+        context={
+            "report": report,
+        },
+    )

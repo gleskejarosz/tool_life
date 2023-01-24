@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Downtime & Scrap Compare View</h4>
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Created</th>
+            <th scope="col">Job</th>
+            <th scope="col">Downtime</th>
+            <th scope="col">Minutes</th>
+            <th scope="col">Scrap</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Pareto ID</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in report %}
+            <tr>
+                <td>{{ object.created }}</td>
+                <td>{{ object.job }}</td>
+                <td>{{ object.downtime }}</td>
+                <td>{% if object.min == 0 %} {% else %}{{ object.minutes }} {% endif %}</td>
+                <td>{{ object.scrap }}</td>
+                <td>{% if object.qty == 0 %} {% else %}{{ object.qty }}{% endif %}</td>
+                <td>{{ object.pareto_id }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
