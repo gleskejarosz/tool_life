@@ -991,10 +991,12 @@ def pareto_create_new(request):
                 else:
                     time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
 
-        Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                              time_stamp=time_stamp, line=line)
-        return redirect("gemba_app:pareto-summary")
-
+            Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
+                                  time_stamp=time_stamp, line=line)
+            return redirect("gemba_app:pareto-summary")
+        else:
+            messages.error(request, "Your account is not setup correctly. Contact with admin")
+            return redirect("gemba_app:index")
     except:
         messages.error(request, "Your account is not setup correctly. Contact with admin")
         return redirect("gemba_app:index")
