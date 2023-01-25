@@ -21,8 +21,8 @@ from django.db.models import Q
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, JobLine
-    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, PRODUCTIVE
+    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, JobLine,\
+    PRODUCTIVE
 from tools.views import tools_update
 
 
@@ -973,12 +973,12 @@ def pareto_create_new(request):
         if line_user_qs.exists():
             line = line_user_qs[0].line
 
-    pareto_date = datetime.now(timezone.utc).date()
-    form = NewPareto(request.POST or None)
-    if form.is_valid():
-        shift = form.cleaned_data["shift"]
-        hours = form.cleaned_data["hours"]
-        time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
+        pareto_date = datetime.now(timezone.utc).date()
+        form = NewPareto(request.POST or None)
+        if form.is_valid():
+            shift = form.cleaned_data["shift"]
+            hours = form.cleaned_data["hours"]
+            time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
 
             if time_start_qs.exists():
                 time_stamp_obj = time_start_qs[0].start
@@ -991,12 +991,13 @@ def pareto_create_new(request):
                 else:
                     time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
 
-        if not line_user_qs.exists():
-            line = ""
-
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
                               time_stamp=time_stamp, line=line)
         return redirect("gemba_app:pareto-summary")
+
+    except:
+        messages.error(request, "Your account is not setup correctly. Contact with admin")
+        return redirect("gemba_app:index")
 
     return render(
         request,
