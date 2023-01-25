@@ -967,39 +967,35 @@ START_CHOICES = (
 @login_required
 def pareto_create_new(request):
     user = request.user
-    try:
-        line_user_qs = LineUser.objects.filter(user=user)
+    line_user_qs = LineUser.objects.filter(user=user)
 
-        if line_user_qs.exists():
-            line = line_user_qs[0].line
+    if line_user_qs.exists():
+        line = line_user_qs[0].line
+    else:
+        line = ""
 
-        pareto_date = datetime.now(timezone.utc).date()
-        form = NewPareto(request.POST or None)
-        if form.is_valid():
-            shift = form.cleaned_data["shift"]
-            hours = form.cleaned_data["hours"]
-            time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
+    pareto_date = datetime.now(timezone.utc).date()
+    form = NewPareto(request.POST or None)
+    if form.is_valid():
+        shift = form.cleaned_data["shift"]
+        hours = form.cleaned_data["hours"]
 
-            if time_start_qs.exists():
-                time_stamp_obj = time_start_qs[0].start
-                time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
-            else:
-                if shift == SHIFT_CHOICES[1][1]:
-                    time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
-                elif shift == SHIFT_CHOICES[2][1]:
-                    time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
-                else:
-                    time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
+        time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
 
-            Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                                  time_stamp=time_stamp, line=line)
-            return redirect("gemba_app:pareto-summary")
+        if time_start_qs.exists():
+            time_stamp_obj = time_start_qs[0].start
+            time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
         else:
-            messages.error(request, "Your account is not setup correctly. Contact with admin")
-            return redirect("gemba_app:index")
-    except:
-        messages.error(request, "Your account is not setup correctly. Contact with admin")
-        return redirect("gemba_app:index")
+            if shift == SHIFT_CHOICES[1][1]:
+                time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
+            elif shift == SHIFT_CHOICES[2][1]:
+                time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
+            else:
+                time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
+
+        Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
+                                    time_stamp=time_stamp, line=line)
+        return redirect("gemba_app:pareto-summary")
 
     return render(
         request,
