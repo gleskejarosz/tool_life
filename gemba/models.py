@@ -50,7 +50,7 @@ class Pareto(models.Model):
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
     scrap = models.ManyToManyField("ScrapDetail")
-    ops = models.PositiveIntegerField(default=0)
+    # ops = models.PositiveIntegerField(default=0)
     availability = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     performance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quality = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -72,6 +72,7 @@ class ParetoDetail(models.Model):
     good = models.PositiveIntegerField(default=0)
     scrap = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    ops = models.PositiveIntegerField(default=0)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, blank=True)
@@ -105,6 +106,7 @@ class DowntimeModel(models.Model):
 class DowntimeDetail(models.Model):
     downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime", blank=False,
                                  null=False)
+    from_job = models.CharField(max_length=64, blank=True, null=True)
     job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs5", blank=False, null=False)
     minutes = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
@@ -127,20 +129,6 @@ class DowntimeDetail(models.Model):
         super().save(*args, **kwargs)
 
 
-# class DowntimeGroup(models.Model):
-#     name = models.CharField(max_length=10, blank=False, null=False)
-#     description = models.CharField(max_length=64, blank=False, null=False)
-#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True, unique=True)
-#     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines6", blank=True, null=True)
-#     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
-#
-#     def __str__(self):
-#         return f"{self.name}"
-#
-#     class Meta:
-#         verbose_name = "User Group Name"
-
-
 class DowntimeUser(models.Model):
     downtime = models.ForeignKey(DowntimeModel, on_delete=models.CASCADE, related_name="downtime_user", blank=False,
                                  null=False)
@@ -158,6 +146,7 @@ class DowntimeUser(models.Model):
 class ScrapModel(models.Model):
     code = models.CharField(max_length=10, blank=False, null=False)
     description = models.CharField(max_length=64, blank=False, null=False)
+    rework = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.code} - {self.description}"
@@ -168,6 +157,7 @@ class ScrapModel(models.Model):
 
 class ScrapDetail(models.Model):
     scrap = models.ForeignKey(ScrapModel, on_delete=models.CASCADE, related_name="scrap", blank=False, null=False)
+    from_job = models.CharField(max_length=64, blank=True, null=True)
     job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs3", blank=False, null=False)
     qty = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
@@ -203,17 +193,6 @@ class ScrapUser(models.Model):
         verbose_name = "Scrap vs Line"
 
 
-# to remove
-# class HourModel(models.Model):
-#     start = models.TimeField()
-#
-#     def __str__(self):
-#         return f"{self.start}"
-#
-#     class Meta:
-#         verbose_name = "Hour"
-
-
 class LineHourModel(models.Model):
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines1", blank=True, null=True)
     start = models.TimeField()
@@ -240,15 +219,16 @@ class JobModel2(models.Model):
         verbose_name = "Job"
 
 
-# class CalculationModel(models.Model):
-#     code = models.CharField(max_length=10, blank=False, null=False)
-#     description = models.CharField(max_length=64, blank=False, null=False)
-#
-#     def __str__(self):
-#         return f"{self.code} - {self.description}"
-#
-#     class Meta:
-#         verbose_name = "Hourly Calculation"
+class JobLine(models.Model):
+    job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="job", blank=True, null=True)
+    target = models.IntegerField(default=0)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines19", blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.job}"
+
+    class Meta:
+        verbose_name = "Job vs Line"
 
 
 class Editors(models.Model):

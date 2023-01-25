@@ -20,7 +20,7 @@ from django.db.models import Q
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer
+    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, JobLine
 from tools.views import tools_update
 
 
@@ -89,6 +89,16 @@ def downtime_detail_create(request, pk):
     job = pareto.job_otg
     line = pareto.line
 
+    # make sure this is set up
+    if pk == "6":
+        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
+        pareto_before_obj = pareto_before_qs[1]
+        job_before_id = pareto_before_obj.job_id
+        job_before_obj = JobModel2.objects.get(id=job_before_id)
+        job_before = job_before_obj.name
+    else:
+        job_before = ""
+
     if job is None:
         return redirect("gemba_app:pareto-summary")
 
@@ -113,7 +123,8 @@ def downtime_detail_create(request, pk):
         minutes = form.cleaned_data["minutes"]
         user = request.user
         downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job,
-                                                      pareto_id=pareto_id, pareto_date=pareto_date, line=line)
+                                                      from_job=job_before, pareto_id=pareto_id, pareto_date=pareto_date,
+                                                      line=line)
         pareto.downtimes.add(downtime_elem)
         return redirect("gemba_app:pareto-summary")
 
@@ -134,6 +145,16 @@ def scrap_detail_create(request, pk):
     job = pareto.job_otg
     line = pareto.line
 
+    # make sure this is set up
+    if pk == "1":
+        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
+        pareto_before_obj = pareto_before_qs[1]
+        job_before_id = pareto_before_obj.job_id
+        job_before_obj = JobModel2.objects.get(id=job_before_id)
+        job_before = job_before_obj.name
+    else:
+        job_before = ""
+
     if job is None:
         return redirect("gemba_app:pareto-summary")
 
@@ -149,7 +170,7 @@ def scrap_detail_create(request, pk):
         #     scrap_elem.save()
         #     return redirect("gemba_app:pareto-summary")
         # else:
-        scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job,
+        scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job, from_job=job_before,
                                                 pareto_id=pareto_id, pareto_date=pareto_date, line=line)
         pareto.scrap.add(scrap_elem)
         return redirect("gemba_app:pareto-summary")
@@ -171,8 +192,9 @@ def pareto_detail_create(request):
     if job is None:
         return redirect("gemba_app:pareto-summary")
 
-    job_id = pareto.job_otg_id
-    job_obj = JobModel2.objects.get(id=job_id)
+    name_id = pareto.job_otg_id
+    job_qs = JobLine.objects.filter(job=name_id)
+    job_obj = job_qs[0]
     target = job_obj.target
     takt_time = round(60 / target, ndigits=5)
     pareto_details_qs = ParetoDetail.objects.filter(user=user, completed=False, job=job)
@@ -333,8 +355,9 @@ class ParetoSummary(LoginRequiredMixin, View):
             if pareto_details.exists():
                 for pareto_detail in pareto_details:
                     job_elem = pareto_detail.job_id
-                    job_model = JobModel2.objects.get(id=job_elem)
-                    takt_time = round(60 / job_model.target, 5)
+                    job_qs = JobLine.objects.filter(job=job_elem)
+                    job_obj = job_qs[0]
+                    takt_time = round(60 / job_obj.target, 5)
                     qty_elem = pareto_detail.output
                     performance_numerator += (qty_elem * takt_time)
 
@@ -810,6 +833,7 @@ def tableau_export(request, pk):
         elem_job = elem.job.name
         jobs.append(elem_job)
         elem_job_id = elem.job.id
+        # wrong
         job_obj = JobModel2.objects.get(id=elem_job_id)
         target = job_obj.target
         elem_takt_time = round(60 / target, ndigits=4)
@@ -952,7 +976,6 @@ def pareto_create_new(request):
     if form.is_valid():
         shift = form.cleaned_data["shift"]
         hours = form.cleaned_data["hours"]
-        ops = form.cleaned_data["ops"]
         time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
 
         if time_start_qs.exists():
@@ -970,7 +993,7 @@ def pareto_create_new(request):
             line = ""
 
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                              time_stamp=time_stamp, ops=ops, line=line)
+                              time_stamp=time_stamp, line=line)
         return redirect("gemba_app:pareto-summary")
 
     return render(
@@ -1037,6 +1060,7 @@ def pareto_detail_update(request, pk):
     target = pareto_detail_obj.job.target
     old_output = pareto_detail_obj.output * -1
     modified = pareto_detail_obj.modified
+    line = pareto_detail_obj.line
 
     if request.method == "POST":
         form = ParetoDetailUpdateForm(request.POST, instance=pareto_detail_obj)
@@ -1046,15 +1070,22 @@ def pareto_detail_update(request, pk):
             good = form.cleaned_data["good"]
             scrap = form.cleaned_data["scrap"]
 
-            ParetoDetail.objects.update(job=job, output=output, good=good, scrap=scrap)
+            pareto_detail_obj.job = job
+            pareto_detail_obj.output = output
+            pareto_detail_obj.good = good
+            pareto_detail_obj.scrap = scrap
+            pareto_detail_obj.save()
 
             if job == old_job:
                 add_output = output + old_output
                 tools_update(job=old_job, output=add_output, target=target, modified=modified)
             else:
                 # tools update
+                job_qs = JobLine.objects.filter(job=job, line=line)
+                job_obj = job_qs[0]
+                new_target = job_obj.target
                 tools_update(job=old_job, output=old_output, target=target, modified=modified)
-                tools_update(job=job, output=output, target=target, modified=modified)
+                tools_update(job=job, output=output, target=new_target, modified=modified)
 
             return redirect("gemba_app:pareto-summary")
 
@@ -1206,7 +1237,7 @@ def scrap_user_list(request):
 def job_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
     line = pareto.line
-    job_qs = JobModel2.objects.filter(line=line).order_by("name")
+    job_qs = JobLine.objects.filter(line=line).order_by("job")
 
     return render(
         request,
@@ -1218,9 +1249,12 @@ def job_user_list(request):
 
 
 def select_job(request, pk):
-    job = get_object_or_404(JobModel2, pk=pk)
+    print(pk)
+    job_line_obj = JobLine.objects.get(pk=pk)
+    job = job_line_obj.job_id
+    job_obj = JobModel2.objects.get(id=job)
     pareto = Pareto.objects.get(user=request.user, completed=False)
-    pareto.job_otg = job
+    pareto.job_otg = job_obj
     pareto.save()
     return redirect("gemba_app:pareto-summary")
 
@@ -1884,8 +1918,9 @@ def export_to_gemba(request):
                             col_c[pos + offset_b] += qty
 
     # path_to_download_folder = str(os.path.join(Path.home(), "Downloads"))
-    path_to_download_folder = os.path.join(os.path.join(os.environ['USERPROFILE']), "Downloads")
-    file_name = f"{path_to_download_folder}\\{query} - GembaData.xlsx"
+    # path_to_download_folder = os.path.join(os.path.join(os.environ['USERPROFILE']), "Downloads")
+    file_name = f"{query} - GembaData.xlsx"
+    print(file_name)
     raw_data = {"code": col_a,
                 "desc": col_b,
                 "min": col_c,
@@ -1893,9 +1928,12 @@ def export_to_gemba(request):
 
     df = pd.DataFrame(raw_data, columns=["code", "desc", "min", "freq"])
 
-    df.to_excel(file_name, sheet_name="data")
+    # df.to_excel(file_name, sheet_name="data")
 
-    return redirect("gemba_app:index")
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename = "{}"'.format(file_name)
+
+    return response
 
 
 def lines_3(request):

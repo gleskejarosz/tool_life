@@ -11,6 +11,7 @@
             <th scope="col">Line</th>
             <th scope="col">Scrap Reason</th>
             <th scope="col">Qty</th>
+            <th scope="col">Job from</th>
             <th scope="col">Job</th>
             <th scope="col">Pareto ID</th>
             <th scope="col">Pareto Date</th>
@@ -23,6 +24,7 @@
                 <td>{{ object.line }}</td>
                 <td>{{ object.scrap }}</td>
                 <td>{{ object.qty }}</td>
+                <td>{% if object.from_job is None %} {% else %} {{ object.from_job }} {% endif %}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.pareto_id }}</td>
                 <td>{{ object.pareto_date }}</td>

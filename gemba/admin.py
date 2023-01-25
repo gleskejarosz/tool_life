@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from gemba.models import DowntimeDetail, DowntimeModel, LineHourModel, LineUser, Pareto, \
-    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, ScrapUser, JobModel2, Editors, Line, Timer
+    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, ScrapUser, JobModel2, Editors, Line, Timer, JobLine
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -11,7 +11,8 @@ class ScrapDetailAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "line", "pareto_id", "modified", "pareto_date", "scrap", "job", "qty", "user", "completed"],
+            "fields": ["id", "line", "pareto_id", "modified", "pareto_date", "scrap", "job", "qty", "from_job", "user",
+                       "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "modified"]
@@ -27,7 +28,8 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "line", "pareto_id", "pareto_date", "modified", "downtime", "job", "minutes", "user", "completed"],
+            "fields": ["id", "line", "pareto_id", "pareto_date", "modified", "downtime", "job", "minutes", "from_job",
+                       "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "modified"]
@@ -36,13 +38,13 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
 class ParetoDetailAdmin(admin.ModelAdmin):
     ordering = ("-id",)
     list_display = ("id", "line", "pareto_date", "created", "modified", "job", "output", "good", "scrap", "takt_time",
-                    "pareto_id", "completed", )
+                    "ops", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "pareto_id", "pareto_date", "created", "modified", "job", "output", "good", "scrap",
-                       "takt_time", "user", "completed"],
+                       "ops", "takt_time", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "created", "modified"]
@@ -50,7 +52,7 @@ class ParetoDetailAdmin(admin.ModelAdmin):
 
 class ParetoAdmin(admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "pareto_date", "user", "line", "shift", "hours", "ops", "not_scheduled_to_run",
+    list_display = ("id", "pareto_date", "user", "line", "shift", "hours", "not_scheduled_to_run",
                     "availability", "performance", "quality", "oee", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
@@ -58,7 +60,7 @@ class ParetoAdmin(admin.ModelAdmin):
         ("General", {
             "fields": ["id", "line", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run",
                        "availability", "performance", "quality", "oee", "jobs", "job_otg", "downtimes", "scrap",
-                       "ops", "completed"],
+                       "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "jobs", "downtimes", "scrap", "availability", "performance", "quality", "oee"]
@@ -169,3 +171,4 @@ admin.site.register(Editors)
 admin.site.register(LineUser)
 admin.site.register(Timer)
 admin.site.register(Line, LineModelAdmin)
+admin.site.register(JobLine)

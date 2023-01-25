@@ -40,16 +40,15 @@ class ScrapQuantity(forms.Form):
 class NewPareto(forms.Form):
     shift = forms.ChoiceField(choices=SHIFT_CHOICES)
     hours = forms.ChoiceField(choices=HOUR_CHOICES)
-    ops = forms.IntegerField(min_value=1)
+    #ops = forms.IntegerField(min_value=1)
 
 
 class ParetoUpdateForm(forms.ModelForm):
     class Meta:
         model = Pareto
-        fields = ["pareto_date", "shift", "ops", "hours", "time_stamp"]
+        fields = ["pareto_date", "shift", "hours", "time_stamp"]
         labels = {
             "time_stamp": "Shift started at",
-            "ops": "Operators",
             "hours": "Shift length (hours)",
         }
 
