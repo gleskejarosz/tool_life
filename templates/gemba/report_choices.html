@@ -2,15 +2,14 @@
 {% block content %}
 
 <h4>Select a line:</h4>
-</br>
  <form action="{% url 'gemba_app:scrap-downtime-compare' %}" method="get">
         {% for o in lines_qs %}
         <tr>
-            <td>{{o.name}}</td>
-            <td><input type="radio" name="Samples" value="{{o.name}}"></td>
+            </br>
+            <td>{{o.name}}<input type="radio" name="Samples" value="{{o.name}}"></td>
+            </br>
         </tr>
         {% endfor %}
-     </br>
       </br>
      <h5>Select a date range:</h5>
      </br>

@@ -4,6 +4,7 @@ from itertools import chain
 
 import pytz
 import xlwt
+from django.contrib import messages
 from django.core.paginator import Paginator
 from xlwt import XFStyle, Font
 from datetime import datetime, timezone, timedelta
@@ -942,36 +943,38 @@ START_CHOICES = (
 @login_required
 def pareto_create_new(request):
     user = request.user
-    line_user_qs = LineUser.objects.filter(user=user)
+    try:
+        line_user_qs = LineUser.objects.filter(user=user)
 
-    if line_user_qs.exists():
-        line = line_user_qs[0].line
+        if line_user_qs.exists():
+            line = line_user_qs[0].line
 
-    pareto_date = datetime.now(timezone.utc).date()
-    form = NewPareto(request.POST or None)
-    if form.is_valid():
-        shift = form.cleaned_data["shift"]
-        hours = form.cleaned_data["hours"]
-        ops = form.cleaned_data["ops"]
-        time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
+        pareto_date = datetime.now(timezone.utc).date()
+        form = NewPareto(request.POST or None)
+        if form.is_valid():
+            shift = form.cleaned_data["shift"]
+            hours = form.cleaned_data["hours"]
+            ops = form.cleaned_data["ops"]
+            time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
 
-        if time_start_qs.exists():
-            time_stamp_obj = time_start_qs[0].start
-            time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
-        else:
-            if shift == SHIFT_CHOICES[1][1]:
-                time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
-            elif shift == SHIFT_CHOICES[2][1]:
-                time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
+            if time_start_qs.exists():
+                time_stamp_obj = time_start_qs[0].start
+                time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
             else:
-                time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
+                if shift == SHIFT_CHOICES[1][1]:
+                    time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
+                elif shift == SHIFT_CHOICES[2][1]:
+                    time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
+                else:
+                    time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
 
-        if not line_user_qs.exists():
-            line = ""
+            Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
+                                  time_stamp=time_stamp, ops=ops, line=line)
 
-        Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                              time_stamp=time_stamp, ops=ops, line=line)
-        return redirect("gemba_app:pareto-summary")
+            return redirect("gemba_app:pareto-summary")
+    except:
+        messages.error(request, "Your account is not setup correctly. Contact with admin")
+        return redirect("gemba_app:index")
 
     return render(
         request,
@@ -1904,7 +1907,7 @@ def report_choices(request):
         request,
         template_name="gemba/report_choices.html",
         context={
-          "lines_qs": lines_qs,
+            "lines_qs": lines_qs,
         },
     )
 

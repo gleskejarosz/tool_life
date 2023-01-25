@@ -5,5 +5,19 @@
     {{ form.as_p }}
     <input type="submit" value="Submit">
 </form>
+{% comment %} Display Messages {% endcomment %}
+{% if messages %}
+<div class="col-12">
+   {% for message in messages %}
+   {% if message.tags == "error" %}
+   <div class="alert alert-danger alert-dismissible fade show" role="alert" style="margin-top: 10px;">
+      <b>{{ message }}</b>
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span></button>
+   </div>
+   {% endif %}
+   {% endfor %}
+</div>
+{% endif %}
 {% endblock %}
 
