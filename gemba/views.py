@@ -4,6 +4,7 @@ from itertools import chain
 
 import pytz
 import xlwt
+from django.contrib import messages
 from django.core.paginator import Paginator
 from xlwt import XFStyle, Font
 from datetime import datetime, timezone, timedelta
@@ -21,6 +22,7 @@ from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPar
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, JobLine
+    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, PRODUCTIVE
 from tools.views import tools_update
 
 
@@ -123,8 +125,7 @@ def downtime_detail_create(request, pk):
         minutes = form.cleaned_data["minutes"]
         user = request.user
         downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job,
-                                                      from_job=job_before, pareto_id=pareto_id, pareto_date=pareto_date,
-                                                      line=line)
+                                                      pareto_id=pareto_id, pareto_date=pareto_date, line=line)
         pareto.downtimes.add(downtime_elem)
         return redirect("gemba_app:pareto-summary")
 
@@ -966,10 +967,11 @@ START_CHOICES = (
 @login_required
 def pareto_create_new(request):
     user = request.user
-    line_user_qs = LineUser.objects.filter(user=user)
+    try:
+        line_user_qs = LineUser.objects.filter(user=user)
 
-    if line_user_qs.exists():
-        line = line_user_qs[0].line
+        if line_user_qs.exists():
+            line = line_user_qs[0].line
 
     pareto_date = datetime.now(timezone.utc).date()
     form = NewPareto(request.POST or None)
@@ -978,16 +980,16 @@ def pareto_create_new(request):
         hours = form.cleaned_data["hours"]
         time_start_qs = LineHourModel.objects.filter(line=line, shift=shift)
 
-        if time_start_qs.exists():
-            time_stamp_obj = time_start_qs[0].start
-            time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
-        else:
-            if shift == SHIFT_CHOICES[1][1]:
-                time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
-            elif shift == SHIFT_CHOICES[2][1]:
-                time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
+            if time_start_qs.exists():
+                time_stamp_obj = time_start_qs[0].start
+                time_stamp = datetime.strptime(str(time_stamp_obj), "%H:%M:%S")
             else:
-                time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
+                if shift == SHIFT_CHOICES[1][1]:
+                    time_stamp = datetime.strptime(str(START_CHOICES[0][1]), "%H:%M:%S")
+                elif shift == SHIFT_CHOICES[2][1]:
+                    time_stamp = datetime.strptime(str(START_CHOICES[1][1]), "%H:%M:%S")
+                else:
+                    time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
 
         if not line_user_qs.exists():
             line = ""
@@ -1936,37 +1938,29 @@ def export_to_gemba(request):
     return response
 
 
-def lines_3(request):
-    lines_qs = Line.objects.all().order_by("name")
-    return render(request, "gemba/lines3.html", {"lines_qs": lines_qs})
-
-
-def dates_choice(request, line_id):
-    line_obj = Line.objects.all()
-
+def report_choices(request):
+    lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     return render(
         request,
-        template_name="gemba/dates_choice.html",
+        template_name="gemba/report_choices.html",
         context={
-          "line_obj": line_obj,
+            "lines_qs": lines_qs,
         },
     )
-    # return HttpResponseRedirect(reverse("gemba_app:dates-choice", kwargs={'line_id': line_id}))
 
 
 def scrap_downtime_compare(request):
+    line_name = request.GET.get("Samples")
+    line_qs = Line.objects.filter(name=line_name)
+    line_id = line_qs[0]
+
     date_from = request.GET.get("from")
     date_to = request.GET.get("to")
-    # if date_from == "" and date_to == "":
-    #     date_to = datetime.now(tz=pytz.UTC)
-    #     date_from = datetime.now(tz=pytz.UTC)
-    # elif date_to == "":
-    #     date_to = datetime.now(tz=pytz.UTC)
-    # elif date_from == "":
-    #     date_from = date_to
 
-    scrap_qs = ScrapDetail.objects.filter(Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
-    down_qs = DowntimeDetail.objects.filter(Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
+    scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(
+        Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
+    down_qs = DowntimeDetail.objects.filter(line=line_id).filter(
+        Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
 
     report = sorted(
         chain(down_qs, scrap_qs),

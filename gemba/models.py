@@ -238,6 +238,7 @@ class Editors(models.Model):
     def __str__(self):
         return "{}-{}".format(self.editor_name, self.num_users)
 
+
 # line setup as primary key
 class Line(models.Model):
     LINE_STATUS = (
