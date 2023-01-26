@@ -161,9 +161,9 @@ def gemba_export2(request):
             shift_vector = 0
             ws.write(1, 2 + col, line_name)
         elif shift == PM:
-            shift_vector = 163
+            shift_vector = 159
         else:
-            shift_vector = 322
+            shift_vector = 318
 
         hours = pareto.hours
         not_scheduled_to_run = pareto.not_scheduled_to_run
@@ -270,7 +270,7 @@ def gemba_export2(request):
                         # product B
                         ws.write(row + offset_a + offset_b, 2 + col, qty)
 
-        wb.save(response)
-        return response
+    wb.save(response)
+    return response
 
 

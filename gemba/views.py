@@ -92,7 +92,7 @@ def downtime_detail_create(request, pk):
     line = pareto.line
 
     # make sure this is set up
-    if pk == "6":
+    if pk == "7":
         pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
         pareto_before_obj = pareto_before_qs[1]
         job_before_id = pareto_before_obj.job_id
