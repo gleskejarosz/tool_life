@@ -85,6 +85,7 @@
             <th scope="col" class="central_pos">Good</th>
             <th scope="col" class="central_pos">Scrap</th>
             <th scope="col" class="smaller_font">Takt time</th>
+            <th scope="col" class="smaller_font">Ops</th>
             <th scope="col" class="smaller_font">Last Entry</th>
         </tr>
         </thead>
@@ -102,6 +103,7 @@
             <td class="central_pos">{{ pareto_item.good }}</td>
             <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="smaller_font">{{ pareto_item.takt_time }}</td>
+            <td class="smaller_font">{{ pareto_item.ops }}</td>
             <td class="smaller_font">{{ pareto_item.modified|date:"H:i" }}</td>
         </tr>
         {% endfor %}

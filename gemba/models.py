@@ -50,13 +50,13 @@ class Pareto(models.Model):
     jobs = models.ManyToManyField("ParetoDetail")
     downtimes = models.ManyToManyField("DowntimeDetail")
     scrap = models.ManyToManyField("ScrapDetail")
-    # ops = models.PositiveIntegerField(default=0)
     availability = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     performance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quality = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     oee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     not_scheduled_to_run = models.PositiveIntegerField(default=0)
     job_otg = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="job5", blank=True, null=True)
+    ops_otg = models.PositiveIntegerField(default=0)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines2", blank=True, null=True)
 
     def __str__(self):
@@ -251,8 +251,6 @@ class Line(models.Model):
     line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
     col_vector = models.IntegerField(blank=True, null=True)
-    downtime_rows = models.IntegerField(blank=True, null=True)
-    scrap_rows = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"

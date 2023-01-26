@@ -19,7 +19,7 @@ from django.views.generic import TemplateView, UpdateView, DeleteView, DetailVie
 from django.db.models import Q
 
 from gemba.forms import ParetoDetailForm, DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
-    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm
+    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, OperatorsChoice
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, HC, Editors, AM, PM, NS, LineUser, Line, Timer, JobLine,\
     PRODUCTIVE
@@ -190,6 +190,7 @@ def pareto_detail_create(request):
     pareto_qs = Pareto.objects.filter(user=user, completed=False)
     pareto = pareto_qs[0]
     job = pareto.job_otg
+    ops = pareto.ops_otg
     line = pareto.line
     if job is None:
         return redirect("gemba_app:pareto-summary")
@@ -238,7 +239,7 @@ def pareto_detail_create(request):
 
             else:
                 pareto_elem = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
-                                                          pareto_id=pareto_id, line=line,
+                                                          pareto_id=pareto_id, line=line, ops=ops,
                                                           pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                 pareto.jobs.add(pareto_elem)
 
@@ -286,7 +287,7 @@ def pareto_detail_create(request):
                 return redirect("gemba_app:pareto-summary")
             else:
                 pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=cal_good,
-                                                          pareto_id=pareto_id, line=line,
+                                                          pareto_id=pareto_id, line=line, ops=ops,
                                                           pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                 pareto.jobs.add(pareto_item)
                 return redirect("gemba_app:pareto-summary")
@@ -347,10 +348,15 @@ class ParetoSummary(LoginRequiredMixin, View):
             availability = availability_cal(available_time=available_time, downtime=total_down)
 
             scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by("-modified")
+
             total_scrap = 0
             for scrap_elem in scrap_qs:
-                qty = scrap_elem.qty
-                total_scrap += qty
+                scrap_id = scrap_elem.scrap_id
+                scrap = ScrapModel.objetcs.get(id=scrap_id)
+                rework = scrap.rework
+                if rework is False:
+                    qty = scrap_elem.qty
+                    total_scrap += qty
 
             performance_numerator = 0
 
@@ -1130,7 +1136,6 @@ def job_user_list(request):
 
 
 def select_job(request, pk):
-    print(pk)
     job_line_obj = JobLine.objects.get(pk=pk)
     job = job_line_obj.job_id
     job_obj = JobModel2.objects.get(id=job)

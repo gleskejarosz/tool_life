@@ -205,8 +205,8 @@ def gemba_export2(request):
         ws.write(66 + shift_vector, 1 + col, "Total Bags made(bags)")
         ws.write(66 + shift_vector, 2 + col, output_values[0])
 
-        downtime_rows = line_obj.downtime_rows
-        scrap_rows = line_obj.scrap_rows
+        downtime_rows = 60
+        scrap_rows = 40
 
         offset_a = downtime_rows + 5
         offset_b = scrap_rows + 6

@@ -39,8 +39,16 @@ class ScrapQuantity(forms.Form):
 
 class NewPareto(forms.Form):
     shift = forms.ChoiceField(choices=SHIFT_CHOICES)
-    hours = forms.ChoiceField(choices=HOUR_CHOICES)
-    #ops = forms.IntegerField(min_value=1)
+    hours = forms.ChoiceField(choices=HOUR_CHOICES, label="Shift length in hours")
+    ops_otg = forms.IntegerField(min_value=1, label="Operators")
+
+
+class OperatorsChoice(forms.ModelForm):
+    ops_otg = forms.IntegerField(min_value=1)
+
+    class Meta:
+        model = Pareto
+        fields = ["ops_otg"]
 
 
 class ParetoUpdateForm(forms.ModelForm):
@@ -67,7 +75,7 @@ class NotScheduledToRunUpdateForm(forms.ModelForm):
 class ParetoDetailUpdateForm(forms.ModelForm):
     class Meta:
         model = ParetoDetail
-        fields = ("job", "output", "good", "scrap",)
+        fields = ("job", "output", "good", "scrap", "ops", )
 
     def clean(self):
         result = super().clean()

@@ -53,14 +53,14 @@ class ParetoDetailAdmin(admin.ModelAdmin):
 class ParetoAdmin(admin.ModelAdmin):
     ordering = ("-id",)
     list_display = ("id", "pareto_date", "user", "line", "shift", "hours", "not_scheduled_to_run",
-                    "availability", "performance", "quality", "oee", "completed", )
+                    "availability", "performance", "quality", "oee", "completed", "ops_otg", )
     list_display_links = ("id",)
     list_per_page = 20
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run",
                        "availability", "performance", "quality", "oee", "jobs", "job_otg", "downtimes", "scrap",
-                       "completed"],
+                       "ops_otg", "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "jobs", "downtimes", "scrap", "availability", "performance", "quality", "oee"]
@@ -68,12 +68,12 @@ class ParetoAdmin(admin.ModelAdmin):
 
 class ScrapModelAdmin(admin.ModelAdmin):
     ordering = ("code",)
-    list_display = ("code", "description", )
+    list_display = ("code", "description", "rework", )
     list_display_links = ("code",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "description"],
+            "fields": ["id", "code", "description", "rework"],
         }),
     ]
     readonly_fields = ["id"]
