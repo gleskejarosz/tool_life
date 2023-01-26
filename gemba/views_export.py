@@ -147,7 +147,6 @@ def gemba_export2(request):
     for pareto in pareto_qs:
         pareto_id = pareto.id
         shift = pareto.shift
-        print(shift)
         line = pareto.line
         line_id = pareto.line_id
         line_name = line.name
@@ -258,17 +257,21 @@ def gemba_export2(request):
             ws.write(row + offset_a + offset_b, 1 + col, scrap_desc)
 
             scraps_exist_qs = ScrapDetail.objects.filter(pareto_id=pareto_id).filter(scrap=scrap_id)
+            qty_a = 0
+            qty_b = 0
             if scraps_exist_qs.exists():
                 for elem in scraps_exist_qs:
                     job = elem.job.name
-                    num = jobs.index(job)
-                    qty = elem.qty
-                    if num == 0:
-                        # product A
-                        ws.write(row + offset_a, 2 + col, qty)
-                    else:
-                        # product B
-                        ws.write(row + offset_a + offset_b, 2 + col, qty)
+                    if job in jobs:
+                        num = jobs.index(job)
+                        if num == 0:
+                            # product A
+                            qty_a += elem.qty
+                        else:
+                            # product B
+                            qty_b += elem.qty
+                ws.write(row + offset_a, 2 + col, qty_a)
+                ws.write(row + offset_a + offset_b, 2 + col, qty_b)
 
     wb.save(response)
     return response
