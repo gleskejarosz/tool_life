@@ -115,7 +115,7 @@ class DowntimeDetail(models.Model):
     pareto_date = models.DateField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True, blank=True)
     modified = models.DateTimeField(auto_now_add=True, blank=True)
-    frequency = models.PositiveIntegerField(default=1)
+    # frequency = models.PositiveIntegerField(default=1)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines4", blank=True, null=True)
 
     def __str__(self):
@@ -250,6 +250,9 @@ class Line(models.Model):
     description = models.CharField(max_length=64, blank=True, null=True)
     line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
+    col_vector = models.IntegerField(blank=True, null=True)
+    downtime_rows = models.IntegerField(blank=True, null=True)
+    scrap_rows = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"

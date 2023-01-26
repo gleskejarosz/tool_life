@@ -151,7 +151,8 @@ class LineModelAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "name", "description", "calculation", "line_status"],
+            "fields": ["id", "code", "name", "description", "calculation", "col_vector", "downtime_rows",
+                       "scrap_rows", "line_status"],
         }),
     ]
     readonly_fields = ["id"]
