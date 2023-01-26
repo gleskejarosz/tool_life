@@ -75,11 +75,11 @@ class NotScheduledToRunUpdateForm(forms.ModelForm):
 class ParetoDetailUpdateForm(forms.ModelForm):
     class Meta:
         model = ParetoDetail
-        fields = ("job", "output", "good", "scrap", "ops", )
+        fields = ("job", "output", "good", "scrap", "rework", "ops", )
 
     def clean(self):
         result = super().clean()
         if not self.errors:
-            if result["good"] + result["scrap"] != result["output"]:
+            if result["good"] + result["scrap"] + result["rework"] != result["output"]:
                 raise ValidationError("Good plus scrap should equal output. Please fix it before submitting",
                                       code='invalid')

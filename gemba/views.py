@@ -222,13 +222,25 @@ def pareto_detail_create(request):
 
             new_output = output - total_output
             new_good = good - total_good
-            scrap = output - good
+            # scrap = output - good
+            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
+            scrap = 0
+            rework_cal = 0
+            for scrap_elem in scrap_qs:
+                scrap_id = scrap_elem.scrap_id
+                scrap_obj = ScrapModel.objects.get(id=scrap_id)
+                rework = scrap_obj.rework
+                if rework is False:
+                    scrap += scrap_elem.qty
+                else:
+                    rework_cal += scrap_elem.qty
 
             if pareto_details_qs.exists():
                 pareto_elem = ParetoDetail.objects.get(user=user, job=job, pareto_id=pareto_id)
                 pareto_elem.output += new_output
                 pareto_elem.good += new_good
                 pareto_elem.scrap = scrap
+                pareto_elem.rework = rework_cal
                 pareto_elem.save()
 
                 # tools update
@@ -264,8 +276,15 @@ def pareto_detail_create(request):
 
             scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
             scrap = 0
+            rework_cal = 0
             for scrap_elem in scrap_qs:
-                scrap += scrap_elem.qty
+                scrap_id = scrap_elem.scrap_id
+                scrap_obj = ScrapModel.objects.get(id=scrap_id)
+                rework = scrap_obj.rework
+                if rework is False:
+                    scrap += scrap_elem.qty
+                else:
+                    rework_cal += scrap_elem.qty
 
             good_qs = ParetoDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
             old_good = 0
@@ -283,6 +302,7 @@ def pareto_detail_create(request):
                 pareto_elem.output = output
                 pareto_elem.good += cal_good
                 pareto_elem.scrap = scrap
+                pareto_elem.rework = rework_cal
                 pareto_elem.save()
                 return redirect("gemba_app:pareto-summary")
             else:

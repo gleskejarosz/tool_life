@@ -71,6 +71,7 @@ class ParetoDetail(models.Model):
     output = models.PositiveIntegerField(default=0)
     good = models.PositiveIntegerField(default=0)
     scrap = models.PositiveIntegerField(default=0)
+    rework = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     ops = models.PositiveIntegerField(default=0)
     completed = models.BooleanField(default=False)
