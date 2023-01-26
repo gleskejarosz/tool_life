@@ -352,7 +352,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             total_scrap = 0
             for scrap_elem in scrap_qs:
                 scrap_id = scrap_elem.scrap_id
-                scrap = ScrapModel.objetcs.get(id=scrap_id)
+                scrap = ScrapModel.objects.get(id=scrap_id)
                 rework = scrap.rework
                 if rework is False:
                     qty = scrap_elem.qty
