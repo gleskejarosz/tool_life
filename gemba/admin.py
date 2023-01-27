@@ -9,6 +9,7 @@ class ScrapDetailAdmin(admin.ModelAdmin):
     list_display = ("id", "line", "pareto_date", "modified", "scrap", "user", "job", "qty", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
+    list_filter = ("line",)
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "pareto_id", "modified", "pareto_date", "scrap", "job", "qty", "from_job", "user",
@@ -26,6 +27,7 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     list_display = ("id", "line", "pareto_date", "modified", "downtime", "user", "job", "minutes", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_per_page = 20
+    list_filter = ("line",)
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "pareto_id", "pareto_date", "modified", "downtime", "job", "minutes", "from_job",
@@ -40,6 +42,7 @@ class ParetoDetailAdmin(admin.ModelAdmin):
     list_display = ("id", "line", "pareto_date", "created", "modified", "job", "output", "good", "scrap", "takt_time",
                     "ops", "pareto_id", "completed", )
     list_display_links = ("id",)
+    list_filter = ("line",)
     list_per_page = 20
     fieldsets = [
         ("General", {
@@ -56,6 +59,7 @@ class ParetoAdmin(admin.ModelAdmin):
                     "availability", "performance", "quality", "oee", "completed", "ops_otg", )
     list_display_links = ("id",)
     list_per_page = 20
+    list_filter = ("line", "shift",)
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "user", "pareto_date", "time_stamp", "shift", "hours", "not_scheduled_to_run",
@@ -96,6 +100,7 @@ class DowntimeUserModelAdmin(admin.ModelAdmin):
     ordering = ("id",)
     list_display = ("downtime", "line", "order", "gemba", )
     list_display_links = ("downtime",)
+    list_filter = ("line",)
     list_per_page = 20
     fieldsets = [
         ("General", {
@@ -110,6 +115,7 @@ class ScrapUserModelAdmin(admin.ModelAdmin):
     list_display = ("scrap", "line", "order", "gemba", )
     list_display_links = ("scrap",)
     list_per_page = 20
+    list_filter = ("line",)
     fieldsets = [
         ("General", {
             "fields": ["id", "scrap", "line", "order", "gemba"],
@@ -136,6 +142,7 @@ class LineHourModelAdmin(admin.ModelAdmin):
     list_display = ("line", "start", "shift", "id", )
     list_display_links = ("line",)
     list_per_page = 20
+    list_filter = ("line",)
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "start", "shift"],
@@ -162,6 +169,7 @@ class JobLineModelAdmin(admin.ModelAdmin):
     list_display = ("job", "target", "line", )
     list_display_links = ("job",)
     list_per_page = 20
+    list_filter = ("line",)
     fieldsets = [
         ("General", {
             "fields": ["id", "job", "target", "line"],
