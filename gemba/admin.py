@@ -151,8 +151,20 @@ class LineModelAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "name", "description", "calculation", "col_vector", "downtime_rows",
-                       "scrap_rows", "line_status"],
+            "fields": ["id", "code", "name", "description", "calculation", "col_vector", "line_status"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
+class JobLineModelAdmin(admin.ModelAdmin):
+    ordering = ("job",)
+    list_display = ("job", "target", "line", )
+    list_display_links = ("job",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "job", "target", "line"],
         }),
     ]
     readonly_fields = ["id"]
@@ -172,4 +184,4 @@ admin.site.register(Editors)
 admin.site.register(LineUser)
 admin.site.register(Timer)
 admin.site.register(Line, LineModelAdmin)
-admin.site.register(JobLine)
+admin.site.register(JobLine, JobLineModelAdmin)

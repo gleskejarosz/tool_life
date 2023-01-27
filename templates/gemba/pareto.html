@@ -3,11 +3,6 @@
 {% load mathfilters %}
 <head>
     <style>
-        .smaller_font{
-            font-size:0.7vw ;
-            vertical-align: center;
-            text-align: center;
-      }
         .bigger_font{
             font-size:1.5vw;
             font-weight: bold;
@@ -70,8 +65,8 @@
     </div>
 
     </div>
-    <p>Shift started at: {{ pareto_list.time_stamp|time:"h:i a" }} ({{ pareto_list.shift }}) - {{ pareto_list.hours }} hours -
-        Operators: {{ pareto_list.ops }} - Time available until now: {{ available_time }} min - Not scheduled to run:
+    <p>Shift started at: {{ pareto_list.time_stamp|time:"h:i a" }} ({{ pareto_list.shift }}) - {{ pareto_list.hours }}
+        hours - Time available until now: {{ available_time }} min - Not scheduled to run:
         {{ pareto_list.not_scheduled_to_run}} min</p>
 
 <div>
@@ -85,9 +80,9 @@
             <th scope="col" class="central_pos">Good</th>
             <th scope="col" class="central_pos">Scrap</th>
             <th scope="col" class="central_pos">Rework</th>
-            <th scope="col" class="smaller_font">Takt time</th>
-            <th scope="col" class="smaller_font">Ops</th>
-            <th scope="col" class="smaller_font">Last Entry</th>
+            <th scope="col" class="central_pos">Takt time</th>
+            <th scope="col" class="central_pos">Ops</th>
+            <th scope="col" class="central_pos">Last Entry</th>
         </tr>
         </thead>
         <tbody>
@@ -104,9 +99,9 @@
             <td class="central_pos">{{ pareto_item.good }}</td>
             <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="central_pos">{{ pareto_item.rework }}</td>
-            <td class="smaller_font">{{ pareto_item.takt_time }}</td>
-            <td class="smaller_font">{{ pareto_item.ops }}</td>
-            <td class="smaller_font">{{ pareto_item.modified|date:"H:i" }}</td>
+            <td class="central_pos">{{ pareto_item.takt_time }}</td>
+            <td class="central_pos">{{ pareto_item.ops }}</td>
+            <td class="central_pos">{{ pareto_item.modified|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -135,14 +130,14 @@
                 Performance<br/>
                 Quality<br/>
                     <br/>
-                <p style="font-size:1vw;"><b>OEE</b></p><br/>
+                <p><b>OEE</b></p><br/>
                 </td>
                 <td>
                 {{ availability }}%<br/>
                 {{ performance }}%<br/>
                 {{ quality }}%<br/>
                     <br/>
-                <p style="font-size:1vw;"><b>{{ oee }}%</b></p>
+                <p><b>{{ oee }}%</b></p>
                 </td>
             </tr>
             </tbody>
@@ -160,8 +155,8 @@
         <tr>
             <th  scope="col">Downtime Reason</th>
             <th  scope="col" class="central_pos">Min</th>
-            <th  scope="col" class="smaller_font">Job</th>
-            <th  scope="col" class="smaller_font">Created</th>
+            <th  scope="col" class="central_pos">Job</th>
+            <th  scope="col" class="central_pos">Created</th>
         </tr>
         </thead>
         <tbody>
@@ -175,8 +170,8 @@
             <td><a href="{% url 'gemba_app:downtime-detail-view' pk=pareto_item.pk %}">
                 {{ pareto_item.downtime.code }} - {{ pareto_item.downtime.description }}</a></td>
             <td class="central_pos">{{ pareto_item.minutes }}</td>
-            <td class="smaller_font">{{ pareto_item.job }}</td>
-            <td class="smaller_font">{{ pareto_item.created|date:"H:i" }}</td>
+            <td class="central_pos">{{ pareto_item.job }}</td>
+            <td class="central_pos">{{ pareto_item.created|date:"H:i" }}</td>
         </tr>
         {% endfor %}
         <tr>
@@ -191,7 +186,7 @@
 
     </div>
     <div class = "col">
-        {% if calc_option == TC %} {% if total_scrap_cal|sub:total_scrap < 0 %} Remove scrap qty:
+        {% if calc_option == TC %} {% if total_scrap_cal|sub:total_scrap < 0 %} Over scrap qty:
         {{ total_scrap|sub:total_scrap_cal }} {% else %} Missing qty: {{ total_scrap_cal|sub:total_scrap }} {% endif %}
         {% else %} -- {% endif %}
             <table class="table table-hover">
@@ -199,8 +194,8 @@
         <tr>
             <th scope="col">Scrap Reason</th>
             <th scope="col" class="central_pos">Quantity</th>
-            <th scope="col" class="smaller_font">Job</th>
-            <th scope="col" class="smaller_font">Created</th>
+            <th scope="col" class="central_pos">Job</th>
+            <th scope="col" class="central_pos">Created</th>
         </tr>
         </thead>
         <tbody>
@@ -213,8 +208,8 @@
                  <td><a href="{% url 'gemba_app:scrap-detail-view' pk=pareto_item.pk %}">
                      {{ pareto_item.scrap.code }} - {{ pareto_item.scrap.description }}</a></td>
                  <td class="central_pos">{{ pareto_item.qty }}</td>
-                 <td class="smaller_font">{{ pareto_item.job }}</td>
-                 <td class="smaller_font">{{ pareto_item.created|date:"H:i" }}</td>
+                 <td class="central_pos">{{ pareto_item.job }}</td>
+                 <td class="central_pos">{{ pareto_item.created|date:"H:i" }}</td>
              </tr>
         {% endfor %}
         <tr>

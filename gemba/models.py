@@ -20,13 +20,15 @@ SHIFT_CHOICES = (
 )
 
 TC = "Total output, Total good"
-HC = "Hourly Good, Scrap items"
-MC = "Meter, Scrap items"
+HCI = "Hourly Good, Scrap items, Inners"
+HCB = "Hourly Good, Scrap items, Bags"
+MC = "Meter, Scrap items, Inners"
 
 CALCULATION_CHOICES = (
     (TC, "Total output, Total good"),
-    (HC, "Hourly Good, Scrap items"),
-    (MC, "Meter, Scrap items"),
+    (HCI, "Hourly Good, Scrap items, Inners"),
+    (HCB, "Hourly Good, Scrap items, Bags"),
+    (MC, "Meter, Scrap items, Inners"),
 )
 HOUR_CHOICES = (
         ("6", "6"),
@@ -56,7 +58,7 @@ class Pareto(models.Model):
     oee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     not_scheduled_to_run = models.PositiveIntegerField(default=0)
     job_otg = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="job5", blank=True, null=True)
-    ops_otg = models.PositiveIntegerField(default=0)
+    ops_otg = models.PositiveIntegerField(blank=True, null=True)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines2", blank=True, null=True)
 
     def __str__(self):
@@ -73,7 +75,7 @@ class ParetoDetail(models.Model):
     scrap = models.PositiveIntegerField(default=0)
     rework = models.PositiveIntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
-    ops = models.PositiveIntegerField(default=0)
+    ops = models.PositiveIntegerField(blank=True, null=True)
     completed = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, blank=True)
@@ -250,7 +252,7 @@ class Line(models.Model):
     name = models.CharField(max_length=16)
     description = models.CharField(max_length=64, blank=True, null=True)
     line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
-    calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HC)
+    calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HCI)
     col_vector = models.IntegerField(blank=True, null=True)
 
     def __str__(self):

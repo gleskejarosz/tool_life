@@ -45,9 +45,7 @@
           <li class="navbar-nav">
             <a class="nav-item nav-link active" href="/admin" title="Admin panel">Admin</a>
           </li>
-          {% endif %}
           </ul>
-          {% if user.is_authenticated %}
           <span class="navbar-nav"><a class="nav-item nav-link active" href="{% url 'gemba_app:pareto-summary' %}">
             Pareto Sheet</a></span>
           {% endif %}

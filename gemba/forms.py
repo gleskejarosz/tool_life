@@ -9,8 +9,12 @@ from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto, Par
 TODAY = datetime.today().strftime('%d-%m-%Y')
 
 
-class ParetoDetailForm(forms.Form):
+class ParetoDetailHCIForm(forms.Form):
     good = forms.IntegerField(label="Packed Inners")
+
+
+class ParetoDetailHCBForm(forms.Form):
+    good = forms.IntegerField(label="Parts")
 
 
 class ParetoTotalQtyDetailForm(forms.Form):
@@ -80,6 +84,6 @@ class ParetoDetailUpdateForm(forms.ModelForm):
     def clean(self):
         result = super().clean()
         if not self.errors:
-            if result["good"] + result["scrap"] + result["rework"] != result["output"]:
+            if result["good"] + result["scrap"] != result["output"]:
                 raise ValidationError("Good plus scrap should equal output. Please fix it before submitting",
                                       code='invalid')
