@@ -222,18 +222,15 @@ def pareto_detail_create(request):
 
             new_output = output - total_output
             new_good = good - total_good
-            # scrap = output - good
+            scrap = output - good
             scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
 
-            scrap = 0
             rework_cal = 0
             for scrap_elem in scrap_qs:
                 scrap_id = scrap_elem.scrap_id
                 scrap_obj = ScrapModel.objects.get(id=scrap_id)
                 rework = scrap_obj.rework
-                if rework is False:
-                    scrap += scrap_elem.qty
-                else:
+                if rework is True:
                     rework_cal += scrap_elem.qty
 
             if pareto_details_qs.exists():
@@ -252,7 +249,7 @@ def pareto_detail_create(request):
 
             else:
                 pareto_elem = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
-                                                          pareto_id=pareto_id, line=line, ops=ops,
+                                                          pareto_id=pareto_id, line=line, ops=ops, rework=rework_cal,
                                                           pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                 pareto.jobs.add(pareto_elem)
 
@@ -398,12 +395,15 @@ class ParetoSummary(LoginRequiredMixin, View):
             pareto_details = ParetoDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id)
             total_good = 0
             total_output = 0
+            total_rework = 0
             if pareto_details.exists():
                 for scrap_cal in pareto_details:
                     output = scrap_cal.output
+                    rework = scrap_cal.rework
                     total_output += output
                     good = scrap_cal.good
                     total_good += good
+                    total_rework += rework
             total_scrap_cal = total_output - total_good
 
             quality = quality_cal(good=total_good, output=total_output)
@@ -425,8 +425,8 @@ class ParetoSummary(LoginRequiredMixin, View):
                 scrap_id = scrap_elem.scrap_id
                 scrap = ScrapModel.objects.get(id=scrap_id)
                 rework = scrap.rework
+                qty = scrap_elem.qty
                 if rework is False:
-                    qty = scrap_elem.qty
                     total_scrap += qty
 
             performance_numerator = 0
@@ -460,6 +460,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "performance": performance,
                               "oee": oee,
                               "total_scrap": total_scrap,
+                              "total_rework": total_rework,
                               "total_down": total_down,
                               "total_output": total_output,
                               "total_good": total_good,
@@ -480,6 +481,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             total_output = 0
             total_good = 0
             total_scrap_cal = 0
+            total_rework = 0
 
             return render(self.request,
                           template_name='gemba/pareto.html',
@@ -495,6 +497,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "total_down": total_down,
                               "total_output": total_output,
                               "total_good": total_good,
+                              "total_rework": total_rework,
                               "total_scrap_cal": total_scrap_cal,
                               "message_status": message_status,
                           }
@@ -675,9 +678,17 @@ def final_oee_calculation(pareto):
 
     calculation["oee"] = oee
     scrap = 0
+    rework_cal = 0
     for scrap_elem in pareto.scrap.all():
-        scrap += scrap_elem.qty
+        scrap_id = scrap_elem.scrap_id
+        scrap_obj = ScrapModel.objects.get(id=scrap_id)
+        rework = scrap_obj.rework
+        if rework is False:
+            scrap += scrap_elem.qty
+        else:
+            rework_cal += scrap_elem.qty
 
+    calculation["rework"] = rework_cal
     calculation["scrap"] = scrap
 
     return calculation
@@ -716,6 +727,25 @@ def before_close_pareto(request):
         last_detail.scrap = scrap
         last_detail.good = good
         last_detail.save()
+    elif calc_option == TC:
+        pareto_details_qs = ParetoDetail.objects.filter(user=request.user, completed=False,
+                                                        pareto_id=pareto_id).order_by("-id")
+        last_detail = pareto_details_qs[0]
+
+        # balance amount of rework
+        job = last_detail.job_id
+
+        scraps_qs = ScrapDetail.objects.filter(user=request.user, completed=False,
+                                               pareto_id=pareto_id, job=job)
+        rework = 0
+        for scrap_obj in scraps_qs:
+            scrap_id = scrap_obj.scrap_id
+            scrap_elem = ScrapModel.objects.get(id=scrap_id)
+            if scrap_elem.rework is True:
+                rework += scrap_obj.qty
+
+        last_detail.rework = rework
+        last_detail.save()
 
     calculation = final_oee_calculation(pareto)
 
@@ -728,6 +758,7 @@ def before_close_pareto(request):
     performance = calculation["performance"]
     oee = calculation["oee"]
     scrap = calculation["scrap"]
+    rework = calculation["rework"]
     scrap_compare = output - good - scrap
 
     return render(request,
@@ -744,6 +775,7 @@ def before_close_pareto(request):
                       "oee": oee,
                       "scrap": scrap,
                       "scrap_compare": scrap_compare,
+                      "rework": rework,
                   },
                   )
 

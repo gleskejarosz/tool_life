@@ -32,6 +32,7 @@
             <th scope="col">Job</th>
             <th scope="col">Output</th>
             <th scope="col">Good</th>
+            <th scope="col">Rework</th>
             <th scope="col">Scrap</th>
             <th scope="col">Takt time</th>
         </tr>
@@ -47,6 +48,7 @@
             <td>{{ pareto_item.job.name }}</td>
             <td>{{ pareto_item.output }}</td>
             <td>{{ pareto_item.good }}</td>
+            <td>{{ pareto_item.rework }}</td>
             <td>{{ pareto_item.scrap }}</td>
             <td>{{ pareto_item.takt_time }}</td>
         </tr>
@@ -55,6 +57,7 @@
             <td> <b>Total</b> </td>
             <td> <b>{{ output }}</b> </td>
             <td> <b>{{ good }}</b> </td>
+            <td> <b>{{ rework }}</b> </td>
             <td> <b>{{ scrap }}</b> </td>
             <td> </td>
         </tr>

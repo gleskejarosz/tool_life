@@ -91,7 +91,7 @@ class ParetoDetail(models.Model):
         verbose_name = "Pareto Detail"
 
     def save(self, *args, **kwargs):
-        self.modified = datetime.now()
+        self.modified = datetime.now(tz=pytz.UTC)
         super().save(*args, **kwargs)
 
 

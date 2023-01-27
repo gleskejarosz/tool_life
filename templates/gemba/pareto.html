@@ -77,9 +77,9 @@
         <tr>
             <th scope="col">Job</th>
             <th scope="col" class="central_pos">Output</th>
-            <th scope="col" class="central_pos">Good</th>
+            <th scope="col" class="central_pos">Total Good</th>
+            <th scope="col" class="central_pos">Reworked good</th>
             <th scope="col" class="central_pos">Scrap</th>
-            <th scope="col" class="central_pos">Rework</th>
             <th scope="col" class="central_pos">Takt time</th>
             <th scope="col" class="central_pos">Ops</th>
             <th scope="col" class="central_pos">Last Entry</th>
@@ -97,8 +97,8 @@
                 {{ pareto_item.job.name }}</a></td>
             <td class="central_pos">{{ pareto_item.output }}</td>
             <td class="central_pos">{{ pareto_item.good }}</td>
-            <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="central_pos">{{ pareto_item.rework }}</td>
+            <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="central_pos">{{ pareto_item.takt_time }}</td>
             <td class="central_pos">{{ pareto_item.ops }}</td>
             <td class="central_pos">{{ pareto_item.modified|date:"H:i" }}</td>
@@ -108,8 +108,8 @@
             <td> <b>Total</b> </td>
             <td class="central_pos"> <b>{{ total_output }}</b> </td>
             <td class="central_pos"> <b>{{ total_good }}</b> </td>
+            <td class="central_pos"> <b>{{ total_rework }}</b> </td>
             <td class="central_pos"> <b>{{ total_scrap_cal }}</b> </td>
-            <td> </td>
             <td> </td>
         </tr>
         </tbody>
