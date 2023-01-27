@@ -12,7 +12,7 @@
         <tbody>
         {% for object in report %}
             <tr>
-                <td>{{ object.created|date:'d-m-Y H:i' }}</td>
+                <td>{{ object.created|date:'H:i' }}</td>
                 <td>{{ object.downtime }} {{ object.scrap }}</td>
                 <td>{% if object.minutes is not None %}{{ object.minutes }} min{% else %}
                 {{ object.qty }} parts{% endif %}</td>

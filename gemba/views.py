@@ -1945,7 +1945,7 @@ def scrap_downtime_compare(request):
     else:
         return render(
             request,
-            template_name="gemba/scrap_downtime_compare_mobile.html",
+            template_name="gemba/scrap_downtime_compare.html",
             context={
                 "report": report,
                 "line_name": line_name,
