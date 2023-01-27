@@ -210,10 +210,10 @@ class LineHourModel(models.Model):
 
 class JobModel2(models.Model):
     name = models.CharField(max_length=64)
-    target = models.IntegerField(default=0)
+    # target = models.IntegerField(default=0)
     inner_size = models.PositiveSmallIntegerField(default=1)
-    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines11", blank=True, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    # line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines11", blank=True, null=True)
+    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"

@@ -190,7 +190,7 @@ def pareto_detail_create(request):
     pareto = pareto_qs[0]
     job = pareto.job_otg
     ops = pareto.ops_otg
-    print(ops)
+
     line = pareto.line
     if job is None:
         return redirect("gemba_app:pareto-summary")
@@ -566,11 +566,79 @@ def oee_cal(availability, performance, quality):
 def pareto_detail_view(request, pk):
     pareto = Pareto.objects.get(pk=pk)
     report_list = oee_calculation(pareto)
+
+    downtimes = []
+    downtimes_list = []
+    for down_obj in pareto.downtimes.all():
+        down_code = down_obj.downtime.code
+        down_desc = down_obj.downtime.description
+        job = down_obj.job.name
+        if down_desc not in downtimes:
+            down_time = down_obj.minutes
+            downtimes_list.append({
+                "job": job,
+                "code": down_code,
+                "description": down_desc,
+                "minutes": down_time,
+                "frequency": 1,
+            })
+            downtimes.append(down_desc)
+        else:
+            pos = downtimes.index(down_desc)
+            minutes = down_obj.minutes
+            elem_job = downtimes_list[pos]["job"]
+            if elem_job == job:
+                downtimes_list[pos]["minutes"] += minutes
+                downtimes_list[pos]["frequency"] += 1
+            else:
+                downtimes_list.append({
+                    "job": job,
+                    "code": down_code,
+                    "description": down_desc,
+                    "minutes": minutes,
+                    "frequency": 1,
+                })
+    scraps = []
+    scraps_list = []
+    for scrap_obj in pareto.scrap.all():
+        scrap_code = scrap_obj.scrap.code
+        scrap_desc = scrap_obj.scrap.description
+        scrap_id = scrap_obj.scrap_id
+        job = scrap_obj.job.name
+        if scrap_id not in scraps:
+            scrap_qty = scrap_obj.qty
+            scraps_list.append({
+                "job": job,
+                "code": scrap_code,
+                "description": scrap_desc,
+                "qty": scrap_qty,
+                "frequency": 1,
+            })
+            scraps.append(scrap_id)
+        else:
+            pos = scraps.index(scrap_id)
+            qty = scrap_obj.qty
+            elem_job = scraps_list[pos]["job"]
+            print(f"Job {job} == {elem_job} + {qty}")
+            if elem_job == job:
+                scraps_list[pos]["qty"] += qty
+                scraps_list[pos]["frequency"] += 1
+            else:
+                scraps_list.append({
+                    "job": job,
+                    "code": scrap_code,
+                    "description": scrap_desc,
+                    "qty": qty,
+                    "frequency": 1,
+                })
+
     return render(request,
                   template_name='gemba/pareto_details.html',
                   context={
                       "pareto_list": pareto,
                       "report_list": report_list,
+                      "downtimes_list": downtimes_list,
+                      "scraps_list": scraps_list,
                   },
                   )
 
@@ -902,9 +970,14 @@ class DailyParetoSearchResultsView(ListView):
 
     def get_queryset(self):
         query = self.request.GET.get("q")
-        report_list = Pareto.objects.filter(
-            Q(pareto_date__exact=query)
-        ).order_by("line", "id")
+        if query == "":
+            report_list = Pareto.objects.filter(
+                Q(pareto_date__exact=datetime.now(tz=pytz.UTC).date())
+            ).order_by("line", "id")
+        else:
+            report_list = Pareto.objects.filter(
+                Q(pareto_date__exact=query)
+            ).order_by("line", "id")
         object_list = get_details_to_display(object_list=report_list)
         return object_list
 
@@ -1079,10 +1152,13 @@ class ParetoDetailView(DetailView):
 @login_required
 def pareto_detail_update(request, pk):
     pareto_detail_obj = ParetoDetail.objects.get(pk=pk)
+    line = pareto_detail_obj.line
     form = ParetoDetailUpdateForm(instance=pareto_detail_obj)
 
     old_job = pareto_detail_obj.job
-    target = pareto_detail_obj.job.target
+    job_line_qs = JobLine.objects.filter(line=line, job=old_job)
+
+    target = job_line_qs[0].target
     old_output = pareto_detail_obj.output * -1
     modified = pareto_detail_obj.modified
     line = pareto_detail_obj.line
@@ -1126,7 +1202,10 @@ def pareto_detail_delete(request, pk):
     pareto_detail_obj = ParetoDetail.objects.get(pk=pk)
 
     old_job = pareto_detail_obj.job
-    target = pareto_detail_obj.job.target
+    old_job_id = pareto_detail_obj.job_id
+    line = pareto_detail_obj.line_id
+    line_job_qs = JobLine.objects.filter(job=old_job_id, line=line)
+    target = line_job_qs[0].target
     old_output = pareto_detail_obj.output * -1
     modified = pareto_detail_obj.modified
 
@@ -1830,17 +1909,25 @@ def report_choices(request):
 
 
 def scrap_downtime_compare(request):
-    line_name = request.GET.get("Samples")
-    line_qs = Line.objects.filter(name=line_name)
-    line_id = line_qs[0]
+    line_name = request.GET.get("Lines")
+    if line_name is None:
+        line_qs = Line.objects.all()
+        line_id = line_qs[0]
+    else:
+        line_qs = Line.objects.filter(name=line_name)
+        line_id = line_qs[0]
 
-    date_from = request.GET.get("from")
-    date_to = request.GET.get("to")
-
-    scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(
-        Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
-    down_qs = DowntimeDetail.objects.filter(line=line_id).filter(
-        Q(pareto_date__gte=date_from) | Q(pareto_date__gte=date_to))
+    date_to_display = request.GET.get("date_to_display")
+    if date_to_display == "":
+        scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(
+            Q(pareto_date=datetime.now(tz=pytz.UTC)))
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(
+            Q(pareto_date=datetime.now(tz=pytz.UTC)))
+    else:
+        scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(
+            Q(pareto_date=date_to_display))
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(
+            Q(pareto_date=date_to_display))
 
     report = sorted(
         chain(down_qs, scrap_qs),
@@ -1851,5 +1938,6 @@ def scrap_downtime_compare(request):
         template_name="gemba/scrap_downtime_compare.html",
         context={
             "report": report,
+            "line_name": line_name,
         },
     )

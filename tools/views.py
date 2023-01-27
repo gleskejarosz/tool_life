@@ -5,7 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 
-from gemba.models import JobModel2, Line, PRODUCTIVE
+from gemba.models import JobModel2, Line, PRODUCTIVE, JobLine
 from tools.filters import OperationFilter, ToolFilter
 from tools.forms import ToolChangeForm, AddTool
 from tools.models import OperationModel, ToolStationModel, ToolJobModel, SPARE, USE
@@ -135,9 +135,9 @@ def tools_vs_jobs(request, machine_id):
     tools_qs = ToolJobModel.objects.all().order_by("job__name")
 
     jobs_list = []
-    jobs_qs = JobModel2.objects.filter(line=machine_id).order_by("name")
+    jobs_qs = JobLine.objects.filter(line=machine_id).order_by("job")
     for job_elem in jobs_qs:
-        job_id = job_elem.id
+        job_id = job_elem.job_id
         job = JobModel2.objects.get(id=job_id)
         job_name = job.name
         if job not in jobs_list:
@@ -252,10 +252,10 @@ def add_tool(request, machine_id):
 
         tool_obj = ToolStationModel.objects.create(machine=machine, station=station, tool=tool)
 
-        jobs_qs = JobModel2.objects.filter(line=machine)
+        jobs_qs = JobLine.objects.filter(line=machine)
 
         for job_obj in jobs_qs:
-            job_id = job_obj.id
+            job_id = job_obj.job_id
             job = JobModel2.objects.get(id=job_id)
             ToolJobModel.objects.create(job=job, tool=tool_obj)
 

@@ -1,20 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h4>Select a line:</h4>
  <form action="{% url 'gemba_app:scrap-downtime-compare' %}" method="get">
+     <h4>Select a date:</h4>
+     </br>
+    Date <input name="date_to_display" type="date">
+    </br>
+    </br>
+     <h4>Select a line:</h4>
         {% for o in lines_qs %}
         <tr>
             </br>
-            <td>{{o.name}}<input type="radio" name="Samples" value="{{o.name}}"></td>
+            <td>{{o.name}}      <input type="radio" name="Lines" value="{{o.name}}"></td>
             </br>
         </tr>
         {% endfor %}
       </br>
-     <h5>Select a date range:</h5>
-     </br>
-    From <input name="from" type="date"> to
-     <input name="to" type="date">
      <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
     </button>
  </form>

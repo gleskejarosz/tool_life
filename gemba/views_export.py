@@ -29,7 +29,6 @@ def tableau_export(request, pk):
     quality = pareto.quality / 100
     availability = pareto.availability / 100
     oee = pareto.oee / 100
-    ops = pareto.ops
     line = pareto.line_id
 
     response = HttpResponse(content_type="application/ms-excel")
@@ -50,8 +49,6 @@ def tableau_export(request, pk):
     ws.write(2, 0, shift)
     # A4 Available time
     ws.write(3, 0, available_time)
-    # H1 Operators
-    ws.write(0, 7, ops)
 
     style2 = XFStyle()
     style2.num_format_str = "0%"
@@ -70,22 +67,26 @@ def tableau_export(request, pk):
 
     jobs = []
     col = 1
+    total_ops = 0
+    jobs_objs = 0
     for elem in pareto.jobs.all():
         elem_job = elem.job.name
         jobs.append(elem_job)
-        elem_job_id = elem.job.id
-        # wrong
-        job_obj = JobModel2.objects.get(id=elem_job_id)
-        target = job_obj.target
-        elem_takt_time = round(60 / target, ndigits=4)
+        elem_takt_time = elem.takt_time
         elem_output = elem.output
         elem_good = elem.good
+        elem_ops = elem.ops
+        total_ops += elem_ops
+        jobs_objs += 1
         ws.write(0, col, elem_job)
         ws.write(1, col, elem_takt_time)
         ws.write(2, col, elem_output)
         ws.write(3, col, elem_good)
         col += 1
 
+    ops = round(total_ops/jobs_objs, ndigits=0)
+    # H1 Operators
+    ws.write(0, 7, ops)
     scrap_qs = ScrapUser.objects.filter(line=line).order_by("gemba")
 
     vector = 4  # start scrap reasons from row 5
@@ -186,14 +187,10 @@ def gemba_export2(request):
         jobs = []
         takt_times = []
         output_values = []
-        good_values = []
         for elem in pareto.jobs.all():
             elem_job = elem.job.name
             jobs.append(elem_job)
-            elem_job_id = elem.job.id
-            job_obj = JobModel2.objects.get(id=elem_job_id)
-            target = job_obj.target
-            elem_takt_time = round(60 / target, ndigits=4)
+            elem_takt_time = elem.takt_time
             takt_times.append(elem_takt_time)
             elem_output = elem.output
             output_values.append(elem_output)

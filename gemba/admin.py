@@ -120,12 +120,12 @@ class ScrapUserModelAdmin(admin.ModelAdmin):
 
 class JobModelAdmin2(admin.ModelAdmin):
     ordering = ("name",)
-    list_display = ("id", "name", "target", "inner_size", "line", )
+    list_display = ("id", "name", "inner_size", )
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "name", "target", "inner_size", "line"],
+            "fields": ["id", "name", "inner_size"],
         }),
     ]
     readonly_fields = ["id"]
