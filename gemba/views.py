@@ -1515,10 +1515,11 @@ def scrap_rate_report_by_week(request, line_id):
 
     total_all_output = 0
     total_all_weeks = 0
-
-    for week_num in range(9):
+    range_list = [a for a in range(9)]
+    reversed_range_list = reversed(range_list)
+    for week_num, idx in enumerate(reversed_range_list):
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
@@ -1531,7 +1532,7 @@ def scrap_rate_report_by_week(request, line_id):
         # total scrap per reason, for week, period summary total, row sum up
         for obj in scrap_qs:
             obj_name = obj.scrap.description
-            if obj in scrap_list:
+            if obj_name in scrap_list:
                 pos = scrap_list.index(obj_name)
                 qty = obj.qty
                 total_weekly += qty
@@ -1682,9 +1683,11 @@ def downtime_rate_report_by_week(request, line_id):
     }
     total_all_output = 0
     total_all_weeks = 0
-    for week_num in range(9):
+    range_list = [a for a in range(9)]
+    reversed_range_list = reversed(range_list)
+    for week_num, idx in enumerate(reversed_range_list):
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
@@ -1708,7 +1711,7 @@ def downtime_rate_report_by_week(request, line_id):
         # total downtime per reason, for week, period summary total, row sum up
         for obj in down_qs:
             obj_name = obj.downtime.description
-            if obj in down_list:
+            if obj_name in down_list:
                 pos = down_list.index(obj_name)
                 minutes = obj.minutes
                 total_weekly += minutes
