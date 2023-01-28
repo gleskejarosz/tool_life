@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'tools',
     'gemba',
     'mathfilters',
-    'django_truncate',
 ]
 
 MIDDLEWARE = [

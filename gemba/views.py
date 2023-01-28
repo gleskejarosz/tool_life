@@ -1,23 +1,20 @@
-import csv
 from itertools import chain
 
 import pytz
-import xlwt
 from django.core.paginator import Paginator
-from xlwt import XFStyle, Font
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
-from django.db.models import Q
+
 
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
-    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, OperatorsChoice, ParetoDetailHCBForm, \
+    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
@@ -1602,7 +1599,6 @@ def scrap_rate_report_by_week(request, line_id):
 
 
 def downtime_rate_report_by_week(request, line_id):
-    # line = Line.objects.get(pk=line_id)
     today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
 
     report = []
@@ -1810,23 +1806,22 @@ def scrap_downtime_compare(request):
         chain(down_qs, scrap_qs),
         key=lambda obj: obj.created)
 
+    context = {
+        "report": report,
+        "line_name": line_name,
+        "date": date_to_display,
+    }
     if mobile_browser_check(request):
         return render(
             request,
             template_name="gemba/scrap_downtime_compare_mobile.html",
-            context={
-                "report": report,
-                "line_name": line_name,
-            },
+            context=context,
         )
     else:
         return render(
             request,
             template_name="gemba/scrap_downtime_compare.html",
-            context={
-                "report": report,
-                "line_name": line_name,
-            },
+            context=context,
         )
 
 
