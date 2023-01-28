@@ -991,61 +991,6 @@ class DailyParetoSearchResultsView(ListView):
         return object_list
 
 
-def export_daily_oee_report_xls(request):
-    query = request.GET.get("q")
-    report_list = Pareto.objects.filter(
-        Q(pareto_date__exact=query)
-    ).order_by("-user")
-    object_list = get_details_to_display(object_list=report_list)
-
-    response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Daily_OEE_Report.xls"'
-
-    wb = xlwt.Workbook(encoding="utf-8")
-    ws = wb.add_sheet("Report")
-
-    fnt = Font()
-    fnt.height = 300
-    fnt.bold = True
-    style = XFStyle()
-    style.font = fnt
-
-    ws.write(0, 0, f"Daily OEE Report - {object_list[0]['date']}", style)
-    row_num = 2
-
-    row_list = ["id", "user", "shift", "availability", "performance", "quality", "oee"]
-
-    headers = ["Pareto Id", "Line/User", "Shift", "Availability", "Performance", "Quality", "OEE"]
-
-    percentage = ["availability", "performance", "quality", "oee"]
-
-    for col_num in range(len(row_list)):
-        style1 = xlwt.easyxf("font: bold 1")
-        ws.write(1, col_num, headers[col_num], style1)
-
-    style2 = XFStyle()
-    style2.num_format_str = "0%"
-
-    style3 = XFStyle()
-    style3.num_format_str = "D-MMM-YY"
-
-    for row in object_list:
-        for col_num in range(len(row_list)):
-            dict_key = row_list[col_num]
-            elem = row[dict_key]
-            if dict_key == "date":
-                ws.write(row_num, col_num, elem, style3)
-            elif dict_key in percentage:
-                perc_value = elem / 100
-                ws.write(row_num, col_num, perc_value, style2)
-            else:
-                ws.write(row_num, col_num, elem)
-        row_num += 1
-
-    wb.save(response)
-    return response
-
-
 def pareto_view(request):
     today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by("line", "id")
 
@@ -1433,88 +1378,6 @@ def quarantine_view(request):
     )
 
 
-def export_scrap_search_csv(request):
-    query = request.GET.get("q")
-    object_list = ScrapDetail.objects.filter(
-        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
-        Q(scrap__code__icontains=query) | Q(scrap__description__icontains=query) |
-        Q(qty__icontains=query) | Q(job__name__icontains=query) |
-        Q(pareto_id__icontains=query)
-    ).order_by('id')
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="Scrap_reasons.csv"'
-    writer = csv.writer(response)
-    writer.writerow(["Id", "Date", "User/Line", "Code - Description", "Qty", "Job", "Pareto id"])
-    for e in object_list:
-        writer.writerow([e.id,
-                         e.pareto_date,
-                         e.user,
-                         e.scrap,
-                         e.output,
-                         e.job,
-                         e.pareto_id,
-                         ])
-    return response
-
-
-def export_downtime_search_result_csv(request):
-    query = request.GET.get("q")
-    object_list = DowntimeDetail.objects.filter(
-        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
-        Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
-        Q(minutes__icontains=query) | Q(job__name__icontains=query) |
-        Q(pareto_id__icontains=query)
-    ).order_by('id')
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="Downtime_reasons.csv"'
-    writer = csv.writer(response)
-    writer.writerow(["Id", "Date", "User/Line", "Code - Description", "Minutes", "Job", "Pareto id"])
-    for e in object_list:
-        writer.writerow([e.id,
-                         e.pareto_date,
-                         e.user,
-                         e.downtime,
-                         e.minutes,
-                         e.job,
-                         e.pareto_id,
-                         ])
-    return response
-
-def export_downtimes_xls(request):
-    query = request.GET.get("q")
-    object_list = DowntimeDetail.objects.filter(
-        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
-        Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
-        Q(minutes__icontains=query) | Q(job__name__icontains=query) |
-        Q(pareto_id__icontains=query)
-    ).order_by('id')
-
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xls"'
-
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Report')
-
-    row_num = 1
-    rows = object_list.values('id', 'pareto_date', 'user__username', 'downtime__code', 'downtime__description',
-                              'minutes', 'job__name', 'pareto_id')
-    row_list = ['id', 'pareto_date', 'user__username', 'downtime__code', 'downtime__description',
-                'minutes', 'job__name', 'pareto_id']
-    headers = ["Id", "Pareto date", "Line / User", "Code", "Description", "Minutes", "Job", "Pareto Id"]
-    for col_num in range(len(row_list)):
-        style = xlwt.easyxf('font: bold 1')
-        ws.write(0, col_num, headers[col_num], style)
-
-    for row in rows:
-        for col_num in range(len(row_list)):
-            elem = row[row_list[col_num]]
-            ws.write(row_num, col_num, elem)
-        row_num += 1
-    wb.save(response)
-
-    return response
-
-
 class ParetoNSUpdateView(UpdateView):
     model = Pareto
     template_name = "form.html"
@@ -1652,7 +1515,9 @@ def scrap_rate_report_by_week(request, line_id):
 
     total_all_output = 0
     total_all_weeks = 0
-    for week_num in range(9):
+    range_list = [a for a in range(9)]
+    reversed_list_range = range_list[::-1]
+    for week_num in reversed_list_range:
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=week_num * 7)
         key_monday = "start_monday_" + str(week_num)
@@ -1668,12 +1533,13 @@ def scrap_rate_report_by_week(request, line_id):
         # total scrap per reason, for week, period summary total, row sum up
         for obj in scrap_qs:
             obj_name = obj.scrap.description
-            pos = scrap_list.index(obj_name)
-            qty = obj.qty
-            total_weekly += qty
-            total_all_weeks += qty
-            report[pos]["total"] += qty
-            report[pos][key_qty] += qty
+            if obj in scrap_list:
+                pos = scrap_list.index(obj_name)
+                qty = obj.qty
+                total_weekly += qty
+                total_all_weeks += qty
+                report[pos]["total"] += qty
+                report[pos][key_qty] += qty
 
         # assigning total weekly scrap qty to totals
         key_total = "total_weekly_" + str(week_num)
@@ -1818,7 +1684,9 @@ def downtime_rate_report_by_week(request, line_id):
     }
     total_all_output = 0
     total_all_weeks = 0
-    for week_num in range(9):
+    range_list = [a for a in range(9)]
+    reversed_list_range = range_list[::-1]
+    for week_num in reversed_list_range:
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=week_num * 7)
         key_monday = "start_monday_" + str(week_num)
@@ -1844,12 +1712,13 @@ def downtime_rate_report_by_week(request, line_id):
         # total downtime per reason, for week, period summary total, row sum up
         for obj in down_qs:
             obj_name = obj.downtime.description
-            pos = down_list.index(obj_name)
-            minutes = obj.minutes
-            total_weekly += minutes
-            total_all_weeks += minutes
-            report[pos]["total"] += minutes
-            report[pos][key_qty] += minutes
+            if obj in down_list:
+                pos = down_list.index(obj_name)
+                minutes = obj.minutes
+                total_weekly += minutes
+                total_all_weeks += minutes
+                report[pos]["total"] += minutes
+                report[pos][key_qty] += minutes
 
         # assigning total weekly downtime minutes to totals
         key_total = "total_weekly_" + str(week_num)
@@ -1969,7 +1838,6 @@ def mobile_browser_check(request):
     # returns True for mobile devices
 
     mobile_browser = False
-    # ua = request.META['HTTP_USER_AGENT'].lower()[0:4]
     ua = request.META['HTTP_USER_AGENT'].lower()
 
     for hint in mobile_ua_hints:
