@@ -1517,9 +1517,9 @@ def scrap_rate_report_by_week(request, line_id):
     total_all_weeks = 0
     range_list = [a for a in range(9)]
     reversed_list_range = range_list[::-1]
-    for week_num in reversed_list_range:
+    for week_num, idx in enumerate(reversed_list_range):
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
@@ -1686,9 +1686,9 @@ def downtime_rate_report_by_week(request, line_id):
     total_all_weeks = 0
     range_list = [a for a in range(9)]
     reversed_list_range = range_list[::-1]
-    for week_num in reversed_list_range:
+    for week_num, idx in enumerate(reversed_list_range):
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
