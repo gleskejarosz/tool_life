@@ -253,7 +253,7 @@ class Line(models.Model):
     description = models.CharField(max_length=64, blank=True, null=True)
     line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HCI)
-    col_vector = models.IntegerField(blank=True, null=True)
+    # col_vector = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"

@@ -563,10 +563,7 @@ def oee_cal(availability, performance, quality):
     return oee
 
 
-def pareto_detail_view(request, pk):
-    pareto = Pareto.objects.get(pk=pk)
-    report_list = oee_calculation(pareto)
-
+def count_downtimes(pareto):
     downtimes = []
     downtimes_list = []
     for down_obj in pareto.downtimes.all():
@@ -598,6 +595,10 @@ def pareto_detail_view(request, pk):
                     "minutes": minutes,
                     "frequency": 1,
                 })
+    return downtimes_list
+
+
+def count_scraps(pareto):
     scraps = []
     scraps_list = []
     for scrap_obj in pareto.scrap.all():
@@ -619,7 +620,6 @@ def pareto_detail_view(request, pk):
             pos = scraps.index(scrap_id)
             qty = scrap_obj.qty
             elem_job = scraps_list[pos]["job"]
-            print(f"Job {job} == {elem_job} + {qty}")
             if elem_job == job:
                 scraps_list[pos]["qty"] += qty
                 scraps_list[pos]["frequency"] += 1
@@ -631,6 +631,15 @@ def pareto_detail_view(request, pk):
                     "qty": qty,
                     "frequency": 1,
                 })
+    return scraps_list
+
+
+def pareto_detail_view(request, pk):
+    pareto = Pareto.objects.get(pk=pk)
+
+    report_list = oee_calculation(pareto)
+    downtimes_list = count_downtimes(pareto)
+    scraps_list = count_scraps(pareto)
 
     return render(request,
                   template_name='gemba/pareto_details.html',

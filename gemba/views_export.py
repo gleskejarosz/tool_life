@@ -65,8 +65,8 @@ def tableau_export(request, pk):
     ws.write(3, 14, "OEE")
     ws.write(3, 15, oee, style2)
 
-    jobs = []
     col = 1
+    jobs = []
     total_ops = 0
     jobs_objs = 0
     for elem in pareto.jobs.all():
@@ -87,6 +87,7 @@ def tableau_export(request, pk):
     ops = round(total_ops/jobs_objs, ndigits=0)
     # H1 Operators
     ws.write(0, 7, ops)
+
     scrap_qs = ScrapUser.objects.filter(line=line).order_by("gemba")
 
     vector = 4  # start scrap reasons from row 5
@@ -97,12 +98,14 @@ def tableau_export(request, pk):
         scrap_name = scrap_item.description
         ws.write(vector + idx, 0, scrap_name)
 
+        qty = 0
         scraps_exist_qs = ScrapDetail.objects.filter(pareto_id=pk).filter(scrap=scrap_id)
+        column = 1
         for elem in scraps_exist_qs:
             job = elem.job.name
-            column = jobs.index(job) + 1
-            qty = elem.qty
-            ws.write(vector + idx, column, qty)
+            column += jobs.index(job)
+            qty += elem.qty
+        ws.write(vector + idx, column, qty)
 
     down_qs = DowntimeUser.objects.filter(line=line).order_by("gemba")
 
@@ -120,9 +123,8 @@ def tableau_export(request, pk):
         if down_exist_obj.exists():
             for down_obj in down_exist_obj:
                 obj_min = down_obj.minutes
-                obj_freq = down_obj.frequency
                 minutes += obj_min
-                frequency += obj_freq
+                frequency += 1
             ws.write(idx, 11, minutes)
             ws.write(idx, 12, frequency)
 
@@ -152,9 +154,9 @@ def gemba_export2(request):
         line_id = pareto.line_id
         line_name = line.name
 
-        # first column for data
-        line_obj = Line.objects.get(id=line_id)
-        col = line_obj.col_vector
+        col = line_id
+        if col > 0:
+            col *= 4
 
         # from row - depends on the shift
         if shift == AM:
