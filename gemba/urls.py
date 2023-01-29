@@ -45,8 +45,8 @@ urlpatterns = [
     path("daily_oee_view/", views.pareto_view, name="pareto-view"),
     path("daily_pareto_search_result", views.DailyParetoSearchResultsView.as_view(), name="daily-pareto-search-result"),
     path("pareto_details_view/<pk>/", views.pareto_detail_view, name="pareto-detail-view"),
-    # productivity report
-    path("pareto-details/", views.pareto_details_view, name="pareto-details"),
+    # produced report
+    path("pareto_produced_details/", views.pareto_details_view, name="pareto-details"),
     path("pareto_details_search_result/", views.ParetoDetailsSearchResultsView.as_view(),
          name="pareto-details-search-result"),
     # downtimes report
@@ -62,6 +62,8 @@ urlpatterns = [
     # downtimes & scrap report
     path("report_choices/", views.report_choices, name="report-choices"),
     path("scrap_downtime_compare/", views.scrap_downtime_compare, name="scrap-downtime-compare"),
+    path("lines_3/", views.lines_3, name="lines-3"),
+    path("downtime_scrap_set_up/<line_id>/", views.downtime_scrap_set_up, name="downtime-scrap-set-up"),
     # quarantine report
     path("quarantine_view/", views.quarantine_view, name="quarantine-view"),
     # exports and other

@@ -24,7 +24,7 @@ class ParetoTotalQtyDetailForm(forms.Form):
     def clean(self):
         result = super().clean()
         if not self.errors:
-            if result["output"] <= result["good"]:
+            if result["output"] < result["good"]:
                 raise ValidationError("Output should be more than good", code='invalid')
 
 

@@ -87,18 +87,37 @@ def downtime_detail_create(request, pk):
     job = pareto.job_otg
     line = pareto.line
 
-    # make sure this is set up downtime reason
-    if pk == "7":
-        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
-        pareto_before_obj = pareto_before_qs[1]
-        job_before_id = pareto_before_obj.job_id
-        job_before_obj = JobModel2.objects.get(id=job_before_id)
-        job_before = job_before_obj.name
-    else:
-        job_before = ""
-
     if job is None:
         return redirect("gemba_app:pareto-summary")
+
+    # make sure this is "Set up"
+    if pk == "7":
+        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
+        if len(pareto_before_qs) > 1:
+            pareto_before_obj = pareto_before_qs[1]
+            job_before_id = pareto_before_obj.job_id
+            job_before_obj = JobModel2.objects.get(id=job_before_id)
+            job_before = job_before_obj.name
+        else:
+            job_before = ""
+
+        downtime_qs = DowntimeDetail.objects.filter(user=request.user, completed=False, downtime_id=pk, job=job)
+
+        if downtime_qs.exists() and job != job_before:
+            downtime_id = downtime_qs[0].id
+            downtime = DowntimeDetail.objects.get(id=downtime_id)
+            old_time = downtime.minutes
+
+            form = DowntimeMinutes(request.POST or None)
+
+            if form.is_valid():
+                minutes = form.cleaned_data["minutes"]
+                new_time = minutes + old_time
+                downtime.minutes = new_time
+                downtime.save()
+                return redirect("gemba_app:pareto-summary")
+    else:
+        job_before = ""
 
     # downtime_qs = DowntimeDetail.objects.filter(user=request.user, completed=False, downtime_id=pk, job=job)
     #
@@ -135,7 +154,7 @@ def downtime_detail_create(request, pk):
 
 @login_required
 def scrap_detail_create(request, pk):
-    scrap = get_object_or_404(ScrapModel, pk=pk)
+    scrap = ScrapModel.objects.get(pk=pk)
     pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
     pareto = pareto_qs[0]
     pareto_id = pareto.id
@@ -143,18 +162,37 @@ def scrap_detail_create(request, pk):
     job = pareto.job_otg
     line = pareto.line
 
-    # make sure this is set up
-    if pk == "1":
-        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
-        pareto_before_obj = pareto_before_qs[1]
-        job_before_id = pareto_before_obj.job_id
-        job_before_obj = JobModel2.objects.get(id=job_before_id)
-        job_before = job_before_obj.name
-    else:
-        job_before = ""
-
     if job is None:
         return redirect("gemba_app:pareto-summary")
+
+    # make sure this is "Set up"
+    if pk == "1":
+        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
+        if len(pareto_before_qs) > 1:
+            pareto_before_obj = pareto_before_qs[1]
+            job_before_id = pareto_before_obj.job_id
+            job_before_obj = JobModel2.objects.get(id=job_before_id)
+            job_before = job_before_obj.name
+        else:
+            job_before = ""
+
+        scrap_qs = ScrapDetail.objects.filter(user=request.user, completed=False, scrap=scrap, job=job)
+
+        if scrap_qs.exists() and job != job_before:
+            scrap_id = scrap_qs[0].id
+            scrap = ScrapDetail.objects.get(id=scrap_id)
+            old_qty = scrap.qty
+
+            form = ScrapQuantity(request.POST or None)
+
+            if form.is_valid():
+                qty = form.cleaned_data["qty"]
+                new_qty = qty + old_qty
+                scrap.qty = new_qty
+                scrap.save()
+                return redirect("gemba_app:pareto-summary")
+    else:
+        job_before = ""
 
     form = ScrapQuantity(request.POST or None)
     if form.is_valid():
@@ -408,6 +446,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             down_qs = DowntimeDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by(
                 "-modified")
             total_down = 0
+
             if down_qs.exists():
                 for down in down_qs:
                     quantity = down.minutes
@@ -1839,4 +1878,38 @@ def mobile_browser_check(request):
             mobile_browser = True
 
     return mobile_browser
+
+
+def lines_3(request):
+    lines3_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines3.html", {"lines3_qs": lines3_qs})
+
+
+def downtime_scrap_set_up(request, line_id):
+    line = Line.objects.get(pk=line_id)
+    line_name = line.name
+    pareto_detail_qs = ParetoDetail.objects.filter(line=line_id).order_by("-id")
+    down_qs = DowntimeDetail.objects.filter(line=line_id, downtime=4).order_by("-id")
+    scrap_qs = ScrapDetail.objects.filter(line=line_id, scrap=2).order_by("-id")
+
+    report = sorted(
+        chain(pareto_detail_qs, down_qs, scrap_qs),
+        key=lambda obj: obj.created)
+
+    context = {
+        "report": report,
+        "line_name": line_name,
+    }
+    if mobile_browser_check(request):
+        return render(
+            request,
+            template_name="gemba/downtime_scrap_set_up_mobile.html",
+            context=context,
+        )
+    else:
+        return render(
+            request,
+            template_name="gemba/downtime_scrap_set_up.html",
+            context=context,
+        )
 

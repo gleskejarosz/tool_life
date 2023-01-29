@@ -14,14 +14,34 @@
     Operators: {{ pareto_list.ops }} - Available time: {{ available_time }} min - Not scheduled to run:
     {{ pareto_list.not_scheduled_to_run}} min</p>
 <p> Total Downtime: {{ downtime }} min </p>
-<h5 style="color: red;">{% if scrap_compare != 0 %}There is a mistake in your Pareto: Output: {{ output }} -
-    Good: {{ good }} = {{ scrap }}?! Should be {{ scrap|add:scrap_compare }}. Go back to Pareto sheet and fix it. {% endif %}</h5>
-<h5>{% if performance > 100 %} Possibly, there is a mistake in your Pareto: {{ performance }} > 100%.
-    Please go back to Pareto sheet and fix it.{% endif %}</h5>
-<h5>{% if performance < 80 %} Possibly, there is a mistake in your Pareto: Your Performance ({{ performance }}%)
-    is too low. Please go back to Pareto sheet and check it.{% endif %}</h5>
-<h5>{% if quality == 100 %} Possibly, there is a mistake in your Pareto: {{quality }} == 100%.
-    Please go back to Pareto sheet and check it.{% endif %}</h5>
+
+    {% if scrap_compare != 0 %}
+    <div class="alert alert-danger"><strong>Info!</strong>
+    There is a mistake in your Pareto: Output: {{ output }} -
+    Good: {{ good }} = {{ scrap }}?! Should be {{ scrap|add:scrap_compare }}. Go back to Pareto sheet and fix it.
+    </div>
+    {% endif %}
+
+    {% if performance > 100 %}
+    <div class="alert alert-primary"><strong>Info!</strong>
+    Possibly, there is a mistake in your Pareto: Your Performance ({{ performance }}%) > 100%.
+    Please go back to Pareto sheet and fix it.
+    </div>
+    {% endif %}
+
+    {% if performance < 70 %}
+    <div class="alert alert-primary"><strong>Info!</strong>
+    Possibly, there is a mistake in your Pareto: Your Performance ({{ performance }}%)
+    is too low. Please go back to Pareto sheet and check it.
+    </div>
+    {% endif %}
+
+    {% if quality == 100 %}
+    <div class="alert alert-primary"><strong>Info!</strong>
+    Possibly, there is a mistake in your Pareto: Your Quality ({{quality }}%) = 100%.
+    Please go back to Pareto sheet and check it.
+    </div>
+    {% endif %}
 
 <div>
     <div class = "row">

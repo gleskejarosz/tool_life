@@ -158,7 +158,7 @@ class LineModelAdmin(admin.ModelAdmin):
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "name", "description", "calculation", "col_vector", "line_status"],
+            "fields": ["id", "code", "name", "description", "calculation", "line_status"],
         }),
     ]
     readonly_fields = ["id"]
@@ -178,6 +178,19 @@ class JobLineModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
+class TimerModelAdmin(admin.ModelAdmin):
+    ordering = ("-id",)
+    list_display = ("user", "start",)
+    list_display_links = ("user",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "user", "start", "end", "completed"],
+        }),
+    ]
+    readonly_fields = ["id", "user", "start", "end", "completed"]
+
+
 admin.site.register(Pareto, ParetoAdmin)
 admin.site.register(ParetoDetail, ParetoDetailAdmin)
 admin.site.register(DowntimeModel, DowntimeModelAdmin)
@@ -190,6 +203,6 @@ admin.site.register(ScrapUser, ScrapUserModelAdmin)
 admin.site.register(JobModel2, JobModelAdmin2)
 admin.site.register(Editors)
 admin.site.register(LineUser)
-admin.site.register(Timer)
+admin.site.register(Timer, TimerModelAdmin)
 admin.site.register(Line, LineModelAdmin)
 admin.site.register(JobLine, JobLineModelAdmin)
