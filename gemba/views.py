@@ -1889,8 +1889,8 @@ def downtime_scrap_set_up(request, line_id):
     line = Line.objects.get(pk=line_id)
     line_name = line.name
     pareto_detail_qs = ParetoDetail.objects.filter(line=line_id).order_by("-id")
-    down_qs = DowntimeDetail.objects.filter(line=line_id, downtime=4).order_by("-id")
-    scrap_qs = ScrapDetail.objects.filter(line=line_id, scrap=2).order_by("-id")
+    down_qs = DowntimeDetail.objects.filter(line=line_id, downtime=7).order_by("-id")
+    scrap_qs = ScrapDetail.objects.filter(line=line_id, scrap=1).order_by("-id")
 
     report = sorted(
         chain(pareto_detail_qs, down_qs, scrap_qs),
