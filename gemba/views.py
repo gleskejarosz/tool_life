@@ -606,7 +606,8 @@ def count_downtimes(pareto):
         down_code = down_obj.downtime.code
         down_desc = down_obj.downtime.description
         job = down_obj.job.name
-        if down_desc not in downtimes:
+        down_id = down_obj.downtime_id
+        if down_id not in downtimes:
             down_time = down_obj.minutes
             downtimes_list.append({
                 "job": job,
@@ -615,22 +616,26 @@ def count_downtimes(pareto):
                 "minutes": down_time,
                 "frequency": 1,
             })
-            downtimes.append(down_desc)
+            downtimes.append(down_id)
         else:
-            pos = downtimes.index(down_desc)
-            minutes = down_obj.minutes
-            elem_job = downtimes_list[pos]["job"]
-            if elem_job == job:
-                downtimes_list[pos]["minutes"] += minutes
-                downtimes_list[pos]["frequency"] += 1
-            else:
-                downtimes_list.append({
-                    "job": job,
-                    "code": down_code,
-                    "description": down_desc,
-                    "minutes": minutes,
-                    "frequency": 1,
-                })
+            indexes = []
+            for idx, elem in enumerate(downtimes):
+                if elem == down_id:
+                    indexes.append(idx)
+            for pos in indexes:
+                minutes = down_obj.minutes
+                elem_job = downtimes_list[pos]["job"]
+                if elem_job == job:
+                    downtimes_list[pos]["minutes"] += minutes
+                    downtimes_list[pos]["frequency"] += 1
+                else:
+                    downtimes_list.append({
+                        "job": job,
+                        "code": down_code,
+                        "description": down_desc,
+                        "minutes": minutes,
+                        "frequency": 1,
+                        })
     return downtimes_list
 
 
@@ -653,20 +658,24 @@ def count_scraps(pareto):
             })
             scraps.append(scrap_id)
         else:
-            pos = scraps.index(scrap_id)
-            qty = scrap_obj.qty
-            elem_job = scraps_list[pos]["job"]
-            if elem_job == job:
-                scraps_list[pos]["qty"] += qty
-                scraps_list[pos]["frequency"] += 1
-            else:
-                scraps_list.append({
-                    "job": job,
-                    "code": scrap_code,
-                    "description": scrap_desc,
-                    "qty": qty,
-                    "frequency": 1,
-                })
+            indexes = []
+            for idx, elem in enumerate(scraps):
+                if elem == scrap_id:
+                    indexes.append(idx)
+            for pos in indexes:
+                qty = scrap_obj.qty
+                elem_job = scraps_list[pos]["job"]
+                if elem_job == job:
+                    scraps_list[pos]["qty"] += qty
+                    scraps_list[pos]["frequency"] += 1
+                else:
+                    scraps_list.append({
+                        "job": job,
+                        "code": scrap_code,
+                        "description": scrap_desc,
+                        "qty": qty,
+                        "frequency": 1,
+                    })
     return scraps_list
 
 
@@ -1123,7 +1132,7 @@ class DowntimeDetailView(DetailView):
 
 class DowntimeUpdateView(UpdateView):
     model = DowntimeDetail
-    fields = ("job", "minutes", "frequency",)
+    fields = ("job", "minutes", )
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -1331,7 +1340,7 @@ def scrap_user_list(request):
 def job_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
     line = pareto.line
-    job_qs = JobLine.objects.filter(line=line).order_by("job")
+    job_qs = JobLine.objects.filter(line=line).order_by("job__name")
 
     return render(
         request,
@@ -1903,7 +1912,7 @@ def downtime_scrap_set_up(request, line_id):
     if mobile_browser_check(request):
         return render(
             request,
-            template_name="gemba/downtime_scrap_set_up_mobile.html",
+            template_name="gemba/downtime_scrap_set_up.html",
             context=context,
         )
     else:

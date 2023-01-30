@@ -5,6 +5,7 @@
         <thead>
         <tr>
             <th scope="col">Created</th>
+            <th scope="col">Job before</th>
             <th scope="col">Job</th>
             <th scope="col">Output</th>
             <th scope="col">Good</th>
@@ -20,6 +21,7 @@
         {% for object in report %}
             <tr>
                 <td>{{ object.created|date:'d-m-Y H:i' }}</td>
+                <td>{{ object.from_job }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.output }}</td>
                 <td>{{ object.good }}</td>
