@@ -1,23 +1,20 @@
-import csv
 from itertools import chain
 
 import pytz
-import xlwt
 from django.core.paginator import Paginator
-from xlwt import XFStyle, Font
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
-from django.db.models import Q
+
 
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
-    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, OperatorsChoice, ParetoDetailHCBForm, \
+    NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
@@ -90,18 +87,37 @@ def downtime_detail_create(request, pk):
     job = pareto.job_otg
     line = pareto.line
 
-    # make sure this is set up downtime reason
-    if pk == "7":
-        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
-        pareto_before_obj = pareto_before_qs[1]
-        job_before_id = pareto_before_obj.job_id
-        job_before_obj = JobModel2.objects.get(id=job_before_id)
-        job_before = job_before_obj.name
-    else:
-        job_before = ""
-
     if job is None:
         return redirect("gemba_app:pareto-summary")
+
+    # make sure this is "Set up"
+    if pk == "7":
+        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
+        if len(pareto_before_qs) > 1:
+            pareto_before_obj = pareto_before_qs[1]
+            job_before_id = pareto_before_obj.job_id
+            job_before_obj = JobModel2.objects.get(id=job_before_id)
+            job_before = job_before_obj.name
+        else:
+            job_before = ""
+
+        downtime_qs = DowntimeDetail.objects.filter(user=request.user, completed=False, downtime_id=pk, job=job)
+
+        if downtime_qs.exists() and job != job_before:
+            downtime_id = downtime_qs[0].id
+            downtime = DowntimeDetail.objects.get(id=downtime_id)
+            old_time = downtime.minutes
+
+            form = DowntimeMinutes(request.POST or None)
+
+            if form.is_valid():
+                minutes = form.cleaned_data["minutes"]
+                new_time = minutes + old_time
+                downtime.minutes = new_time
+                downtime.save()
+                return redirect("gemba_app:pareto-summary")
+    else:
+        job_before = ""
 
     # downtime_qs = DowntimeDetail.objects.filter(user=request.user, completed=False, downtime_id=pk, job=job)
     #
@@ -138,7 +154,7 @@ def downtime_detail_create(request, pk):
 
 @login_required
 def scrap_detail_create(request, pk):
-    scrap = get_object_or_404(ScrapModel, pk=pk)
+    scrap = ScrapModel.objects.get(pk=pk)
     pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
     pareto = pareto_qs[0]
     pareto_id = pareto.id
@@ -146,18 +162,37 @@ def scrap_detail_create(request, pk):
     job = pareto.job_otg
     line = pareto.line
 
-    # make sure this is set up
-    if pk == "1":
-        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
-        pareto_before_obj = pareto_before_qs[1]
-        job_before_id = pareto_before_obj.job_id
-        job_before_obj = JobModel2.objects.get(id=job_before_id)
-        job_before = job_before_obj.name
-    else:
-        job_before = ""
-
     if job is None:
         return redirect("gemba_app:pareto-summary")
+
+    # make sure this is "Set up"
+    if pk == "1":
+        pareto_before_qs = ParetoDetail.objects.filter(user=request.user).order_by("-id")
+        if len(pareto_before_qs) > 1:
+            pareto_before_obj = pareto_before_qs[1]
+            job_before_id = pareto_before_obj.job_id
+            job_before_obj = JobModel2.objects.get(id=job_before_id)
+            job_before = job_before_obj.name
+        else:
+            job_before = ""
+
+        scrap_qs = ScrapDetail.objects.filter(user=request.user, completed=False, scrap=scrap, job=job)
+
+        if scrap_qs.exists() and job != job_before:
+            scrap_id = scrap_qs[0].id
+            scrap = ScrapDetail.objects.get(id=scrap_id)
+            old_qty = scrap.qty
+
+            form = ScrapQuantity(request.POST or None)
+
+            if form.is_valid():
+                qty = form.cleaned_data["qty"]
+                new_qty = qty + old_qty
+                scrap.qty = new_qty
+                scrap.save()
+                return redirect("gemba_app:pareto-summary")
+    else:
+        job_before = ""
 
     form = ScrapQuantity(request.POST or None)
     if form.is_valid():
@@ -411,6 +446,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             down_qs = DowntimeDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id).order_by(
                 "-modified")
             total_down = 0
+
             if down_qs.exists():
                 for down in down_qs:
                     quantity = down.minutes
@@ -991,61 +1027,6 @@ class DailyParetoSearchResultsView(ListView):
         return object_list
 
 
-def export_daily_oee_report_xls(request):
-    query = request.GET.get("q")
-    report_list = Pareto.objects.filter(
-        Q(pareto_date__exact=query)
-    ).order_by("-user")
-    object_list = get_details_to_display(object_list=report_list)
-
-    response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Daily_OEE_Report.xls"'
-
-    wb = xlwt.Workbook(encoding="utf-8")
-    ws = wb.add_sheet("Report")
-
-    fnt = Font()
-    fnt.height = 300
-    fnt.bold = True
-    style = XFStyle()
-    style.font = fnt
-
-    ws.write(0, 0, f"Daily OEE Report - {object_list[0]['date']}", style)
-    row_num = 2
-
-    row_list = ["id", "user", "shift", "availability", "performance", "quality", "oee"]
-
-    headers = ["Pareto Id", "Line/User", "Shift", "Availability", "Performance", "Quality", "OEE"]
-
-    percentage = ["availability", "performance", "quality", "oee"]
-
-    for col_num in range(len(row_list)):
-        style1 = xlwt.easyxf("font: bold 1")
-        ws.write(1, col_num, headers[col_num], style1)
-
-    style2 = XFStyle()
-    style2.num_format_str = "0%"
-
-    style3 = XFStyle()
-    style3.num_format_str = "D-MMM-YY"
-
-    for row in object_list:
-        for col_num in range(len(row_list)):
-            dict_key = row_list[col_num]
-            elem = row[dict_key]
-            if dict_key == "date":
-                ws.write(row_num, col_num, elem, style3)
-            elif dict_key in percentage:
-                perc_value = elem / 100
-                ws.write(row_num, col_num, perc_value, style2)
-            else:
-                ws.write(row_num, col_num, elem)
-        row_num += 1
-
-    wb.save(response)
-    return response
-
-
 def pareto_view(request):
     today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by("line", "id")
 
@@ -1433,88 +1414,6 @@ def quarantine_view(request):
     )
 
 
-def export_scrap_search_csv(request):
-    query = request.GET.get("q")
-    object_list = ScrapDetail.objects.filter(
-        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
-        Q(scrap__code__icontains=query) | Q(scrap__description__icontains=query) |
-        Q(qty__icontains=query) | Q(job__name__icontains=query) |
-        Q(pareto_id__icontains=query)
-    ).order_by('id')
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="Scrap_reasons.csv"'
-    writer = csv.writer(response)
-    writer.writerow(["Id", "Date", "User/Line", "Code - Description", "Qty", "Job", "Pareto id"])
-    for e in object_list:
-        writer.writerow([e.id,
-                         e.pareto_date,
-                         e.user,
-                         e.scrap,
-                         e.output,
-                         e.job,
-                         e.pareto_id,
-                         ])
-    return response
-
-
-def export_downtime_search_result_csv(request):
-    query = request.GET.get("q")
-    object_list = DowntimeDetail.objects.filter(
-        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
-        Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
-        Q(minutes__icontains=query) | Q(job__name__icontains=query) |
-        Q(pareto_id__icontains=query)
-    ).order_by('id')
-    response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="Downtime_reasons.csv"'
-    writer = csv.writer(response)
-    writer.writerow(["Id", "Date", "User/Line", "Code - Description", "Minutes", "Job", "Pareto id"])
-    for e in object_list:
-        writer.writerow([e.id,
-                         e.pareto_date,
-                         e.user,
-                         e.downtime,
-                         e.minutes,
-                         e.job,
-                         e.pareto_id,
-                         ])
-    return response
-
-def export_downtimes_xls(request):
-    query = request.GET.get("q")
-    object_list = DowntimeDetail.objects.filter(
-        Q(pareto_date__icontains=query) | Q(user__username__icontains=query) |
-        Q(downtime__code__icontains=query) | Q(downtime__description__icontains=query) |
-        Q(minutes__icontains=query) | Q(job__name__icontains=query) |
-        Q(pareto_id__icontains=query)
-    ).order_by('id')
-
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="Downtime_reasons.xls"'
-
-    wb = xlwt.Workbook(encoding='utf-8')
-    ws = wb.add_sheet('Report')
-
-    row_num = 1
-    rows = object_list.values('id', 'pareto_date', 'user__username', 'downtime__code', 'downtime__description',
-                              'minutes', 'job__name', 'pareto_id')
-    row_list = ['id', 'pareto_date', 'user__username', 'downtime__code', 'downtime__description',
-                'minutes', 'job__name', 'pareto_id']
-    headers = ["Id", "Pareto date", "Line / User", "Code", "Description", "Minutes", "Job", "Pareto Id"]
-    for col_num in range(len(row_list)):
-        style = xlwt.easyxf('font: bold 1')
-        ws.write(0, col_num, headers[col_num], style)
-
-    for row in rows:
-        for col_num in range(len(row_list)):
-            elem = row[row_list[col_num]]
-            ws.write(row_num, col_num, elem)
-        row_num += 1
-    wb.save(response)
-
-    return response
-
-
 class ParetoNSUpdateView(UpdateView):
     model = Pareto
     template_name = "form.html"
@@ -1652,28 +1551,30 @@ def scrap_rate_report_by_week(request, line_id):
 
     total_all_output = 0
     total_all_weeks = 0
-    for week_num in range(9):
+    range_list = [a for a in range(9)]
+    reversed_range_list = reversed(range_list)
+    for week_num, idx in enumerate(reversed_range_list):
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
         scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
         total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(created__gte=start_sunday,
                                                                            created__lt=end_sunday)
-
         total_weekly = 0
         key_qty = "qty_" + str(week_num)
 
         # total scrap per reason, for week, period summary total, row sum up
         for obj in scrap_qs:
             obj_name = obj.scrap.description
-            pos = scrap_list.index(obj_name)
-            qty = obj.qty
-            total_weekly += qty
-            total_all_weeks += qty
-            report[pos]["total"] += qty
-            report[pos][key_qty] += qty
+            if obj_name in scrap_list:
+                pos = scrap_list.index(obj_name)
+                qty = obj.qty
+                total_weekly += qty
+                total_all_weeks += qty
+                report[pos]["total"] += qty
+                report[pos][key_qty] += qty
 
         # assigning total weekly scrap qty to totals
         key_total = "total_weekly_" + str(week_num)
@@ -1737,7 +1638,6 @@ def scrap_rate_report_by_week(request, line_id):
 
 
 def downtime_rate_report_by_week(request, line_id):
-    # line = Line.objects.get(pk=line_id)
     today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
 
     report = []
@@ -1818,9 +1718,11 @@ def downtime_rate_report_by_week(request, line_id):
     }
     total_all_output = 0
     total_all_weeks = 0
-    for week_num in range(9):
+    range_list = [a for a in range(9)]
+    reversed_range_list = reversed(range_list)
+    for week_num, idx in enumerate(reversed_range_list):
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=week_num * 7)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
@@ -1844,12 +1746,13 @@ def downtime_rate_report_by_week(request, line_id):
         # total downtime per reason, for week, period summary total, row sum up
         for obj in down_qs:
             obj_name = obj.downtime.description
-            pos = down_list.index(obj_name)
-            minutes = obj.minutes
-            total_weekly += minutes
-            total_all_weeks += minutes
-            report[pos]["total"] += minutes
-            report[pos][key_qty] += minutes
+            if obj_name in down_list:
+                pos = down_list.index(obj_name)
+                minutes = obj.minutes
+                total_weekly += minutes
+                total_all_weeks += minutes
+                report[pos]["total"] += minutes
+                report[pos][key_qty] += minutes
 
         # assigning total weekly downtime minutes to totals
         key_total = "total_weekly_" + str(week_num)
@@ -1942,23 +1845,22 @@ def scrap_downtime_compare(request):
         chain(down_qs, scrap_qs),
         key=lambda obj: obj.created)
 
+    context = {
+        "report": report,
+        "line_name": line_name,
+        "date": date_to_display,
+    }
     if mobile_browser_check(request):
         return render(
             request,
             template_name="gemba/scrap_downtime_compare_mobile.html",
-            context={
-                "report": report,
-                "line_name": line_name,
-            },
+            context=context,
         )
     else:
         return render(
             request,
             template_name="gemba/scrap_downtime_compare.html",
-            context={
-                "report": report,
-                "line_name": line_name,
-            },
+            context=context,
         )
 
 
@@ -1969,7 +1871,6 @@ def mobile_browser_check(request):
     # returns True for mobile devices
 
     mobile_browser = False
-    # ua = request.META['HTTP_USER_AGENT'].lower()[0:4]
     ua = request.META['HTTP_USER_AGENT'].lower()
 
     for hint in mobile_ua_hints:
@@ -1977,4 +1878,38 @@ def mobile_browser_check(request):
             mobile_browser = True
 
     return mobile_browser
+
+
+def lines_3(request):
+    lines3_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines3.html", {"lines3_qs": lines3_qs})
+
+
+def downtime_scrap_set_up(request, line_id):
+    line = Line.objects.get(pk=line_id)
+    line_name = line.name
+    pareto_detail_qs = ParetoDetail.objects.filter(line=line_id).order_by("-id")
+    down_qs = DowntimeDetail.objects.filter(line=line_id, downtime=7).order_by("-id")
+    scrap_qs = ScrapDetail.objects.filter(line=line_id, scrap=1).order_by("-id")
+
+    report = sorted(
+        chain(pareto_detail_qs, down_qs, scrap_qs),
+        key=lambda obj: obj.created)
+
+    context = {
+        "report": report,
+        "line_name": line_name,
+    }
+    if mobile_browser_check(request):
+        return render(
+            request,
+            template_name="gemba/downtime_scrap_set_up_mobile.html",
+            context=context,
+        )
+    else:
+        return render(
+            request,
+            template_name="gemba/downtime_scrap_set_up.html",
+            context=context,
+        )
 

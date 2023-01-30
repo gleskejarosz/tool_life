@@ -128,7 +128,7 @@ class DowntimeDetail(models.Model):
         verbose_name = "Downtime Detail"
 
     def save(self, *args, **kwargs):
-        self.modified = datetime.now()
+        self.modified = datetime.now(tz=pytz.UTC)
         super().save(*args, **kwargs)
 
 
@@ -210,10 +210,7 @@ class LineHourModel(models.Model):
 
 class JobModel2(models.Model):
     name = models.CharField(max_length=64)
-    # target = models.IntegerField(default=0)
     inner_size = models.PositiveSmallIntegerField(default=1)
-    # line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines11", blank=True, null=True)
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"
@@ -253,7 +250,6 @@ class Line(models.Model):
     description = models.CharField(max_length=64, blank=True, null=True)
     line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
     calculation = models.CharField(max_length=32, choices=CALCULATION_CHOICES, blank=False, default=HCI)
-    # col_vector = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name}"

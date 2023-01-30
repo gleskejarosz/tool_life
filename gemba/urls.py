@@ -45,8 +45,8 @@ urlpatterns = [
     path("daily_oee_view/", views.pareto_view, name="pareto-view"),
     path("daily_pareto_search_result", views.DailyParetoSearchResultsView.as_view(), name="daily-pareto-search-result"),
     path("pareto_details_view/<pk>/", views.pareto_detail_view, name="pareto-detail-view"),
-    # productivity report
-    path("pareto-details/", views.pareto_details_view, name="pareto-details"),
+    # produced report
+    path("pareto_produced_details/", views.pareto_details_view, name="pareto-details"),
     path("pareto_details_search_result/", views.ParetoDetailsSearchResultsView.as_view(),
          name="pareto-details-search-result"),
     # downtimes report
@@ -62,13 +62,15 @@ urlpatterns = [
     # downtimes & scrap report
     path("report_choices/", views.report_choices, name="report-choices"),
     path("scrap_downtime_compare/", views.scrap_downtime_compare, name="scrap-downtime-compare"),
+    path("lines_3/", views.lines_3, name="lines-3"),
+    path("downtime_scrap_set_up/<line_id>/", views.downtime_scrap_set_up, name="downtime-scrap-set-up"),
     # quarantine report
     path("quarantine_view/", views.quarantine_view, name="quarantine-view"),
     # exports and other
-    path("export_scrap_csv/", views.export_scrap_search_csv, name="export-scrap-csv"),
-    path("export_downtimes_csv/", views.export_downtime_search_result_csv, name="export-downtimes-csv"),
-    path("export_downtimes_xls/", views.export_downtimes_xls, name="export-downtimes-xls"),
-    path("export_daily_oee_report/", views.export_daily_oee_report_xls, name="export_daily_oee_report"),
+    path("export_scrap_csv/", views_export.export_scrap_search_csv, name="export-scrap-csv"),
+    path("export_downtimes_csv/", views_export.export_downtime_search_result_csv, name="export-downtimes-csv"),
+    path("export_downtimes_xls/", views_export.export_downtimes_xls, name="export-downtimes-xls"),
+    path("export_daily_oee_report/", views_export.export_daily_oee_report_xls, name="export_daily_oee_report"),
     path("export_to_gemba/", views_export.gemba_export2, name="export-to-gemba"),
     path("tableau/<pk>/", views_export.tableau_export, name="tableau"),
     path("chart/", views.EditorChartView.as_view(), name="chart"),

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Produced & Downtime & Scrap Set Up Compare View for {{ line_name }}</h4>
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Created</th>
+            <th scope="col">Job</th>
+            <th scope="col">Output</th>
+            <th scope="col">Good</th>
+            <th scope="col">Scrap</th>
+            <th scope="col">Downtime</th>
+            <th scope="col">Minutes</th>
+            <th scope="col">Scrap</th>
+            <th scope="col">Qty</th>
+            <th scope="col">Pareto ID</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in report %}
+            <tr>
+                <td>{{ object.created|date:'d-m-Y H:i' }}</td>
+                <td>{{ object.job }}</td>
+                <td>{{ object.output }}</td>
+                <td>{{ object.good }}</td>
+                <td>{% if object.scrap > 0 %}{{ object.scrap }} {% endif %}</td>
+                <td>{% if object.downtime is not None %} {{ object.downtime }} {% endif %}</td>
+                <td>{% if object.downtime is not None %}{% if object.min == 0 %} {% else %}{{ object.minutes }} min
+                    {% endif %}{% endif %}</td>
+                <td>{% if object.scrap is not None %}{% if object.scrap > 0 %} {% else %}
+                    {{ object.scrap.code }} - {{ object.scrap.description }} {% endif %}{% endif %}</td>
+                <td>{% if object.scrap is not None %}{% if object.scrap > 0 %} {% else %}{% if object.qty == 0 %}
+                    {% else %}{{ object.qty }} parts {% endif %} {% endif %}{% endif %}</td>
+                <td>{{ object.pareto_id }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %}
