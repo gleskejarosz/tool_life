@@ -601,14 +601,16 @@ def oee_cal(availability, performance, quality):
 
 def count_downtimes(pareto):
     downtimes = []
+    jobs = []
     downtimes_list = []
+
     for down_obj in pareto.downtimes.all():
         down_code = down_obj.downtime.code
         down_desc = down_obj.downtime.description
-        job = down_obj.job.name
+        down_time = down_obj.minutes
         down_id = down_obj.downtime_id
+        job = down_obj.job.name
         if down_id not in downtimes:
-            down_time = down_obj.minutes
             downtimes_list.append({
                 "job": job,
                 "code": down_code,
@@ -617,38 +619,37 @@ def count_downtimes(pareto):
                 "frequency": 1,
             })
             downtimes.append(down_id)
+            jobs.append(job)
         else:
-            indexes = []
-            for idx, elem in enumerate(downtimes):
-                if elem == down_id:
-                    indexes.append(idx)
-            for pos in indexes:
-                minutes = down_obj.minutes
-                elem_job = downtimes_list[pos]["job"]
-                if elem_job == job:
-                    downtimes_list[pos]["minutes"] += minutes
-                    downtimes_list[pos]["frequency"] += 1
-                else:
-                    downtimes_list.append({
-                        "job": job,
-                        "code": down_code,
-                        "description": down_desc,
-                        "minutes": minutes,
-                        "frequency": 1,
-                        })
+            pos = downtimes.index(down_id)
+            job_elem = jobs[pos]
+            if job == job_elem:
+                downtimes_list[pos]["minutes"] += down_time
+                downtimes_list[pos]["frequency"] += 1
+            else:
+                downtimes_list.append({
+                    "job": job,
+                    "code": down_code,
+                    "description": down_desc,
+                    "minutes": down_time,
+                    "frequency": 1,
+                })
+                downtimes.append(down_id)
+                jobs.append(job)
     return downtimes_list
 
 
 def count_scraps(pareto):
     scraps = []
+    jobs = []
     scraps_list = []
     for scrap_obj in pareto.scrap.all():
         scrap_code = scrap_obj.scrap.code
         scrap_desc = scrap_obj.scrap.description
         scrap_id = scrap_obj.scrap_id
+        scrap_qty = scrap_obj.qty
         job = scrap_obj.job.name
         if scrap_id not in scraps:
-            scrap_qty = scrap_obj.qty
             scraps_list.append({
                 "job": job,
                 "code": scrap_code,
@@ -657,25 +658,24 @@ def count_scraps(pareto):
                 "frequency": 1,
             })
             scraps.append(scrap_id)
+            jobs.append(job)
         else:
-            indexes = []
-            for idx, elem in enumerate(scraps):
-                if elem == scrap_id:
-                    indexes.append(idx)
-            for pos in indexes:
-                qty = scrap_obj.qty
-                elem_job = scraps_list[pos]["job"]
-                if elem_job == job:
-                    scraps_list[pos]["qty"] += qty
-                    scraps_list[pos]["frequency"] += 1
-                else:
-                    scraps_list.append({
-                        "job": job,
-                        "code": scrap_code,
-                        "description": scrap_desc,
-                        "qty": qty,
-                        "frequency": 1,
-                    })
+            pos = scraps.index(scrap_id)
+            job_elem = jobs[pos]
+            if job == job_elem:
+                scraps_list[pos]["qty"] += scrap_qty
+                scraps_list[pos]["frequency"] += 1
+            else:
+                scraps_list.append({
+                    "job": job,
+                    "code": scrap_code,
+                    "description": scrap_desc,
+                    "qty": scrap_qty,
+                    "frequency": 1,
+                })
+                scraps.append(scrap_id)
+                jobs.append(job)
+
     return scraps_list
 
 
