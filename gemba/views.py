@@ -190,6 +190,7 @@ def pareto_detail_create(request):
     pareto = pareto_qs[0]
     job = pareto.job_otg
     ops = pareto.ops_otg
+    pareto_id = pareto.id
 
     line = pareto.line
     if job is None:
@@ -200,7 +201,7 @@ def pareto_detail_create(request):
     job_obj = job_qs[0]
     target = job_obj.target
     takt_time = round(60 / target, ndigits=5)
-    pareto_details_qs = ParetoDetail.objects.filter(user=user, completed=False, job=job)
+    pareto_details_qs = ParetoDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
 
     total_output = 0
     total_good = 0
@@ -209,7 +210,6 @@ def pareto_detail_create(request):
         total_output += elem.output
         total_good += elem.good
 
-    pareto_id = pareto.id
     pareto_date = pareto.pareto_date
     line_qs = Line.objects.filter(name=line)
     calc_option = line_qs[0].calculation
@@ -234,7 +234,7 @@ def pareto_detail_create(request):
                     rework_cal += scrap_elem.qty
 
             if pareto_details_qs.exists():
-                pareto_elem = ParetoDetail.objects.get(user=user, job=job, pareto_id=pareto_id)
+                pareto_elem = ParetoDetail.objects.get(user=user, completed=False, job=job, pareto_id=pareto_id)
                 pareto_elem.output += new_output
                 pareto_elem.good += new_good
                 pareto_elem.scrap = scrap
@@ -345,7 +345,7 @@ def pareto_detail_create(request):
             output = old_good + good + scrap
 
             if pareto_details_qs.exists():
-                pareto_elem = ParetoDetail.objects.get(user=user, job=job, pareto_id=pareto_id)
+                pareto_elem = ParetoDetail.objects.get(user=user, completed=False, job=job, pareto_id=pareto_id)
                 pareto_elem.output = output
                 pareto_elem.good += good
                 pareto_elem.scrap = scrap
