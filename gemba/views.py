@@ -602,8 +602,8 @@ def oee_cal(availability, performance, quality):
 
 def count_downtimes(pareto):
     downtimes = []
-    jobs = []
     downtimes_list = []
+    founded = 0
 
     for down_obj in pareto.downtimes.all():
         down_code = down_obj.downtime.code
@@ -613,6 +613,7 @@ def count_downtimes(pareto):
         job = down_obj.job.name
         if down_id not in downtimes:
             downtimes_list.append({
+                "down_id": down_id,
                 "job": job,
                 "code": down_code,
                 "description": down_desc,
@@ -620,23 +621,26 @@ def count_downtimes(pareto):
                 "frequency": 1,
             })
             downtimes.append(down_id)
-            jobs.append(job)
         else:
-            pos = downtimes.index(down_id)
-            job_elem = jobs[pos]
-            if job == job_elem:
-                downtimes_list[pos]["minutes"] += down_time
-                downtimes_list[pos]["frequency"] += 1
-            else:
+            for down_elem in downtimes_list:
+                job_elem = down_elem["job"]
+                down_elem_id = down_elem["down_id"]
+                if job == job_elem and down_id == down_elem_id:
+                    down_elem["minutes"] += down_time
+                    down_elem["frequency"] += 1
+                    founded += 1
+                    break
+            if founded == 0:
                 downtimes_list.append({
-                    "job": job,
-                    "code": down_code,
-                    "description": down_desc,
-                    "minutes": down_time,
-                    "frequency": 1,
+                        "down_id": down_id,
+                        "job": job,
+                        "code": down_code,
+                        "description": down_desc,
+                        "minutes": down_time,
+                        "frequency": 1,
                 })
                 downtimes.append(down_id)
-                jobs.append(job)
+            founded = 0
     return downtimes_list
 
 
@@ -651,40 +655,33 @@ def count_scraps(pareto):
         scrap_qty = scrap_obj.qty
         job = scrap_obj.job.name
         if scrap_id not in scraps:
-            b = {
+            scraps_list.append({
                 "scrap_id": scrap_id,
                 "job": job,
                 "code": scrap_code,
                 "description": scrap_desc,
                 "qty": scrap_qty,
                 "frequency": 1,
-            }
-            print(scraps)
-            print(b)
-            scraps_list.append(b)
+            })
             scraps.append(scrap_id)
         else:
             for scrap_elem in scraps_list:
                 job_elem = scrap_elem["job"]
                 scrap_elem_id = scrap_elem["scrap_id"]
-                print(f"{scrap_elem_id} == {scrap_id} and {job} == {job_elem}")
                 if job == job_elem and scrap_id == scrap_elem_id:
                     scrap_elem["qty"] += scrap_qty
                     scrap_elem["frequency"] += 1
-                    print(f"{scrap_elem} + {scrap_qty}")
                     founded += 1
                     break
             if founded == 0:
-                a = {
-                    "scrap_id": scrap_id,
-                    "job": job,
-                    "code": scrap_code,
-                    "description": scrap_desc,
-                    "qty": scrap_qty,
-                    "frequency": 1,
-                    }
-                scraps_list.append(a)
-                print(a)
+                scraps_list.append({
+                        "scrap_id": scrap_id,
+                        "job": job,
+                        "code": scrap_code,
+                        "description": scrap_desc,
+                        "qty": scrap_qty,
+                        "frequency": 1,
+                })
                 scraps.append(scrap_id)
             founded = 0
     return scraps_list
