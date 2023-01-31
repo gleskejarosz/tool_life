@@ -643,6 +643,7 @@ def count_downtimes(pareto):
 def count_scraps(pareto):
     scraps = []
     scraps_list = []
+    founded = 0
     for scrap_obj in pareto.scrap.all():
         scrap_code = scrap_obj.scrap.code
         scrap_desc = scrap_obj.scrap.description
@@ -650,34 +651,42 @@ def count_scraps(pareto):
         scrap_qty = scrap_obj.qty
         job = scrap_obj.job.name
         if scrap_id not in scraps:
-            scraps_list.append({
+            b = {
                 "scrap_id": scrap_id,
                 "job": job,
                 "code": scrap_code,
                 "description": scrap_desc,
                 "qty": scrap_qty,
                 "frequency": 1,
-            })
+            }
+            print(scraps)
+            print(b)
+            scraps_list.append(b)
             scraps.append(scrap_id)
         else:
             for scrap_elem in scraps_list:
                 job_elem = scrap_elem["job"]
                 scrap_elem_id = scrap_elem["scrap_id"]
+                print(f"{scrap_elem_id} == {scrap_id} and {job} == {job_elem}")
                 if job == job_elem and scrap_id == scrap_elem_id:
                     scrap_elem["qty"] += scrap_qty
                     scrap_elem["frequency"] += 1
-                elif job != job_elem and scrap_id == scrap_elem_id:
-                    scraps_list.append({
-                        "scrap_id": scrap_id,
-                        "job": job,
-                        "code": scrap_code,
-                        "description": scrap_desc,
-                        "qty": scrap_qty,
-                        "frequency": 1,
-                    })
-                    scraps.append(scrap_id)
-                else:
+                    print(f"{scrap_elem} + {scrap_qty}")
+                    founded += 1
                     break
+            if founded == 0:
+                a = {
+                    "scrap_id": scrap_id,
+                    "job": job,
+                    "code": scrap_code,
+                    "description": scrap_desc,
+                    "qty": scrap_qty,
+                    "frequency": 1,
+                    }
+                scraps_list.append(a)
+                print(a)
+                scraps.append(scrap_id)
+            founded = 0
     return scraps_list
 
 
