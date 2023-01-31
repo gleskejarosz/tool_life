@@ -1,13 +1,36 @@
 {% extends "base.html" %}
 {% block content %}
+{% load widget_tweaks %}
+<div>
+<div>
+    <div class = "row">
+    <div class = "col">
 <h4>Scrap reasons:</h4>
 {% if message_status == "Display" %}
     <div class="alert alert-primary">
     <strong>Info!</strong> You should <a href="{% url 'gemba_app:job-user-view' %}" class="alert-link">choose a job first!</a>
     </div>
 {% endif %}
-
+</div>
+    <div class = "col">
+<form method="get">
+    <div class="well">
+      <p><a href="{% url 'gemba_app:scrap-user-view' %}">Clear all filters</a></p>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.code.label_tag }}
+          {% render_field filter.form.code class="form-control" %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+</form>
+</div>
+</div>
 <div>
+    <div class = "row">
     <br/>
     <table class="table table-bordered">
         <thead>
@@ -20,88 +43,83 @@
         </tr>
         </thead>
         <tbody>
-        {% if items_list.all|length == 0 %}
-              <tr>
-                <td colspan='5'>No reasons to select</td>
-              </tr>
-        {% endif %}
     <tr>
-    {% for item in items_list|slice:"0:5" %}
+    {% for item in filter.qs|slice:"0:5" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in items_list|slice:"5:10" %}
+    {% for item in filter.qs|slice:"5:10" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in items_list|slice:"10:15" %}
+    {% for item in filter.qs|slice:"10:15" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"15:20" %}
+    {% for item in filter.qs|slice:"15:20" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"20:25" %}
+    {% for item in filter.qs|slice:"20:25" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"25:30" %}
+    {% for item in filter.qs|slice:"25:30" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"30:35" %}
+    {% for item in filter.qs|slice:"30:35" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"35:40" %}
+    {% for item in filter.qs|slice:"35:40" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"40:45" %}
+    {% for item in filter.qs|slice:"40:45" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"45:50" %}
+    {% for item in filter.qs|slice:"45:50" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"50:55" %}
+    {% for item in filter.qs|slice:"50:55" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"55:60" %}
+    {% for item in filter.qs|slice:"55:60" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"60:65" %}
+    {% for item in filter.qs|slice:"60:65" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"65:70" %}
+    {% for item in filter.qs|slice:"65:70" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"70:75" %}
+    {% for item in filter.qs|slice:"70:75" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>
         <tr>
-    {% for item in items_list|slice:"75:80" %}
+    {% for item in filter.qs|slice:"75:80" %}
     <td><a href="{% url 'gemba_app:scrap-detail-create' pk=item.scrap.pk %}">{{ item.scrap }}</a></td>
     {% endfor %}
     </tr>

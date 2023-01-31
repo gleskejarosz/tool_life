@@ -24,3 +24,11 @@ class DailyParetoFilter(django_filters.FilterSet):
 #     class Meta:
 #         model = ParetoDetail
 #         fields = "__all__"
+
+
+class DowntimeFilter(django_filters.FilterSet):
+    code = django_filters.CharFilter(field_name='downtime__code', label="Code", lookup_expr="contains")
+
+
+class ScrapFilter(django_filters.FilterSet):
+    code = django_filters.CharFilter(field_name='scrap__code', label="Code", lookup_expr="contains")

@@ -2,13 +2,14 @@ import csv
 
 import xlwt
 from django.contrib.auth.decorators import login_required
+from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
 from django.http import HttpResponse
 from xlwt import XFStyle, Font
 
 from gemba.models import Pareto, AM, PM, NS, ScrapUser, ScrapModel, ScrapDetail, DowntimeUser, DowntimeModel,\
     DowntimeDetail
-from gemba.views import get_details_to_display
+from gemba.views import get_details_to_display, oee_calculation, count_downtimes, count_scraps
 
 
 @login_required
@@ -415,3 +416,24 @@ def export_downtimes_xls(request):
     wb.save(response)
 
     return response
+
+import io
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+
+
+def export_pareto_to_pdf(request, pk):
+    pareto = Pareto.objects.get(pk=pk)
+
+    report_list = oee_calculation(pareto)
+    downtimes_list = count_downtimes(pareto)
+    scraps_list = count_scraps(pareto)
+
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer)
+    p.drawString(100, 100, "Hello word.")
+    p.showPage()
+    p.save()
+    buffer.seek(0)
+    return FileResponse(buffer, as_attachment=True, filename="hello.pdf")
+

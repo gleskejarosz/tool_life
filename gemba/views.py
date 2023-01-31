@@ -1,3 +1,4 @@
+import io
 from itertools import chain
 
 import pytz
@@ -12,7 +13,7 @@ from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 
-
+from gemba.filters import DowntimeFilter, ScrapFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm
@@ -641,7 +642,6 @@ def count_downtimes(pareto):
 
 def count_scraps(pareto):
     scraps = []
-    jobs = []
     scraps_list = []
     for scrap_obj in pareto.scrap.all():
         scrap_code = scrap_obj.scrap.code
@@ -651,6 +651,7 @@ def count_scraps(pareto):
         job = scrap_obj.job.name
         if scrap_id not in scraps:
             scraps_list.append({
+                "scrap_id": scrap_id,
                 "job": job,
                 "code": scrap_code,
                 "description": scrap_desc,
@@ -658,24 +659,25 @@ def count_scraps(pareto):
                 "frequency": 1,
             })
             scraps.append(scrap_id)
-            jobs.append(job)
         else:
-            pos = scraps.index(scrap_id)
-            job_elem = jobs[pos]
-            if job == job_elem:
-                scraps_list[pos]["qty"] += scrap_qty
-                scraps_list[pos]["frequency"] += 1
-            else:
-                scraps_list.append({
-                    "job": job,
-                    "code": scrap_code,
-                    "description": scrap_desc,
-                    "qty": scrap_qty,
-                    "frequency": 1,
-                })
-                scraps.append(scrap_id)
-                jobs.append(job)
-
+            for scrap_elem in scraps_list:
+                job_elem = scrap_elem["job"]
+                scrap_elem_id = scrap_elem["scrap_id"]
+                if job == job_elem and scrap_id == scrap_elem_id:
+                    scrap_elem["qty"] += scrap_qty
+                    scrap_elem["frequency"] += 1
+                elif job != job_elem and scrap_id == scrap_elem_id:
+                    scraps_list.append({
+                        "scrap_id": scrap_id,
+                        "job": job,
+                        "code": scrap_code,
+                        "description": scrap_desc,
+                        "qty": scrap_qty,
+                        "frequency": 1,
+                    })
+                    scraps.append(scrap_id)
+                else:
+                    break
     return scraps_list
 
 
@@ -1301,6 +1303,7 @@ def downtime_user_list(request):
         timer_obj = ""
 
     items_list = DowntimeUser.objects.filter(line=line).filter(order__gt=0).order_by("order")
+    items_filter = DowntimeFilter(request.GET, queryset=items_list)
 
     return render(
         request,
@@ -1308,7 +1311,7 @@ def downtime_user_list(request):
         context={
             "pareto": pareto,
             "message_status": message_status,
-            "items_list": items_list,
+            "filter": items_filter,
             "timer_obj": timer_obj,
             "down_length": down_length,
         },
@@ -1325,6 +1328,7 @@ def scrap_user_list(request):
         message_status = "Display"
 
     items_list = ScrapUser.objects.filter(line=line).filter(order__gt=0).order_by("order")
+    items_filter = ScrapFilter(request.GET, queryset=items_list)
 
     return render(
         request,
@@ -1332,7 +1336,7 @@ def scrap_user_list(request):
         context={
             "pareto": pareto,
             "message_status": message_status,
-            "items_list": items_list,
+            "filter": items_filter,
         },
     )
 
