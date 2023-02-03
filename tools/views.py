@@ -1,6 +1,6 @@
 import csv
 
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -11,6 +11,7 @@ from tools.forms import ToolChangeForm, AddTool
 from tools.models import OperationModel, ToolStationModel, ToolJobModel, SPARE, USE
 
 
+@staff_member_required
 def index(request):
     return render(
         request,
@@ -18,7 +19,7 @@ def index(request):
     )
 
 
-@login_required
+@staff_member_required
 def change_tool(request, tool_id):
     tool_obj = ToolStationModel.objects.get(id=tool_id)
     tool_type = tool_obj.tool_type
@@ -59,6 +60,7 @@ def change_tool(request, tool_id):
     )
 
 
+@staff_member_required
 def select_tool(request):
     tools_qs = ToolStationModel.objects.filter(machine__line_status=PRODUCTIVE).order_by("machine__name", "station__name")
     tools_filter = ToolFilter(request.GET, queryset=tools_qs)
@@ -70,12 +72,14 @@ def select_tool(request):
                   })
 
 
+@staff_member_required
 def tool_actions_view(request):
     operations = OperationModel.objects.all().order_by("-start_date")
     operations_filter = OperationFilter(request.GET, queryset=operations)
     return render(request, "tools/tool_actions.html", {"filter": operations_filter})
 
 
+@staff_member_required
 def export_csv(request):
     operations = OperationModel.objects.all()
     search_result = OperationFilter(request.GET, queryset=operations).qs
@@ -94,6 +98,7 @@ def export_csv(request):
     return response
 
 
+@staff_member_required
 def tool_in_use(request):
     tools_in_use = OperationModel.objects.filter(status=False).order_by("machine", "station")
     return render(request, template_name="tools/in_use.html", context={"tools_list": tools_in_use})
@@ -120,16 +125,19 @@ def tools_update(job, output, target, modified):
             action.save()
 
 
+@staff_member_required
 def machines_view(request):
     machine_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     return render(request, "tools/machines.html", {"machine_qs": machine_qs})
 
 
+@staff_member_required
 def machines_view_3(request):
     machine_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     return render(request, "tools/machines_3.html", {"machine_qs": machine_qs})
 
 
+@staff_member_required
 def tools_vs_jobs(request, machine_id):
     # machine = Line.objects.get(pk=machine_id)
     tools_qs = ToolJobModel.objects.all().order_by("job__name")
@@ -156,6 +164,7 @@ def tools_vs_jobs(request, machine_id):
     )
 
 
+@staff_member_required
 def tools_vs_jobs_table(request, machine_id):
     machine = Line.objects.get(pk=machine_id)
 
@@ -205,6 +214,7 @@ def tools_vs_jobs_table(request, machine_id):
     )
 
 
+@staff_member_required
 def update_tool_vs_job(request, pk):
     tool_job_obj = ToolJobModel.objects.get(pk=pk)
     tool_id = tool_job_obj.tool_id
@@ -219,11 +229,13 @@ def update_tool_vs_job(request, pk):
     return HttpResponseRedirect(reverse('tools_app:tools-vs-jobs', kwargs={'machine_id': machine_id}))
 
 
+@staff_member_required
 def machines_view2(request):
     machine_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     return render(request, "tools/tools_machines.html", {"machine_qs": machine_qs})
 
 
+@staff_member_required
 def tools_on_the_machine(request, machine_id):
     machine = get_object_or_404(Line, pk=machine_id)
     machine_name = machine.name
@@ -241,6 +253,7 @@ def tools_on_the_machine(request, machine_id):
     )
 
 
+@staff_member_required
 def add_tool(request, machine_id):
     machine = get_object_or_404(Line, pk=machine_id)
 

@@ -14,8 +14,10 @@
                 <th scope="col">Job</th>
                 <th scope="col">Output</th>
                 <th scope="col">Good</th>
+                <th scope="col">Rework Good</th>
                 <th scope="col">Scrap</th>
                 <th scope="col">Takt time</th>
+                <th scope="col">Operators</th>
                 <th scope="col">Pareto ID</th>
                 <th scope="col">Pareto Date</th>
             </tr>
@@ -28,8 +30,10 @@
                 <td>{{ object.job }}</td>
                 <td>{{ object.output }}</td>
                 <td>{{ object.good }}</td>
+                <td>{{ object.rework }}</td>
                 <td>{{ object.scrap }}</td>
                 <td>{{ object.takt_time }}</td>
+                <td>{{ object.ops }}</td>
                 <td>{{ object.pareto_id }}</td>
                 <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
             </tr>

@@ -166,13 +166,13 @@ class LineModelAdmin(admin.ModelAdmin):
 
 class JobLineModelAdmin(admin.ModelAdmin):
     ordering = ("job",)
-    list_display = ("job", "target", "line", )
+    list_display = ("job", "target", "line", "factor")
     list_display_links = ("job",)
     list_per_page = 20
     list_filter = ("line",)
     fieldsets = [
         ("General", {
-            "fields": ["id", "job", "target", "line"],
+            "fields": ["id", "job", "target", "line", "factor"],
         }),
     ]
     readonly_fields = ["id"]

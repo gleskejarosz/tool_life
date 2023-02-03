@@ -11,6 +11,7 @@
             <th scope="col">Line</th>
             <th scope="col">Shift</th>
             <th scope="col">Job OTG/End</th>
+            <th scope="col">OPs OTG/End</th>
             <th scope="col">Availability</th>
             <th scope="col">Performance</th>
             <th scope="col">Quality</th>
@@ -24,6 +25,7 @@
             <td>{{ item.line }}</td>
             <td>{{ item.shift }}</td>
             <td>{% if item.job_otg is None %} ----- {% else %} {{ item.job_otg }} {% endif %}</td>
+            <td>{{ item.ops }}</td>
             <td>{{ item.availability }}%</td>
             <td>{{ item.performance }}%</td>
             <td>{{ item.quality }}%</td>

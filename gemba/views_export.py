@@ -1,6 +1,7 @@
 import csv
 
 import xlwt
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
@@ -12,7 +13,7 @@ from gemba.models import Pareto, AM, PM, NS, ScrapUser, ScrapModel, ScrapDetail,
 from gemba.views import get_details_to_display, oee_calculation, count_downtimes, count_scraps
 
 
-@login_required
+@staff_member_required
 def tableau_export(request, pk):
     pareto = Pareto.objects.get(pk=pk)
 
@@ -136,7 +137,7 @@ def tableau_export(request, pk):
     return response
 
 
-@login_required
+@staff_member_required
 def gemba_export2(request):
     query = request.GET.get("q")
 
@@ -280,6 +281,7 @@ def gemba_export2(request):
     return response
 
 
+@staff_member_required
 def export_daily_oee_report_xls(request):
     query = request.GET.get("q")
     report_list = Pareto.objects.filter(
@@ -335,6 +337,7 @@ def export_daily_oee_report_xls(request):
     return response
 
 
+@staff_member_required
 def export_scrap_search_csv(request):
     query = request.GET.get("q")
     object_list = ScrapDetail.objects.filter(
@@ -359,6 +362,7 @@ def export_scrap_search_csv(request):
     return response
 
 
+@staff_member_required
 def export_downtime_search_result_csv(request):
     query = request.GET.get("q")
     object_list = DowntimeDetail.objects.filter(
@@ -383,6 +387,7 @@ def export_downtime_search_result_csv(request):
     return response
 
 
+@staff_member_required
 def export_downtimes_xls(request):
     query = request.GET.get("q")
     object_list = DowntimeDetail.objects.filter(
@@ -422,6 +427,7 @@ from django.http import FileResponse
 from reportlab.pdfgen import canvas
 
 
+@staff_member_required
 def export_pareto_to_pdf(request, pk):
     pareto = Pareto.objects.get(pk=pk)
 

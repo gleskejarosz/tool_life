@@ -22,13 +22,13 @@ SHIFT_CHOICES = (
 TC = "Total output, Total good"
 HCI = "Hourly Good, Scrap items, Inners"
 HCB = "Hourly Good, Scrap items, Bags"
-MC = "Meter, Scrap items, Inners"
+MC = "Meter, Scrap items"
 
 CALCULATION_CHOICES = (
     (TC, "Total output, Total good"),
     (HCI, "Hourly Good, Scrap items, Inners"),
     (HCB, "Hourly Good, Scrap items, Bags"),
-    (MC, "Meter, Scrap items, Inners"),
+    (MC, "Meter, Scrap items"),
 )
 HOUR_CHOICES = (
         ("6", "6"),
@@ -81,6 +81,7 @@ class ParetoDetail(models.Model):
     created = models.DateTimeField(auto_now_add=True, blank=True)
     modified = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
+    start_meter = models.PositiveIntegerField(default=0)
     takt_time = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines3", blank=True, null=True)
 
@@ -223,6 +224,7 @@ class JobLine(models.Model):
     job = models.ForeignKey(JobModel2, on_delete=models.CASCADE, related_name="job", blank=True, null=True)
     target = models.IntegerField(default=0)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines19", blank=True, null=True)
+    factor = models.IntegerField(default=1)
 
     def __str__(self):
         return f"{self.job}"

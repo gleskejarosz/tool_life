@@ -28,6 +28,15 @@ class ParetoTotalQtyDetailForm(forms.Form):
                 raise ValidationError("Output should be more than good", code='invalid')
 
 
+class ParetoMeterForm(forms.Form):
+    meter = forms.IntegerField(label="Meter")
+
+
+class ParetoMeterStartForm(forms.Form):
+    start_meter = forms.IntegerField(label="Start Meter")
+    meter = forms.IntegerField(label="Meter")
+
+
 class DowntimeAdd(forms.Form):
     downtime = forms.ModelChoiceField(queryset=DowntimeModel.objects.all().order_by("code"))
     minutes = forms.IntegerField(min_value=0)
