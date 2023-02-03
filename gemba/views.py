@@ -462,6 +462,7 @@ def pareto_detail_create(request):
                 start_meter = form.cleaned_data["start_meter"]
 
                 output = (meter - start_meter) * factor
+
                 new_output = output - total_output
 
                 rework_cal = 0
