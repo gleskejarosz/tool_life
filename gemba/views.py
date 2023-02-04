@@ -1152,14 +1152,42 @@ class DailyParetoSearchResultsView(ListView):
 
 @staff_member_required
 def pareto_view(request):
-    today_pareto = Pareto.objects.filter(pareto_date=datetime.now()).order_by("line", "id")
+    today_pareto = Pareto.objects.filter(pareto_date=datetime.now(tz=pytz.UTC)).order_by("line", "id")
 
     report_list = get_details_to_display(object_list=today_pareto)
+
+    sum_availability = 0
+    sum_performance = 0
+    sum_quality = 0
+    sum_oee = 0
+    counter = 0
+
+    for report_elem in report_list:
+        sum_availability += report_elem["availability"]
+        sum_performance += report_elem["performance"]
+        sum_quality += report_elem["quality"]
+        sum_oee += report_elem["oee"]
+        counter += 1
+
+    if counter > 0:
+        avg_availability = round(sum_availability / counter, ndigits=2)
+        avg_performance = round(sum_performance / counter, ndigits=2)
+        avg_quality = round(sum_quality / counter, ndigits=2)
+        avg_oee = round(sum_oee / counter, ndigits=2)
+    else:
+        avg_availability = 0
+        avg_performance = 0
+        avg_quality = 0
+        avg_oee = 0
 
     return render(request,
                   template_name="gemba/pareto_view.html",
                   context={
                       "report_list": report_list,
+                      "avg_availability": avg_availability,
+                      "avg_performance": avg_performance,
+                      "avg_quality": avg_quality,
+                      "avg_oee": avg_oee,
                   },
                   )
 

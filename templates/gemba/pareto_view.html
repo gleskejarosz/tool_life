@@ -35,6 +35,16 @@ Select a date
             <td>{{ item.oee }}%</td>
         </tr>
         {% endfor %}
+        <tr>
+            <td colspan="3"><b>Average Daily OEE Elements</b></td>
+            <td></td>
+            <td></td>
+            <td><b>{{ avg_availability }}%</b></td>
+            <td><b>{{ avg_performance }}%</b></td>
+            <td><b>{{ avg_quality }}%</b></td>
+            <td><b>{{ avg_oee }}%</b></td>
+        </tr>
+
         </tbody>
 </table>
 {% endblock %}
