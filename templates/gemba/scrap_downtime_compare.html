@@ -19,9 +19,10 @@
                 <td>{{ object.created|date:'H:i' }}</td>
                 <td>{{ object.job }}</td>
                 <td>{{ object.downtime }}</td>
-                <td>{% if object.min == 0 %}{% else %} {{ object.minutes }} {% endif %}</td>
+                <td>{% if object.minutes == 0 or object.minutes is None %} {% else %} {{ object.minutes }} min
+                    {% endif %}</td>
                 <td>{{ object.scrap }}</td>
-                <td>{% if object.qty == 0 %} {% else %}{{ object.qty }} {% endif %}</td>
+                <td>{% if object.qty == 0 or object.qty is None %} {% else %}{{ object.qty }} parts {% endif %}</td>
                 <td>{{ object.pareto_id }}</td>
             </tr>
         {% endfor %}
