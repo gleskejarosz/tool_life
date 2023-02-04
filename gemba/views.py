@@ -1063,6 +1063,13 @@ def get_details_to_display(object_list):
     Used in Daily OEE Report.
     """
     report_list = []
+    sum_availability = 0
+    sum_performance = 0
+    sum_quality = 0
+    sum_oee = 0
+    counter = 0
+    sum_ops = 0
+
     for pareto in object_list:
         date = pareto.pareto_date
         id = pareto.id
@@ -1074,6 +1081,8 @@ def get_details_to_display(object_list):
         time_stamp = pareto.time_stamp
         job_otg = pareto.job_otg
         ops = pareto.ops_otg
+        if ops is None:
+            ops = 0
         not_scheduled_to_run = pareto.not_scheduled_to_run
         available_time = available_time_cal(status=status, hours=hours, time_stamp=time_stamp,
                                             not_scheduled_to_run=not_scheduled_to_run)
@@ -1129,6 +1138,33 @@ def get_details_to_display(object_list):
             "oee": oee,
             "ops": ops,
         })
+
+        sum_availability += availability
+        sum_performance += performance
+        sum_quality += quality
+        sum_oee += oee
+        sum_ops += ops
+        counter += 1
+
+    if counter > 0:
+        avg_availability = round(sum_availability / counter, ndigits=2)
+        avg_performance = round(sum_performance / counter, ndigits=2)
+        avg_quality = round(sum_quality / counter, ndigits=2)
+        avg_oee = round(sum_oee / counter, ndigits=2)
+    else:
+        avg_availability = 0
+        avg_performance = 0
+        avg_quality = 0
+        avg_oee = 0
+
+    report_list.append({
+        "avg_availability": avg_availability,
+        "avg_performance": avg_performance,
+        "avg_quality": avg_quality,
+        "avg_oee": avg_oee,
+        "sum_ops": sum_ops,
+    })
+
     return report_list
 
 
@@ -1147,6 +1183,7 @@ class DailyParetoSearchResultsView(ListView):
                 Q(pareto_date__exact=query)
             ).order_by("line", "id")
         object_list = get_details_to_display(object_list=report_list)
+
         return object_list
 
 
@@ -1154,36 +1191,21 @@ class DailyParetoSearchResultsView(ListView):
 def pareto_view(request):
     today_pareto = Pareto.objects.filter(pareto_date=datetime.now(tz=pytz.UTC)).order_by("line", "id")
 
-    report_list = get_details_to_display(object_list=today_pareto)
+    object_list = get_details_to_display(object_list=today_pareto)
 
-    sum_availability = 0
-    sum_performance = 0
-    sum_quality = 0
-    sum_oee = 0
-    counter = 0
+    avg_availability = object_list[-1]["avg_availability"]
+    avg_performance = object_list[-1]["avg_performance"]
+    avg_quality = object_list[-1]["avg_quality"]
+    avg_oee = object_list[-1]["avg_oee"]
+    sum_ops = object_list[-1]["sum_ops"]
 
-    for report_elem in report_list:
-        sum_availability += report_elem["availability"]
-        sum_performance += report_elem["performance"]
-        sum_quality += report_elem["quality"]
-        sum_oee += report_elem["oee"]
-        counter += 1
-
-    if counter > 0:
-        avg_availability = round(sum_availability / counter, ndigits=2)
-        avg_performance = round(sum_performance / counter, ndigits=2)
-        avg_quality = round(sum_quality / counter, ndigits=2)
-        avg_oee = round(sum_oee / counter, ndigits=2)
-    else:
-        avg_availability = 0
-        avg_performance = 0
-        avg_quality = 0
-        avg_oee = 0
+    report_list = object_list[:-1]
 
     return render(request,
                   template_name="gemba/pareto_view.html",
                   context={
                       "report_list": report_list,
+                      "sum_ops": sum_ops,
                       "avg_availability": avg_availability,
                       "avg_performance": avg_performance,
                       "avg_quality": avg_quality,
