@@ -22,7 +22,8 @@
                 <td>{% if object.minutes == 0 or object.minutes is None %} {% else %} {{ object.minutes }} min
                     {% endif %}</td>
                 <td>{{ object.scrap }}</td>
-                <td>{% if object.qty == 0 or object.qty is None %} {% else %}{{ object.qty }} parts {% endif %}</td>
+                <td>{% if object.qty == 0 or object.qty is None %} {% elif object.qty == 1 %} {{ object.qty }} part
+                    {% else %}{{ object.qty }} parts {% endif %}</td>
                 <td>{{ object.pareto_id }}</td>
             </tr>
         {% endfor %}
