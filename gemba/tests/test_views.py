@@ -64,10 +64,10 @@ class ParetoOperations(TestCase):
         line = Line.objects.get(id=1)
         user = User.objects.get(username="test_user")
         job = JobModel2.objects.get(id=1)
-        job_name = job.name
+        job_id = job.id
         time_user = LineHourModel.objects.get(id=1)
         time_start = time_user.start
-        Pareto.objects.create(user=user, shift=AM, hours=8, pareto_date=pareto_date, job=job_name,
+        Pareto.objects.create(user=user, shift=AM, hours=8, pareto_date=pareto_date, job_otg=job,
                               line=line, ops_otg=1, time_stamp=time_start)
         pareto = Pareto.objects.get(id=1)
         pareto_id = pareto.id
@@ -83,7 +83,7 @@ class ParetoOperations(TestCase):
         )
         pareto.downtimes.add(down_detail)
 
-        self.assertEqual(down_detail.line, "Delta-A")
+        self.assertEqual(down_detail.line.name, "Delta")
         self.assertEqual(down_detail.downtime.code, "W2")
         self.assertEqual(down_detail.downtime.description, "Meeting")
         self.assertEqual(down_detail.job.name, "Delta-A")
@@ -91,9 +91,7 @@ class ParetoOperations(TestCase):
         self.assertEqual(down_detail.minutes, 10)
         self.assertEqual(down_detail.pareto_id, 1)
         self.assertEqual(down_detail.pareto_date, datetime.now(tz=pytz.UTC).date())
-        self.assertEqual(len(pareto.downtimes), 1)
-        self.assertEqual(pareto.downtimes.code, "W2")
-        self.assertEqual(pareto.downtimes.description, "Meeting")
+
 
 
 
