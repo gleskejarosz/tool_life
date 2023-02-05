@@ -28,10 +28,10 @@
                 <td>{{ object.total_scrap }}</td>
                 <td>{{ object.total_rework }}</td>
                 <td>{{ object.total_available_time }}</td>
-                <td>{{ object.total_availability|div:object.counter }}</td>
-                <td>{{ object.total_performance|div:object.counter }}</td>
-                <td>{{ object.total_quality|div:object.counter }}</td>
-                <td>{{ object.total_oee|div:object.counter }}</td>
+                <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}</td>
+                <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}</td>
+                <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}</td>
+                <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}</td>
             </tr>
         {% endfor %}
         </tbody>
