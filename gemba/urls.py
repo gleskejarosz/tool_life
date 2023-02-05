@@ -1,11 +1,10 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 
 admin.autodiscover()
 
-from gemba import views
-from gemba import views_export
+from gemba import views, views_export, views_report
 
 app_name = "gemba_app"
 
@@ -81,4 +80,6 @@ urlpatterns = [
     path("tableau/<pk>/", views_export.tableau_export, name="tableau"),
     path("export_pareto_to_pdf/<pk>/", views_export.export_pareto_to_pdf, name="export-pareto-to-pdf"),
     path("chart/", views.EditorChartView.as_view(), name="chart"),
+    # dashboard
+    path("dashboard/", views_report.dashboard, name="dashboard"),
     ]

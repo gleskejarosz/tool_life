@@ -119,7 +119,6 @@ class DowntimeDetail(models.Model):
     pareto_date = models.DateField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True, blank=True)
     modified = models.DateTimeField(auto_now_add=True, blank=True)
-    # frequency = models.PositiveIntegerField(default=1)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines4", blank=True, null=True)
 
     def __str__(self):
@@ -279,3 +278,25 @@ class Timer(models.Model):
 
     class Meta:
         verbose_name = "Timer"
+
+
+class MonthlyResults(models.Model):
+    year = models.CharField(max_length=4)
+    month = models.CharField(max_length=16)
+    line = models.ForeignKey(Line, on_delete=models.CASCADE, related_name="lines20", blank=True, null=True)
+    total_output = models.PositiveIntegerField(default=0)
+    total_good = models.IntegerField(default=0)
+    total_scrap = models.PositiveIntegerField(default=0)
+    total_rework = models.PositiveIntegerField(default=0)
+    total_available_time = models.PositiveIntegerField(default=0)
+    total_availability = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_performance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_quality = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    total_oee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    counter = models.IntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.year} - {self.month}"
+
+    class Meta:
+        verbose_name = "Monthly Result"

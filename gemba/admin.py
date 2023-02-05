@@ -1,7 +1,8 @@
 from django.contrib import admin
 
 from gemba.models import DowntimeDetail, DowntimeModel, LineHourModel, LineUser, Pareto, \
-    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, ScrapUser, JobModel2, Editors, Line, Timer, JobLine
+    ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, ScrapUser, JobModel2, Editors, Line, Timer, JobLine, \
+    MonthlyResults
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -191,6 +192,21 @@ class TimerModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "user", "start", "end", "completed"]
 
 
+class MonthlyResultsAdmin(admin.ModelAdmin):
+    ordering = ("-id",)
+    list_display = ("year", "month", "line", "total_output", "total_good", "total_scrap", "total_rework")
+    list_display_links = ("line",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["id", "year", "month", "line", "total_output", "total_good", "total_scrap", "total_rework",
+                       "total_available_time", "total_availability", "total_performance", "total_quality", "total_oee",
+                       "counter"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
 admin.site.register(Pareto, ParetoAdmin)
 admin.site.register(ParetoDetail, ParetoDetailAdmin)
 admin.site.register(DowntimeModel, DowntimeModelAdmin)
@@ -206,3 +222,4 @@ admin.site.register(LineUser)
 admin.site.register(Timer, TimerModelAdmin)
 admin.site.register(Line, LineModelAdmin)
 admin.site.register(JobLine, JobLineModelAdmin)
+admin.site.register(MonthlyResults, MonthlyResultsAdmin)

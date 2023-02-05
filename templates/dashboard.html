@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+<h4>{{ year }}</h4>
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Month</th>
+            <th scope="col">Line</th>
+            <th scope="col">Total Output</th>
+            <th scope="col">Total Good</th>
+            <th scope="col">Total Scrap</th>
+            <th scope="col">Total Rework</th>
+            <th scope="col">Total Available Time</th>
+            <th scope="col">Avg Availability</th>
+            <th scope="col">Avg Performance</th>
+            <th scope="col">Avg Quality</th>
+            <th scope="col">Avg OEE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in monthly_records %}
+            <tr>
+                <td>{{ object.month }}</td>
+                <td>{{ object.line }}</td>
+                <td>{{ object.total_output }}</td>
+                <td>{{ object.total_good }}</td>
+                <td>{{ object.total_scrap }}</td>
+                <td>{{ object.total_rework }}</td>
+                <td>{{ object.total_available_time }}</td>
+                <td>{{ object.total_availability|div:object.counter }}</td>
+                <td>{{ object.total_performance|div:object.counter }}</td>
+                <td>{{ object.total_quality|div:object.counter }}</td>
+                <td>{{ object.total_oee|div:object.counter }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

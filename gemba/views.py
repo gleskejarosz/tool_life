@@ -18,7 +18,7 @@ from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateF
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
-    PRODUCTIVE, HCI, HCB, MC
+    PRODUCTIVE, HCI, HCB, MC, MonthlyResults
 from tools.views import tools_update
 
 
@@ -1023,6 +1023,8 @@ def final_confirmation_before_close_pareto(request):
 @staff_member_required
 def close_pareto(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
+    line = pareto.line
+    pareto_date = pareto.pareto_date
 
     calculation = final_oee_calculation(pareto)
 
@@ -1052,6 +1054,34 @@ def close_pareto(request):
     pareto.oee = oee
     pareto.completed = True
     pareto.save()
+
+    year = pareto_date.strftime('%Y')
+    month = pareto_date.strftime('%B')
+    daily_output = calculation["output"]
+    daily_good = calculation["good"]
+    daily_scrap = calculation["scrap"]
+    daily_rework = calculation["rework"]
+    daily_available_time = calculation["available_time"]
+
+    monthly_record_qs = MonthlyResults.objects.filter(line=line, year=year, month=month).order_by("id")
+
+    if monthly_record_qs.exists():
+        monthly_record = monthly_record_qs[0]
+        monthly_record.total_output += daily_output
+        monthly_record.total_good += daily_good
+        monthly_record.total_scrap += daily_scrap
+        monthly_record.total_rework += daily_rework
+        monthly_record.total_available_time += daily_available_time
+        monthly_record.total_availability += availability
+        monthly_record.total_performance += performance
+        monthly_record.total_quality += quality
+        monthly_record.total_oee += oee
+        monthly_record.counter += 1
+    else:
+        MonthlyResults.objects.create(year=year, month=month, line=line, total_output=daily_output,
+                                      total_good=daily_good, total_scrap=daily_scrap, total_rework=daily_rework,
+                                      total_available_time=daily_available_time, total_availability=availability,
+                                      total_performance=performance, total_quality=quality, total_oee=oee, counter=1)
 
     return redirect("gemba_app:index")
 

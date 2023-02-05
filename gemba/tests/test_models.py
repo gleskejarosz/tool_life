@@ -6,8 +6,11 @@ from django.test import TestCase
 
 from gemba.models import ParetoDetail, JobModel2, Line
 
+# initialize in Terminal: python manage.py test gemba
+
 
 class ParetoDetailModelTest(TestCase):
+
     @classmethod
     def setUpTestData(cls):
         job = JobModel2.objects.create(name="aaa")
@@ -16,8 +19,8 @@ class ParetoDetailModelTest(TestCase):
         user.set_password('12345')
         user.save()
         ParetoDetail.objects.create(job=job, user=user, output=1000, good=900, scrap=100, rework=10, ops=2,
-                                    completed=True, created=datetime.now(tz=pytz.UTC).date(),
-                                    modified=datetime.now(tz=pytz.UTC).date(), pareto_date=datetime.now(tz=pytz.UTC).
+                                    completed=True, created=datetime.now(tz=pytz.UTC),
+                                    modified=datetime.now(tz=pytz.UTC), pareto_date=datetime.now(tz=pytz.UTC).
                                     date(), takt_time=0.1, line=line)
 
     def test_job_label(self):
