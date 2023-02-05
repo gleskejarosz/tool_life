@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
+
 <h4>{{ year }}</h4>
-<table class="table table-hover">
+<div>
+<div class="row">
+    <div class="col">
+        <table class="table">
         <thead>
         <tr>
             <th scope="col">Month</th>
@@ -35,5 +39,36 @@
             </tr>
         {% endfor %}
         </tbody>
-    </table>
+        </table>
+        </div>
+
+      <div class="col">
+          <b>{{ yesterday|date:'d-m-Y' }}</b>
+        <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Pos</th>
+            <th scope="col">Line</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Performance</th>
+            <th scope="col">Quality</th>
+            <th scope="col">OEE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for pareto in paretos %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ pareto.line }}</td>
+                <td>{{ pareto.availability }}%</td>
+                <td>{{ pareto.performance }}%</td>
+                <td>{{ pareto.quality }}%</td>
+                <td>{{ pareto.oee }}%</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        </table>
+    </div>
+</div>
+</div>
 {% endblock %}
