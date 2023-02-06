@@ -1,3 +1,4 @@
+import decimal
 from itertools import chain
 
 import pytz
@@ -1064,7 +1065,7 @@ def close_pareto(request):
     daily_available_time = calculation["available_time"]
 
     monthly_record_qs = MonthlyResults.objects.filter(line=line, year=year, month=month).order_by("id")
-
+    print(monthly_record_qs)
     if monthly_record_qs.exists():
         monthly_record = monthly_record_qs[0]
         monthly_record.total_output += daily_output
@@ -1072,11 +1073,12 @@ def close_pareto(request):
         monthly_record.total_scrap += daily_scrap
         monthly_record.total_rework += daily_rework
         monthly_record.total_available_time += daily_available_time
-        monthly_record.total_availability += availability
-        monthly_record.total_performance += performance
-        monthly_record.total_quality += quality
-        monthly_record.total_oee += oee
+        monthly_record.total_availability += decimal.Decimal(availability)
+        monthly_record.total_performance += decimal.Decimal(performance)
+        monthly_record.total_quality += decimal.Decimal(quality)
+        monthly_record.total_oee += decimal.Decimal(oee)
         monthly_record.counter += 1
+        monthly_record.save()
     else:
         MonthlyResults.objects.create(year=year, month=month, line=line, total_output=daily_output,
                                       total_good=daily_good, total_scrap=daily_scrap, total_rework=daily_rework,
