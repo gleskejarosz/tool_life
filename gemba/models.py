@@ -70,10 +70,10 @@ class Pareto(models.Model):
 
 class ParetoDetail(models.Model):
     job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs", blank=False, null=False)
-    output = models.PositiveIntegerField(default=0)
+    output = models.IntegerField(default=0)
     good = models.IntegerField(default=0)
-    scrap = models.PositiveIntegerField(default=0)
-    rework = models.PositiveIntegerField(default=0)
+    scrap = models.IntegerField(default=0)
+    rework = models.IntegerField(default=0)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     ops = models.PositiveIntegerField(blank=True, null=True)
     completed = models.BooleanField(default=False)

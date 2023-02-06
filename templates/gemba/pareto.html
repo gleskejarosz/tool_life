@@ -67,8 +67,7 @@
     </div>
     <p>Shift started at: {{ pareto_list.time_stamp|time:"h:i a" }} ({{ pareto_list.shift }}) - {{ pareto_list.hours }}
         hours - Time available until now: {{ available_time }} min - Not scheduled to run:
-        {{ pareto_list.not_scheduled_to_run}} min</p>
-
+        {{ pareto_list.not_scheduled_to_run}} min.
 <div>
     <div class = "row">
     <div class = "col">
@@ -114,6 +113,7 @@
         </tr>
         </tbody>
         </table>
+        <p>{% if start_meter > 0 %} Start meter = {{ start_meter }}{% endif %}</p>
     </div>
 
     <div class = "col">

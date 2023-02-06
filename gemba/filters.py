@@ -28,7 +28,15 @@ class DailyParetoFilter(django_filters.FilterSet):
 
 class DowntimeFilter(django_filters.FilterSet):
     code = django_filters.CharFilter(field_name='downtime__code', label="Code", lookup_expr="contains")
+    description = django_filters.CharFilter(field_name='downtime__description', label="Description",
+                                            lookup_expr="contains")
 
 
 class ScrapFilter(django_filters.FilterSet):
     code = django_filters.CharFilter(field_name='scrap__code', label="Code", lookup_expr="contains")
+    description = django_filters.CharFilter(field_name='scrap__description', label="Description",
+                                            lookup_expr="contains")
+
+
+class JobFilter(django_filters.FilterSet):
+    job = django_filters.CharFilter(field_name='job__name', label="Job", lookup_expr="contains")

@@ -7,13 +7,14 @@ from django.core.paginator import Paginator
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 
-from gemba.filters import DowntimeFilter, ScrapFilter
+from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm
@@ -503,6 +504,7 @@ class ParetoSummary(LoginRequiredMixin, View):
     def get(self, *args, **kwargs):
         user = self.request.user
         pareto_qs = Pareto.objects.filter(user=user, completed=False)
+        start_meter = 0
         if pareto_qs.exists():
             pareto = pareto_qs[0]
 
@@ -533,6 +535,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                     good = scrap_cal.good
                     total_good += good
                     total_rework += rework
+                    start_meter = scrap_cal.start_meter
             total_scrap_cal = total_output - total_good
 
             quality = quality_cal(good=total_good, output=total_output)
@@ -582,6 +585,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "down_qs": down_qs,
                               "scrap_qs": scrap_qs,
                               "user": user,
+                              "start_meter": start_meter,
                               "pareto_status": pareto_status,
                               "message_status": message_status,
                               "available_time": available_time,
@@ -601,6 +605,7 @@ class ParetoSummary(LoginRequiredMixin, View):
             pareto_status = "Not exist"
             message_status = ""
             user = self.request.user
+            start_meter = 0
             available_time = 0
             availability = 0
             quality = 0
@@ -618,6 +623,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                           context={
                               "available_time": available_time,
                               "user": user,
+                              "start_meter": start_meter,
                               "availability": availability,
                               "quality": quality,
                               "performance": performance,
@@ -1171,10 +1177,10 @@ def get_details_to_display(object_list):
             "ops": ops,
         })
 
-        sum_availability += availability
-        sum_performance += performance
-        sum_quality += quality
-        sum_oee += oee
+        sum_availability += decimal.Decimal(availability)
+        sum_performance += decimal.Decimal(performance)
+        sum_quality += decimal.Decimal(quality)
+        sum_oee += decimal.Decimal(oee)
         sum_ops += ops
         counter += 1
 
@@ -1544,13 +1550,15 @@ def scrap_user_list(request):
 def job_user_list(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
     line = pareto.line
+
     job_qs = JobLine.objects.filter(line=line).order_by("job__name")
+    items_filter = JobFilter(request.GET, queryset=job_qs)
 
     return render(
         request,
         template_name="gemba/job_user_view.html",
         context={
-            "job_list": job_qs,
+            "filter": items_filter,
         },
     )
 

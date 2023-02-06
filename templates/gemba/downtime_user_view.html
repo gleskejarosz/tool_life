@@ -27,6 +27,10 @@
           {{ filter.form.code.label_tag }}
           {% render_field filter.form.code class="form-control" %}
         </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.description.label_tag }}
+          {% render_field filter.form.description class="form-control" %}
+        </div>
       </div>
       <button type="submit" class="btn btn-primary">
         <span class="glyphicon glyphicon-search"></span> Search

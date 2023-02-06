@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
+{% load widget_tweaks %}
+<div>
+<div>
+    <div class = "row">
+    <div class = "col">
 <h4>Choose job:</h4>
+</div>
+    <div class = "col">
+<form method="get">
+    <div class="well">
+      <p><a href="{% url 'gemba_app:job-user-view' %}">Clear filter</a></p>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.job.label_tag }}
+          {% render_field filter.form.job class="form-control" %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+</form>
+</div>
+</div>
 <div>
     <br/>
     <table class="table">
@@ -11,27 +34,27 @@
         </thead>
         <tbody>
     <tr>
-    {% for item in job_list|slice:"0:10" %}
+    {% for item in filter.qs|slice:"0:10" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"10:20" %}
+    {% for item in filter.qs|slice:"10:20" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"20:30" %}
+    {% for item in filter.qs|slice:"20:30" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"30:40" %}
+    {% for item in filter.qs|slice:"30:40" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
     <tr>
-    {% for item in job_list|slice:"40:50" %}
+    {% for item in filter.qs|slice:"40:50" %}
     <td><a href="{% url 'gemba_app:select-job' pk=item.pk %}">{{ item }}</a></td>
     {% endfor %}
     </tr>
