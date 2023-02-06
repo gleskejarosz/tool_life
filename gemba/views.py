@@ -360,56 +360,8 @@ def pareto_detail_create(request):
                 "form": form,
             })
 
-    elif calc_option == HCB:
-        form = ParetoDetailHCBForm(request.POST or None)
-        if form.is_valid():
-            good = form.cleaned_data["good"]
-
-            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
-
-            scrap = 0
-            rework_cal = 0
-            for scrap_elem in scrap_qs:
-                scrap_id = scrap_elem.scrap_id
-                scrap_obj = ScrapModel.objects.get(id=scrap_id)
-                rework = scrap_obj.rework
-                if rework is False:
-                    scrap += scrap_elem.qty
-                else:
-                    rework_cal += scrap_elem.qty
-
-            good_qs = ParetoDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
-            old_good = 0
-            for good_elem in good_qs:
-                old_good += good_elem.good
-
-            output = old_good + good + scrap
-
-            if pareto_details_qs.exists():
-                pareto_elem = ParetoDetail.objects.get(user=user, completed=False, job=job, pareto_id=pareto_id)
-                pareto_elem.output = output
-                pareto_elem.good += good
-                pareto_elem.scrap = scrap
-                pareto_elem.rework = rework_cal
-                pareto_elem.save()
-                return redirect("gemba_app:pareto-summary")
-            else:
-                pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
-                                                          pareto_id=pareto_id, line=line, ops=ops,
-                                                          pareto_date=pareto_date, scrap=scrap, rework=rework_cal,
-                                                          takt_time=takt_time)
-                pareto.jobs.add(pareto_item)
-                return redirect("gemba_app:pareto-summary")
-
-        return render(
-            request,
-            template_name="form.html",
-            context={
-                "form": form,
-            })
     elif calc_option == MC:
         scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
-
 
         if pareto_details_qs.exists():
             form = ParetoMeterForm(request.POST or None)
@@ -498,6 +450,53 @@ def pareto_detail_create(request):
                 context={
                     "form": form,
                 })
+    else:
+        form = ParetoDetailHCBForm(request.POST or None)
+        if form.is_valid():
+            good = form.cleaned_data["good"]
+
+            scrap_qs = ScrapDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
+
+            scrap = 0
+            rework_cal = 0
+            for scrap_elem in scrap_qs:
+                scrap_id = scrap_elem.scrap_id
+                scrap_obj = ScrapModel.objects.get(id=scrap_id)
+                rework = scrap_obj.rework
+                if rework is False:
+                    scrap += scrap_elem.qty
+                else:
+                    rework_cal += scrap_elem.qty
+
+            good_qs = ParetoDetail.objects.filter(user=user, completed=False, pareto_id=pareto_id, job=job)
+            old_good = 0
+            for good_elem in good_qs:
+                old_good += good_elem.good
+
+            output = old_good + good + scrap
+
+            if pareto_details_qs.exists():
+                pareto_elem = ParetoDetail.objects.get(user=user, completed=False, job=job, pareto_id=pareto_id)
+                pareto_elem.output = output
+                pareto_elem.good += good
+                pareto_elem.scrap = scrap
+                pareto_elem.rework = rework_cal
+                pareto_elem.save()
+                return redirect("gemba_app:pareto-summary")
+            else:
+                pareto_item = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
+                                                          pareto_id=pareto_id, line=line, ops=ops,
+                                                          pareto_date=pareto_date, scrap=scrap, rework=rework_cal,
+                                                          takt_time=takt_time)
+                pareto.jobs.add(pareto_item)
+                return redirect("gemba_app:pareto-summary")
+
+        return render(
+            request,
+            template_name="form.html",
+            context={
+                "form": form,
+            })
 
 
 class ParetoSummary(LoginRequiredMixin, View):
