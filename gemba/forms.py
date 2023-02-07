@@ -14,7 +14,7 @@ class ParetoDetailHCIForm(forms.Form):
 
 
 class ParetoDetailHCBForm(forms.Form):
-    good = forms.IntegerField(label="Parts")
+    good = forms.IntegerField(label="Good Parts")
 
 
 class ParetoTotalQtyDetailForm(forms.Form):

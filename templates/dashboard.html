@@ -2,7 +2,7 @@
 {% block content %}
 {% load mathfilters %}
 
-<h4>{{ year }}</h4>
+<h4>Monthly line production summary - {{ year }}</h4>
 <div>
 <div class="row">
     <div class="col">
@@ -43,7 +43,7 @@
         </div>
 
       <div class="col">
-          <b>{{ yesterday|date:'d-m-Y' }}</b>
+          <h4>Yesterday's 5 best results ({{ yesterday|date:'d-m-Y' }})</h4>
         <table class="table">
         <thead>
         <tr>
