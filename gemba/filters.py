@@ -1,6 +1,6 @@
 import django_filters
 from django.forms import DateInput
-from gemba.models import Pareto
+from gemba.models import Pareto, MonthlyResults
 
 
 class DailyParetoFilter(django_filters.FilterSet):
@@ -40,3 +40,38 @@ class ScrapFilter(django_filters.FilterSet):
 
 class JobFilter(django_filters.FilterSet):
     job = django_filters.CharFilter(field_name='job__name', label="Job", lookup_expr="contains")
+
+
+JANUARY = "January"
+FEBRUARY = "February"
+MARCH = "March"
+APRIL = "April"
+MAY = "May"
+JUNE = "June"
+JULY = "July"
+AUGUST = "August"
+SEPTEMBER = "September"
+OCTOBER = "October"
+NOVEMBER = "November"
+DECEMBER = "December"
+
+class MonthlyResultFilter(django_filters.FilterSet):
+    MONTH_CHOICES = (
+        (JANUARY, "January"),
+        (FEBRUARY, "February"),
+        (MARCH, "March"),
+        (APRIL, "April"),
+        (MAY, "May"),
+        (JUNE, "June"),
+        (JULY, "July"),
+        (AUGUST, "August"),
+        (SEPTEMBER, "September"),
+        (OCTOBER, "October"),
+        (NOVEMBER, "November"),
+        (DECEMBER, "December"),
+    )
+    month = django_filters.ChoiceFilter(choices=MONTH_CHOICES, label="Month")
+
+    class Meta:
+        model = MonthlyResults
+        fields = ("month", "line", )

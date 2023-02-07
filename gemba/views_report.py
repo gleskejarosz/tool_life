@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import pytz
 from django.shortcuts import render
 
+from gemba.filters import MonthlyResultFilter
 from gemba.models import MonthlyResults, Pareto
 
 
@@ -14,6 +15,7 @@ def dashboard(request):
 
     # monthly report of average oee elements
     monthly_records_qs = MonthlyResults.objects.filter(year=year).order_by("-month", "line")
+    items_filter = MonthlyResultFilter(request.GET, queryset=monthly_records_qs)
 
     # the best oee result from the day before
     paretos = Pareto.objects.filter(pareto_date=yesterday).order_by("-oee")[:5]
@@ -21,7 +23,7 @@ def dashboard(request):
     return render(request,
                   template_name='dashboard.html',
                   context={
-                      "monthly_records": monthly_records_qs,
+                      "filter": items_filter,
                       "year": year,
                       "paretos": paretos,
                       "yesterday": yesterday,

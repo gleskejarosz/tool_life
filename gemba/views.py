@@ -1214,11 +1214,11 @@ class DailyParetoSearchResultsView(ListView):
         if query == "":
             report_list = Pareto.objects.filter(
                 Q(pareto_date__exact=datetime.now(tz=pytz.UTC).date())
-            ).order_by("line", "id")
+            ).order_by("line__name", "id")
         else:
             report_list = Pareto.objects.filter(
                 Q(pareto_date__exact=query)
-            ).order_by("line", "id")
+            ).order_by("line__name", "id")
         object_list = get_details_to_display(object_list=report_list)
 
         return object_list
@@ -1226,7 +1226,7 @@ class DailyParetoSearchResultsView(ListView):
 
 @staff_member_required
 def pareto_view(request):
-    today_pareto = Pareto.objects.filter(pareto_date=datetime.now(tz=pytz.UTC)).order_by("line", "id")
+    today_pareto = Pareto.objects.filter(pareto_date=datetime.now(tz=pytz.UTC)).order_by("line__name", "id")
 
     object_list = get_details_to_display(object_list=today_pareto)
 

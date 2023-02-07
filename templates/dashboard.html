@@ -1,12 +1,29 @@
 {% extends "base.html" %}
 {% block content %}
+{% load widget_tweaks %}
 {% load mathfilters %}
 
 <h4>Monthly line production summary - {{ year }}</h4>
-<div>
-<div class="row">
-    <div class="col">
-        <table class="table">
+<form method="get">
+    <div class="well">
+      <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
+      <div class="row">
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.month.label_tag }}
+          {% render_field filter.form.month class="form-control" %}
+        </div>
+        <div class="form-group col-sm-4 col-md-3">
+          {{ filter.form.line.label_tag }}
+          {% render_field filter.form.line class="form-control" %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">
+        <span class="glyphicon glyphicon-search"></span> Search
+      </button>
+    </div>
+</form>
+
+<table class="table table-hover">
         <thead>
         <tr>
             <th scope="col">Month</th>
@@ -23,7 +40,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for object in monthly_records %}
+        {% for object in filter.qs %}
             <tr>
                 <td>{{ object.month }}</td>
                 <td>{{ object.line }}</td>
@@ -39,16 +56,14 @@
             </tr>
         {% endfor %}
         </tbody>
-        </table>
-        </div>
-
-      <div class="col">
+</table>
           <h4>Yesterday's 5 best results ({{ yesterday|date:'d-m-Y' }})</h4>
-        <table class="table">
+<table class="table table-hover">
         <thead>
         <tr>
             <th scope="col">Pos</th>
             <th scope="col">Line</th>
+            <th scope="col">Shift</th>
             <th scope="col">Availability</th>
             <th scope="col">Performance</th>
             <th scope="col">Quality</th>
@@ -60,6 +75,7 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ pareto.line }}</td>
+                <td>{{ pareto.shift }}</td>
                 <td>{{ pareto.availability }}%</td>
                 <td>{{ pareto.performance }}%</td>
                 <td>{{ pareto.quality }}%</td>
@@ -67,8 +83,6 @@
             </tr>
         {% endfor %}
         </tbody>
-        </table>
-    </div>
-</div>
-</div>
+</table>
+
 {% endblock %}
