@@ -165,6 +165,7 @@ class ScrapDetail(models.Model):
     qty = models.PositiveIntegerField(default=0, blank=False, null=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     completed = models.BooleanField(default=False)
+    quarantined = models.BooleanField(default=False)
     pareto_id = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, blank=True)
     modified = models.DateTimeField(auto_now_add=True, blank=True)
@@ -300,3 +301,26 @@ class MonthlyResults(models.Model):
 
     class Meta:
         verbose_name = "Monthly Result"
+
+
+class QuarantineHistoryDetail(models.Model):
+    job = models.ForeignKey("JobModel2", on_delete=models.CASCADE, related_name="jobs6", blank=False, null=False)
+    initial_qty = models.PositiveIntegerField(default=0, blank=False, null=False)
+    good = models.IntegerField(default=0)
+    scrap = models.IntegerField(default=0)
+    scraps = models.ManyToManyField("ScrapDetail")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
+    pareto_id = models.PositiveIntegerField(default=0)
+    modified = models.DateTimeField(auto_now_add=True, blank=True)
+    pareto_date = models.DateField(blank=True, null=True)
+    line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines21", blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.job}"
+
+    class Meta:
+        verbose_name = "Quarantine Record"
+
+    def save(self, *args, **kwargs):
+        self.modified = datetime.now(tz=pytz.UTC)
+        super().save(*args, **kwargs)

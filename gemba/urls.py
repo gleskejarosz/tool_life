@@ -71,6 +71,8 @@ urlpatterns = [
     path("downtime_scrap_set_up/<line_id>/", views.downtime_scrap_set_up, name="downtime-scrap-set-up"),
     # quarantine report
     path("quarantine_view/", views.quarantine_view, name="quarantine-view"),
+    path("quarantine_detail/<pk>/", views.pareto_quarantine_view, name="quarantine-detail"),
+    path("create_quarantined_scrap/<pk>/", views.create_quarantined_scrap, name="create-quarantined-scrap"),
     # exports and other
     path("export_scrap_csv/", views_export.export_scrap_search_csv, name="export-scrap-csv"),
     path("export_downtimes_csv/", views_export.export_downtime_search_result_csv, name="export-downtimes-csv"),

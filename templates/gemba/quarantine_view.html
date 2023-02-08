@@ -15,7 +15,8 @@
         <tbody>
         {% for object in quarantine_qs %}
             <tr>
-                <td>{{ object.datetime|date:'d-m-Y H:i' }}</td>
+                <td><a href="{% url 'gemba_app:quarantine-detail' pk=object.pk %}">
+                    {{ object.modified|date:'d-m-Y H:i' }}</a></td>
                 <td>{{ object.line }}</td>
                 <td>{{ object.qty }}</td>
                 <td>{{ object.job }}</td>

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+
+<h4>Pareto Quarantine View</h4>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Line</th>
+            <th scope="col">Date</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Pareto ID</th>
+            <th scope="col">Pareto Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><b>{{ pareto_list.line}}</b></td>
+            <td>{{ pareto_list.pareto_date|date:"d-m-Y" }}</td>
+            <td>{{ pareto_list.shift }}</td>
+            <td>{{ pareto_list.id }}</td>
+            <td>{{ pareto_list.pareto_date }}</td>
+        </tr>
+    </tbody>
+</table>
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Job</th>
+            <th scope="col">Output</th>
+            <th scope="col">Good</th>
+            <th scope="col">Scrap</th>
+            <th scope="col">Quarantine</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ pareto_detail.job.name }}</td>
+            <td>{{ pareto_detail.output }}</td>
+            <td>{{ pareto_detail.good }}</td>
+            <td>{{ pareto_detail.scrap }}</td>
+            <td>{{ scrap_obj.qty }}</td>
+        </tr>
+    </tbody>
+</table>
+<div>
+    <div class="row">
+        <div class="column">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Scrap Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for scrap_item in scrap_qs %}
+                     <tr>
+                         <td>{{ scrap_item.scrap.code }} - {{ scrap_item.scrap.description }}</td>
+                     </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="column">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Scrap Reason</th>
+                        <th scope="col">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if scrap_details_qs|length == 0 %}
+                      <tr>
+                        <td colspan='4'>No scrap reasons recorded</td>
+                      </tr>
+                    {% endif %}
+                    {% for scrap_item in scrap_details_qs %}
+                     <tr>
+                         <td>{{ scrap_item.scrap.code }} - {{ scrap_item.scrap.description }}</td>
+                         <td>{{ scrap_item.qty }}</td>
+                     </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
