@@ -4,7 +4,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import DateInput, TimeInput
 
-from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto, ParetoDetail
+from gemba.models import SHIFT_CHOICES, HOUR_CHOICES, DowntimeModel, Pareto, ParetoDetail, QuarantineHistoryDetail
 
 TODAY = datetime.today().strftime('%d-%m-%Y')
 
@@ -96,3 +96,9 @@ class ParetoDetailUpdateForm(forms.ModelForm):
             if result["good"] + result["scrap"] != result["output"]:
                 raise ValidationError("Good plus scrap should equal output. Please fix it before submitting",
                                       code='invalid')
+
+
+class GoodUpdateForm(forms.ModelForm):
+    class Meta:
+        model = QuarantineHistoryDetail
+        fields = ["good"]

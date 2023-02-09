@@ -2,7 +2,7 @@
 {% block content %}
 {% load mathfilters %}
 
-<h4>Pareto Quarantine Detail View</h4>
+<h4>Pareto Quarantine Summary</h4>
 <table class="table table-hover">
     <thead>
         <tr>
@@ -34,8 +34,8 @@
     <tbody>
         <tr>
             <td>{{ quarantine_obj.job.name }}</td>
-            <td><a href="{% url 'gemba_app:update-good-quarantine' pk=quarantine_obj.id %}">
-                {{ quarantine_obj.good }}</a></td>
+            <td><a href="{% url 'gemba_app:update-good-quarantine' pk=quarantine_obj.id %}">{{ quarantine_obj.good }}
+            </a></td>
             <td>{{ quarantine_obj.scrap }}</td>
             <td>{{ quarantine_obj.initial_qty }}</td>
         </tr>

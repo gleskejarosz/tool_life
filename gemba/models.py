@@ -314,6 +314,7 @@ class QuarantineHistoryDetail(models.Model):
     modified = models.DateTimeField(auto_now_add=True, blank=True)
     pareto_date = models.DateField(blank=True, null=True)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines21", blank=True, null=True)
+    completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.job}"

@@ -17,7 +17,7 @@ from django.views.generic import TemplateView, UpdateView, DeleteView, DetailVie
 from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
-    ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm
+    ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
     PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
@@ -2176,6 +2176,7 @@ def pareto_quarantine_view(request, scrap_id):
                   )
 
 
+@staff_member_required
 def create_quarantine_historic_detail(request, scrap_id, pareto_id):
     pareto = Pareto.objects.get(id=pareto_id)
     scrap_obj = ScrapDetail.objects.get(id=scrap_id)
@@ -2203,16 +2204,43 @@ def create_quarantine_historic_detail(request, scrap_id, pareto_id):
 
     scrap_qs = ScrapUser.objects.filter(line=line)
 
-    QuarantineHistoryDetail.objects.create(pareto_id=pareto_id, user=user, line=line, pareto_date=pareto_date, job=job,
-                                           good=good, scrap=scrap, initial_qty=initial_qty)
+    quarantine_obj = QuarantineHistoryDetail.objects.create(pareto_id=pareto_id, user=user, line=line,
+                                                            pareto_date=pareto_date, job=job, good=good, scrap=scrap,
+                                                            initial_qty=initial_qty)
 
     return render(
         request,
         template_name="gemba/pareto_quarantine_resolve.html",
         context={
-            "pareto_list": pareto,
-            "pareto_detail": pareto_detail,
-            "scrap_obj": scrap_obj,
+            "quarantine_obj": quarantine_obj,
+            "scrap_qs": scrap_qs,
+        }
+    )
+
+
+class GoodUpdateView(UpdateView):
+    model = QuarantineHistoryDetail
+    template_name = "form.html"
+    form_class = GoodUpdateForm
+    success_url = reverse_lazy("gemba_app:quarantine-case-summary")
+
+
+@staff_member_required
+def quarantine_summary(request):
+    quarantine_case_qs = QuarantineHistoryDetail.objects.filter(user=request.user, completed=False)
+    if quarantine_case_qs.exists():
+        quarantine_case = quarantine_case_qs[0]
+        line = quarantine_case.line
+        scrap_qs = ScrapUser.objects.filter(line=line)
+    else:
+        quarantine_case = []
+        scrap_qs = []
+
+    return render(
+        request,
+        template_name="gemba/quarantine_summary.html",
+        context={
+            "quarantine_obj": quarantine_case,
             "scrap_qs": scrap_qs,
         }
     )
