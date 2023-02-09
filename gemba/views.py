@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, request
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
@@ -20,7 +20,7 @@ from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateF
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
-    PRODUCTIVE, HCI, HCB, MC, MonthlyResults
+    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
 from tools.views import tools_update
 
 
@@ -2155,34 +2155,67 @@ def downtime_scrap_set_up(request, line_id):
 
 
 @staff_member_required
-def pareto_quarantine_view(request, pk):
-    scrap_obj = ScrapDetail.objects.get(pk=pk)
+def pareto_quarantine_view(request, scrap_id):
+    scrap_obj = ScrapDetail.objects.get(pk=scrap_id)
     pareto_id = scrap_obj.pareto_id
     pareto_date = scrap_obj.pareto_date
     job = scrap_obj.job
     line = scrap_obj.line
 
     pareto = Pareto.objects.get(pk=pareto_id)
-
-    pareto_detail_qs = ParetoDetail.objects.filter(pareto_id=pareto_id, pareto_date=pareto_date, line=line,
-                                                   completed=True, job=job)
-    pareto_detail = pareto_detail_qs[0]
-
-    scrap_qs = ScrapUser.objects.filter(line=line).filter(order__gt=0).order_by("order")
-
-    scrap_details_qs = ScrapDetail.objects.filter(pareto_id=pareto_id, pareto_date=pareto_date, line=line, job=job,
-                                                  quarantined=True)
+    user = scrap_obj.user
 
     return render(request,
                   template_name='gemba/pareto_quarantine.html',
                   context={
                       "pareto_list": pareto,
-                      "pareto_detail": pareto_detail,
                       "scrap_obj": scrap_obj,
-                      "scrap_qs": scrap_qs,
-                      "scrap_details_qs": scrap_details_qs,
+                      "user": user,
+                      "scrap_id": scrap_id,
                   },
                   )
+
+
+def create_quarantine_historic_detail(request, scrap_id, pareto_id):
+    pareto = Pareto.objects.get(id=pareto_id)
+    scrap_obj = ScrapDetail.objects.get(id=scrap_id)
+
+    completed = pareto.completed
+    if completed is False:
+        message = "This operation cannot be done when pareto is open"
+        return render(
+            request,
+            template_name="gemba/error_message.html",
+            context={
+                "message": message,
+            }
+        )
+
+    initial_qty = scrap_obj.qty
+    user = request.user
+    line = pareto.line
+    pareto_date = pareto.pareto_date
+    job = scrap_obj.job
+
+    pareto_detail = ParetoDetail.objects.get(pareto_id=pareto_id, line=line, job=job)
+    good = pareto_detail.good
+    scrap = pareto_detail.scrap
+
+    scrap_qs = ScrapUser.objects.filter(line=line)
+
+    QuarantineHistoryDetail.objects.create(pareto_id=pareto_id, user=user, line=line, pareto_date=pareto_date, job=job,
+                                           good=good, scrap=scrap, initial_qty=initial_qty)
+
+    return render(
+        request,
+        template_name="gemba/pareto_quarantine_resolve.html",
+        context={
+            "pareto_list": pareto,
+            "pareto_detail": pareto_detail,
+            "scrap_obj": scrap_obj,
+            "scrap_qs": scrap_qs,
+        }
+    )
 
 
 @staff_member_required
@@ -2190,8 +2223,7 @@ def create_quarantined_scrap(request, pk):
     scrap = ScrapUser.objects.get(pk=pk)
     line = scrap.line
     scrap_id = scrap.scrap_id
-    pareto = request.parser_context["kwargs"]["pareto_list"]
-    print(pareto)
+
     form = ScrapQuantity(request.POST or None)
     #
     # if form.is_valid():

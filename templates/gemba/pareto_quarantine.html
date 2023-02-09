@@ -1,14 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
-
-<h4>Pareto Quarantine View</h4>
+<h4>Pareto Quarantine Detail View</h4>
+Do you want to resolve quarantine case now? <a href="{% url 'gemba_app:quarantine-case-detail' scrap_id=scrap_id pareto_id=pareto_list.id %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search">Yes</span>
+    </button></a>
+<br/>
+<br/>
 <table class="table table-hover">
     <thead>
         <tr>
             <th scope="col">Line</th>
             <th scope="col">Date</th>
             <th scope="col">Shift</th>
+            <th scope="col">Job</th>
+            <th scope="col">Quarantine</th>
             <th scope="col">Pareto ID</th>
             <th scope="col">Pareto Date</th>
         </tr>
@@ -18,73 +24,12 @@
             <td><b>{{ pareto_list.line}}</b></td>
             <td>{{ pareto_list.pareto_date|date:"d-m-Y" }}</td>
             <td>{{ pareto_list.shift }}</td>
+            <td>{{ scrap_obj.job.name }}</td>
+            <td>{{ scrap_obj.qty }}</td>
             <td>{{ pareto_list.id }}</td>
             <td>{{ pareto_list.pareto_date }}</td>
         </tr>
     </tbody>
 </table>
 
-<table class="table table-hover">
-    <thead>
-        <tr>
-            <th scope="col">Job</th>
-            <th scope="col">Output</th>
-            <th scope="col">Good</th>
-            <th scope="col">Scrap</th>
-            <th scope="col">Quarantine</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>{{ pareto_detail.job.name }}</td>
-            <td>{{ pareto_detail.output }}</td>
-            <td>{{ pareto_detail.good }}</td>
-            <td>{{ pareto_detail.scrap }}</td>
-            <td>{{ scrap_obj.qty }}</td>
-        </tr>
-    </tbody>
-</table>
-<div>
-    <div class="row">
-        <div class="column">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">Scrap Reason</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for scrap_item in scrap_qs %}
-                     <tr>
-                         <td>{{ scrap_item.scrap.code }} - {{ scrap_item.scrap.description }}</td>
-                     </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="column">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">Scrap Reason</th>
-                        <th scope="col">Qty</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if scrap_details_qs|length == 0 %}
-                      <tr>
-                        <td colspan='4'>No scrap reasons recorded</td>
-                      </tr>
-                    {% endif %}
-                    {% for scrap_item in scrap_details_qs %}
-                     <tr>
-                         <td>{{ scrap_item.scrap.code }} - {{ scrap_item.scrap.description }}</td>
-                         <td>{{ scrap_item.qty }}</td>
-                     </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 {% endblock %}

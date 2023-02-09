@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from gemba.models import DowntimeDetail, DowntimeModel, LineHourModel, LineUser, Pareto, \
     ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, ScrapUser, JobModel2, Line, Timer, JobLine, \
-    MonthlyResults
+    MonthlyResults, QuarantineHistoryDetail
 
 
 class ScrapDetailAdmin(admin.ModelAdmin):
@@ -222,3 +222,4 @@ admin.site.register(Timer, TimerModelAdmin)
 admin.site.register(Line, LineModelAdmin)
 admin.site.register(JobLine, JobLineModelAdmin)
 admin.site.register(MonthlyResults, MonthlyResultsAdmin)
+admin.site.register(QuarantineHistoryDetail)
