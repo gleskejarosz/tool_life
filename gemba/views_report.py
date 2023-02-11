@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 
 import pytz
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 
 from gemba.filters import MonthlyResultFilter
 from gemba.models import MonthlyResults, Pareto
 
 
+@staff_member_required
 def dashboard(request):
     today = datetime.now(tz=pytz.UTC)
     yesterday = today - timedelta(days=1)
