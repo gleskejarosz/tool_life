@@ -3,27 +3,24 @@ from itertools import chain
 
 import pytz
 from django.contrib.admin.views.decorators import staff_member_required
-from django.core.paginator import Paginator, EmptyPage
+from django.core.paginator import Paginator
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect, request
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
-from django_filters.views import FilterView
-from django_tables2 import SingleTableMixin
 
-from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter, ParetoDetailFilter
+
+from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
-    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail, AM, NS, PM
-from gemba.tables import ParetoDetailHTMxMultiColumnTable
+    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
 from tools.views import tools_update
 
 
