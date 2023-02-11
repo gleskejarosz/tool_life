@@ -42,9 +42,9 @@ INSTALLED_APPS = [
     'tools',
     'gemba',
     'mathfilters',
-    'django_htmx',
-    'django_tables2',
-    'crispy_forms',
+    # 'django_htmx',
+    # 'django_tables2',
+    # 'crispy_forms',
 ]
 
 MIDDLEWARE = [
