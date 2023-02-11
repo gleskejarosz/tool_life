@@ -49,6 +49,9 @@ urlpatterns = [
     path("daily_oee_view/", views.pareto_view, name="pareto-view"),
     path("daily_pareto_search_result", staff_member_required(views.DailyParetoSearchResultsView.as_view()), name="daily-pareto-search-result"),
     path("pareto_details_view/<pk>/", views.pareto_detail_view, name="pareto-detail-view"),
+    # pareto view
+    path("report_choices_2/", views.report_choices_2, name="report-choices-2"),
+    path("paretos_view/", views.paretos_view, name="paretos-view"),
     # produced report
     path("pareto_produced_details/", views.pareto_details_view, name="pareto-details"),
     path("pareto_details_search_result/", staff_member_required(views.ParetoDetailsSearchResultsView.as_view()),

@@ -28,7 +28,8 @@
             <th scope="col">Job</th>
             <th scope="col">Good</th>
             <th scope="col">Scrap</th>
-            <th scope="col">Quarantine</th>
+            <th scope="col">Initial Quarantine Qty</th>
+            <th scope="col">Qty left to resolve</th>
         </tr>
     </thead>
     <tbody>
@@ -38,6 +39,7 @@
                 {{ quarantine_obj.good }}</a></td>
             <td>{{ quarantine_obj.scrap }}</td>
             <td>{{ quarantine_obj.initial_qty }}</td>
+            <td>{{ quarantine_obj.initial_qty|sub:total_scrap }}  </td>
         </tr>
     </tbody>
 </table>

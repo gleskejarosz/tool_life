@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Pareto View:</h4>
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Pareto Id</th>
+            <th scope="col">Pareto Date</th>
+            <th scope="col">Line</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Operators</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Performance</th>
+            <th scope="col">Quality</th>
+            <th scope="col">OEE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in page_obj %}
+        <tr>
+            <td><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.id }}</a></td>
+            <td>{{ item.pareto_date|date:"d-m-Y" }}</td>
+            <td>{{ item.line }}</td>
+            <td>{{ item.shift }}</td>
+            <td>{{ item.ops }}</td>
+            <td>{{ item.availability }}%</td>
+            <td>{{ item.performance }}%</td>
+            <td>{{ item.quality }}%</td>
+            <td>{{ item.oee }}%</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+</table>
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+{% endblock %}

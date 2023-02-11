@@ -83,6 +83,59 @@ def pareto_details_view(request):
 
 
 @staff_member_required
+def report_choices_2(request):
+    lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
+    return render(
+        request,
+        template_name="gemba/report_choices_2.html",
+        context={
+            "lines_qs": lines_qs,
+        },
+    )
+
+
+@staff_member_required
+def paretos_view(request):
+    line_name = request.GET.get("Lines")
+    if line_name is None:
+        line_qs = Line.objects.all()
+        line_id = line_qs[0]
+    else:
+        line_qs = Line.objects.filter(name=line_name)
+        line_id = line_qs[0]
+
+    date_from = request.GET.get("date_from")
+    date_to = request.GET.get("date_to")
+
+    if date_from == "" and date_to != "":
+        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
+            Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")[:100]
+    elif date_from != "" and date_to == "":
+        date_to = datetime.now(tz=pytz.UTC)
+        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
+            Q(pareto_date__gte=date_from) | Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+    elif date_from == "" and date_to == "":
+        date_to = datetime.now(tz=pytz.UTC)
+        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
+            Q(pareto_date=date_to)).order_by("-pareto_date", "id")
+    else:
+        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
+            Q(pareto_date__gte=date_from) | Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+
+    paginator = Paginator(paretos, 100)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request,
+                  template_name="gemba/paretos_view.html",
+                  context={
+                      "filter": paretos,
+                      "page_obj": page_obj,
+                  })
+
+
+@staff_member_required
 def downtime_detail_create(request, pk):
     downtime = get_object_or_404(DowntimeModel, pk=pk)
     pareto_qs = Pareto.objects.filter(user=request.user, completed=False)
@@ -146,7 +199,8 @@ def downtime_detail_create(request, pk):
             minutes = form.cleaned_data["minutes"]
             user = request.user
             downtime_elem = DowntimeDetail.objects.create(downtime=downtime, minutes=minutes, user=user, job=job,
-                                                          from_job=job_before, pareto_id=pareto_id, pareto_date=pareto_date,
+                                                          from_job=job_before, pareto_id=pareto_id,
+                                                          pareto_date=pareto_date,
                                                           line=line)
             pareto.downtimes.add(downtime_elem)
             return redirect("gemba_app:pareto-summary")
@@ -298,7 +352,8 @@ def pareto_detail_create(request):
 
                 else:
                     pareto_elem = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
-                                                              pareto_id=pareto_id, line=line, ops=ops, rework=rework_cal,
+                                                              pareto_id=pareto_id, line=line, ops=ops,
+                                                              rework=rework_cal,
                                                               pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
                     pareto.jobs.add(pareto_elem)
 
@@ -441,8 +496,10 @@ def pareto_detail_create(request):
                     good = output - scrap
 
                     pareto_elem = ParetoDetail.objects.create(job=job, output=output, user=user, good=good,
-                                                              pareto_id=pareto_id, line=line, ops=ops, rework=rework_cal,
-                                                              start_meter=start_meter, pareto_date=pareto_date, scrap=scrap,
+                                                              pareto_id=pareto_id, line=line, ops=ops,
+                                                              rework=rework_cal,
+                                                              start_meter=start_meter, pareto_date=pareto_date,
+                                                              scrap=scrap,
                                                               takt_time=takt_time)
                     pareto.jobs.add(pareto_elem)
 
@@ -748,12 +805,12 @@ def count_downtimes(pareto):
                     break
             if founded == 0:
                 downtimes_list.append({
-                        "down_id": down_id,
-                        "job": job,
-                        "code": down_code,
-                        "description": down_desc,
-                        "minutes": down_time,
-                        "frequency": 1,
+                    "down_id": down_id,
+                    "job": job,
+                    "code": down_code,
+                    "description": down_desc,
+                    "minutes": down_time,
+                    "frequency": 1,
                 })
                 downtimes.append(down_id)
             founded = 0
@@ -791,12 +848,12 @@ def count_scraps(pareto):
                     break
             if founded == 0:
                 scraps_list.append({
-                        "scrap_id": scrap_id,
-                        "job": job,
-                        "code": scrap_code,
-                        "description": scrap_desc,
-                        "qty": scrap_qty,
-                        "frequency": 1,
+                    "scrap_id": scrap_id,
+                    "job": job,
+                    "code": scrap_code,
+                    "description": scrap_desc,
+                    "qty": scrap_qty,
+                    "frequency": 1,
                 })
                 scraps.append(scrap_id)
             founded = 0
@@ -1302,7 +1359,7 @@ def pareto_create_new(request):
                 time_stamp = datetime.strptime(str(START_CHOICES[2][1]), "%H:%M:%S")
 
         Pareto.objects.create(user=user, completed=False, shift=shift, hours=hours, pareto_date=pareto_date,
-                                    time_stamp=time_stamp, line=line, ops_otg=ops_otg)
+                              time_stamp=time_stamp, line=line, ops_otg=ops_otg)
         return redirect("gemba_app:pareto-summary")
 
     return render(
@@ -1344,7 +1401,7 @@ class DowntimeDetailView(DetailView):
 
 class DowntimeUpdateView(UpdateView):
     model = DowntimeDetail
-    fields = ("job", "minutes", )
+    fields = ("job", "minutes",)
     template_name = "form.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
 
@@ -2158,9 +2215,6 @@ def downtime_scrap_set_up(request, line_id):
 def pareto_quarantine_view(request, scrap_id):
     scrap_obj = ScrapDetail.objects.get(pk=scrap_id)
     pareto_id = scrap_obj.pareto_id
-    pareto_date = scrap_obj.pareto_date
-    job = scrap_obj.job
-    line = scrap_obj.line
 
     pareto = Pareto.objects.get(pk=pareto_id)
     user = scrap_obj.user
@@ -2204,9 +2258,21 @@ def create_quarantine_historic_detail(request, scrap_id, pareto_id):
 
     scrap_qs = ScrapUser.objects.filter(line=line)
 
-    quarantine_obj = QuarantineHistoryDetail.objects.create(pareto_id=pareto_id, user=user, line=line,
-                                                            pareto_date=pareto_date, job=job, good=good, scrap=scrap,
-                                                            initial_qty=initial_qty)
+    quarantine_qs = QuarantineHistoryDetail.objects.filter(pareto_id=pareto_id, user=user, line=line,
+                                                           pareto_date=pareto_date, job=job, good=good, scrap=scrap,
+                                                           initial_qty=initial_qty)
+    if len(quarantine_qs) == 0:
+        quarantine_obj = QuarantineHistoryDetail.objects.create(pareto_id=pareto_id, user=user, line=line,
+                                                                pareto_date=pareto_date, job=job, good=good,
+                                                                scrap=scrap, initial_qty=initial_qty)
+    else:
+        quarantine_obj = quarantine_qs[0]
+
+    scrap_details_qs = ScrapDetail.objects.filter(line=line, pareto_id=pareto_id, quarantined=True)
+    total_scrap = 0
+    for scrap_obj in scrap_details_qs:
+        qty = scrap_obj.qty
+        total_scrap += qty
 
     return render(
         request,
@@ -2214,6 +2280,8 @@ def create_quarantine_historic_detail(request, scrap_id, pareto_id):
         context={
             "quarantine_obj": quarantine_obj,
             "scrap_qs": scrap_qs,
+            "scrap_details_qs": scrap_details_qs,
+            "total_scrap": total_scrap,
         }
     )
 
@@ -2231,10 +2299,18 @@ def quarantine_summary(request):
     if quarantine_case_qs.exists():
         quarantine_case = quarantine_case_qs[0]
         line = quarantine_case.line
+        pareto_id = quarantine_case.pareto_id
         scrap_qs = ScrapUser.objects.filter(line=line)
+        scrap_details_qs = ScrapDetail.objects.filter(line=line, pareto_id=pareto_id, quarantined=True)
     else:
         quarantine_case = []
         scrap_qs = []
+        scrap_details_qs = []
+
+    total_scrap = 0
+    for scrap_obj in scrap_details_qs:
+        qty = scrap_obj.qty
+        total_scrap += qty
 
     return render(
         request,
@@ -2242,6 +2318,8 @@ def quarantine_summary(request):
         context={
             "quarantine_obj": quarantine_case,
             "scrap_qs": scrap_qs,
+            "scrap_details_qs": scrap_details_qs,
+            "total_scrap": total_scrap,
         }
     )
 
@@ -2250,21 +2328,29 @@ def quarantine_summary(request):
 def create_quarantined_scrap(request, pk):
     scrap = ScrapUser.objects.get(pk=pk)
     line = scrap.line
-    scrap_id = scrap.scrap_id
+    scrap_id = scrap.scrap.id
+    scrap_obj = ScrapModel.objects.get(id=scrap_id)
 
-    form = ScrapQuantity(request.POST or None)
-    #
-    # if form.is_valid():
-    #     qty = form.cleaned_data["qty"]
-    #
-    #     scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job, quarantined=True,
-    #                                             pareto_id=pareto_id, pareto_date=pareto_date, line=line)
-    #     pareto.scrap.add(scrap_elem)
-    #     return redirect("gemba_app:pareto-summary")
-    #
+    quarantine_case_qs = QuarantineHistoryDetail.objects.filter(user=request.user, completed=False)
+    if quarantine_case_qs.exists():
+        quarantine_case = quarantine_case_qs[0]
+        pareto_id = quarantine_case.pareto_id
+        pareto_date = quarantine_case.pareto_date
+        job = quarantine_case.job
+
+        form = ScrapQuantity(request.POST or None)
+
+        if form.is_valid():
+            qty = form.cleaned_data["qty"]
+
+            scrap_elem = ScrapDetail.objects.create(scrap=scrap_obj, qty=qty, user=request.user, job=job,
+                                                    quarantined=True,
+                                                    pareto_id=pareto_id, pareto_date=pareto_date, line=line)
+            quarantine_case.scraps.add(scrap_elem)
+            return redirect("gemba_app:quarantine-case-summary")
+
     return render(
         request,
         template_name="form.html",
         context={"form": form}
-        )
-
+    )

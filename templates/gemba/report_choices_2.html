@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+
+ <form action="{% url 'gemba_app:paretos-view' %}" method="get">
+     <h4>Select a date range:</h4>
+     </br>
+     <div>
+         <div class="row">
+            <div class="column">
+                &nbsp;&nbsp;&nbsp;Date range from <input name="date_from" type="date">
+            </div>
+            <div class="column">
+                &nbsp;&nbsp;&nbsp;to <input name="date_to" type="date">
+            </div>
+         </div>
+    </div>
+    </br>
+     <h4>Select a line:</h4>
+        {% for o in lines_qs %}
+        <tr>
+            </br>
+            <td>{{o.name}}&nbsp;&nbsp;<input type="radio" name="Lines" value="{{o.name}}"></td>
+            </br>
+        </tr>
+        {% endfor %}
+      </br>
+     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
+    </button>
+ </form>
+
+{% endblock %}
