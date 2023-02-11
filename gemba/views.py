@@ -113,14 +113,14 @@ def paretos_view(request):
     elif date_from != "" and date_to == "":
         date_to = datetime.now(tz=pytz.UTC)
         paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date__gte=date_from) | Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+            Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
     elif date_from == "" and date_to == "":
         date_to = datetime.now(tz=pytz.UTC)
         paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
             Q(pareto_date=date_to)).order_by("-pareto_date", "id")
     else:
         paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date__gte=date_from) | Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+            Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
 
     paginator = Paginator(paretos, 100)
 
