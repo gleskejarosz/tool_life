@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+
+ <form action="{% url 'gemba_app:weekly-report-by-line' %}" method="get">
+     <h4>Select a date:</h4>
+     </br>
+    Date <input name="date_to_display" type="date">
+    </br>
+    </br>
+     <h4>Select a shift:</h4>
+        {% for s in shift_list %}
+        <tr>
+            <td>{{s}}&nbsp;&nbsp;<input type="radio" name="Shift" value="{{s}}"></td>
+            </br>
+        </tr>
+        {% endfor %}
+      </br>
+     <h4>Select a line:</h4>
+        {% for o in lines_qs %}
+        <tr>
+            <td>{{o.name}}&nbsp;&nbsp;<input type="radio" name="Line" value="{{o.name}}"></td>
+            </br>
+        </tr>
+        {% endfor %}
+      </br>
+     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
+    </button>
+ </form>
+{% endblock %}

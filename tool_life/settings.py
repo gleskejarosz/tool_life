@@ -42,6 +42,9 @@ INSTALLED_APPS = [
     'tools',
     'gemba',
     'mathfilters',
+    'django_htmx',
+    'django_tables2',
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = 'tool_life.urls'

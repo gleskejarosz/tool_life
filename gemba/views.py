@@ -3,7 +3,7 @@ from itertools import chain
 
 import pytz
 from django.contrib.admin.views.decorators import staff_member_required
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,14 +13,17 @@ from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
+from django_filters.views import FilterView
+from django_tables2 import SingleTableMixin
 
-from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
+from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter, ParetoDetailFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
-    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
+    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail, AM, NS, PM
+from gemba.tables import ParetoDetailHTMxMultiColumnTable
 from tools.views import tools_update
 
 
@@ -2354,3 +2357,35 @@ def create_quarantined_scrap(request, pk):
         template_name="form.html",
         context={"form": form}
     )
+
+
+# class CustomPaginator(Paginator):
+#     def validate_number(self, number):
+#         try:
+#             return super().validate_number(number)
+#         except EmptyPage:
+#             if int(number) > 1:
+#                 # return the last page
+#                 return self.num_pages
+#             elif int(number) < 1:
+#                 # return the first page
+#                 return 1
+#             else:
+#                 raise
+#
+#
+# class ParetoDetailHTMxMultiColumTableView(SingleTableMixin, FilterView):
+#     table_class = ParetoDetailHTMxMultiColumnTable
+#     queryset = ParetoDetail.objects.all().order_by("-id")
+#     filterset_class = ParetoDetailFilter
+#     paginate_by = 10
+#     paginator_class = CustomPaginator
+#
+#     def get_template_names(self):
+#         if self.request.htmx:
+#             template_name = "gemba/pareto_detail_table_partial.html"
+#         else:
+#             template_name = "gemba/pareto_detail_table_col_filter.html"
+#
+#         return template_name
+

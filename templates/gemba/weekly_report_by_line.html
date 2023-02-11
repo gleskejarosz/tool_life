@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+<head>
+    <style>
+        .central_pos{
+            vertical-align: center;
+            text-align: center;
+        }
+    </style>
+</head>
+<h4>Pareto Weekly Compare Report</h4>
+<br/>
+<br/>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">Day</th>
+            <th scope="col" class="central_pos">Monday</th>
+            <th scope="col" class="central_pos">Tuesday</th>
+            <th scope="col" class="central_pos">Wednesday</th>
+            <th scope="col" class="central_pos">Thursday</th>
+            <th scope="col" class="central_pos">Friday</th>
+            <th scope="col" class="central_pos">Saturday</th>
+            <th scope="col" class="central_pos">Sunday</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for elem in report %}
+        <tr>
+            <td>{{ elem.col0 }}</td>
+            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
