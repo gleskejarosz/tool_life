@@ -37,12 +37,20 @@ def dashboard(request):
 def report_choices_3(request):
     lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     shift = [AM, PM, NS]
+    week_list = []
+    today = datetime.now(tz=pytz.UTC)
+
+    for w in range(10):
+        previous_monday = (today - timedelta(days=today.weekday()) - timedelta(days=w * 7)).strftime("%d-%m-%Y")
+        week_list.append(previous_monday)
+
     return render(
         request,
         template_name="gemba/report_choices_3.html",
         context={
             "lines_qs": lines_qs,
             "shift_list": shift,
+            "week_list": week_list,
         },
     )
 
@@ -57,13 +65,13 @@ def weekly_report_by_line(request):
         line_qs = Line.objects.filter(name=line_name)
         line_id = line_qs[0]
 
-    date_to_display = request.GET.get("date_to_display")
+    monday_str = request.GET.get("Week") + " 21:45:00"
     shift = request.GET.get("Shift")
 
-    today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
-    this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-    end_sunday = this_sunday + timedelta(days=7)
+    monday_object = datetime.strptime(monday_str, '%d-%m-%Y %H:%M:%S')
 
+    this_sunday = monday_object - timedelta(days=1)
+    end_sunday = this_sunday + timedelta(days=7)
     pareto_detail_qs = ParetoDetail.objects.filter(created__gte=this_sunday,
                                                    created__lt=end_sunday).filter(line=line_id).order_by("id")
 
@@ -81,7 +89,7 @@ def weekly_report_by_line(request):
 
     report = []
     report.append({
-        "col0": "",
+        "col0": "Date",
         "col1": "",
         "col2": "",
         "col3": "",
@@ -240,10 +248,18 @@ def weekly_report_by_line(request):
             report.remove(scrap_elem)
         idx += 1
 
+    jobs_idx = "6:" + str(row)
+    down_idx = str(row) + ":" + str(report_len)
+    down_len = str(report_len - row)
+    scrap_idx = str(report_len) + ":"
     return render(
         request,
         template_name="gemba/weekly_report_by_line.html",
         context={
             "report": report,
+            "jobs_idx": jobs_idx,
+            "down_idx": down_idx,
+            "down_len": down_len,
+            "scrap_idx": scrap_idx,
         },
     )

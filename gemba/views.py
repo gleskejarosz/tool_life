@@ -2355,34 +2355,3 @@ def create_quarantined_scrap(request, pk):
         context={"form": form}
     )
 
-
-# class CustomPaginator(Paginator):
-#     def validate_number(self, number):
-#         try:
-#             return super().validate_number(number)
-#         except EmptyPage:
-#             if int(number) > 1:
-#                 # return the last page
-#                 return self.num_pages
-#             elif int(number) < 1:
-#                 # return the first page
-#                 return 1
-#             else:
-#                 raise
-#
-#
-# class ParetoDetailHTMxMultiColumTableView(SingleTableMixin, FilterView):
-#     table_class = ParetoDetailHTMxMultiColumnTable
-#     queryset = ParetoDetail.objects.all().order_by("-id")
-#     filterset_class = ParetoDetailFilter
-#     paginate_by = 10
-#     paginator_class = CustomPaginator
-#
-#     def get_template_names(self):
-#         if self.request.htmx:
-#             template_name = "gemba/pareto_detail_table_partial.html"
-#         else:
-#             template_name = "gemba/pareto_detail_table_col_filter.html"
-#
-#         return template_name
-

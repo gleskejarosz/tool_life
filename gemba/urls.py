@@ -102,6 +102,4 @@ urlpatterns = [
     path("chart/", views.EditorChartView.as_view(), name="chart"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
-    # test
-    # path("pareto_detail_multi_column_table/", views.ParetoDetailHTMxMultiColumTableView.as_view(), name="pareto-detail-multi-column-table"),
     ]

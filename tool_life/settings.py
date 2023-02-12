@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-=s&^=9^9e^qq3mozhg^8j!an)$*#(*7^u=uz-+^#1x2(uyb4ck
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+"elle2023.pythonanywhere.com"
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -42,9 +43,6 @@ INSTALLED_APPS = [
     'tools',
     'gemba',
     'mathfilters',
-    # 'django_htmx',
-    # 'django_tables2',
-    # 'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +53,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = 'tool_life.urls'

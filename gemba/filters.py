@@ -1,6 +1,6 @@
 import django_filters
 from django.forms import DateInput
-from gemba.models import Pareto, MonthlyResults, ParetoDetail
+from gemba.models import Pareto, MonthlyResults
 
 
 class DailyParetoFilter(django_filters.FilterSet):
@@ -12,21 +12,21 @@ class DailyParetoFilter(django_filters.FilterSet):
         fields = ["pareto_date"]
 
 
-class ParetoDetailFilter(django_filters.FilterSet):
-    id = django_filters.NumberFilter(label="")
-    line = django_filters.CharFilter(field_name='line__name', label="", lookup_expr="startswith")
-    job = django_filters.CharFilter(field_name='job_id__name', label="", lookup_expr="startswith")
-    output = django_filters.NumberFilter(label="")
-    good = django_filters.NumberFilter(label="")
-    scrap = django_filters.NumberFilter(label="")
-    rework = django_filters.NumberFilter(label="")
-    ops = django_filters.NumberFilter(label="")
-    pareto_id = django_filters.NumberFilter(label="")
-    pareto_date = django_filters.DateFilter(label="", lookup_expr="startswith")
-
-    class Meta:
-        model = ParetoDetail
-        fields = ["id", "line", "job", "output", "good", "scrap", "rework", "ops", "pareto_id", "pareto_date"]
+# class ParetoDetailFilter(django_filters.FilterSet):
+#     id = django_filters.NumberFilter(label="")
+#     line = django_filters.CharFilter(field_name='line__name', label="", lookup_expr="startswith")
+#     job = django_filters.CharFilter(field_name='job_id__name', label="", lookup_expr="startswith")
+#     output = django_filters.NumberFilter(label="")
+#     good = django_filters.NumberFilter(label="")
+#     scrap = django_filters.NumberFilter(label="")
+#     rework = django_filters.NumberFilter(label="")
+#     ops = django_filters.NumberFilter(label="")
+#     pareto_id = django_filters.NumberFilter(label="")
+#     pareto_date = django_filters.DateFilter(label="", lookup_expr="startswith")
+#
+#     class Meta:
+#         model = ParetoDetail
+#         fields = ["id", "line", "job", "output", "good", "scrap", "rework", "ops", "pareto_id", "pareto_date"]
 
 
 class DowntimeFilter(django_filters.FilterSet):

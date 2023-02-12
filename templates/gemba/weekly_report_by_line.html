@@ -1,18 +1,26 @@
 {% extends "base.html" %}
-{% block content %}
 {% load mathfilters %}
-<head>
-    <style>
-        .central_pos{
-            vertical-align: center;
-            text-align: center;
+
+{% block scripts %}
+<script>
+        if (screen.width < 500) {
+
+          $("body").addClass("nohover");
+          $("td, th")
+            .attr("tabindex", "1")
+            .on("touchstart", function() {
+              $(this).focus();
+            });
+
         }
-    </style>
-</head>
+</script>
+{% endblock scripts %}
+
+{% block content %}
 <h4>Pareto Weekly Compare Report</h4>
 <br/>
 <br/>
-<table class="table table-bordered">
+<table>
     <thead>
         <tr>
             <th scope="col">Day</th>
@@ -26,9 +34,51 @@
         </tr>
     </thead>
     <tbody>
-        {% for elem in report %}
+        {% for elem in report|slice:"0:6" %}
         <tr>
-            <td>{{ elem.col0 }}</td>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        {% for elem in report|slice:jobs_idx%}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        {% for elem in report|slice:down_idx%}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        {% for elem in report|slice:scrap_idx%}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
             <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
             <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
             <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
