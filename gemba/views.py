@@ -19,7 +19,7 @@ from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateF
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
-    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, Editors, LineUser, Line, Timer, JobLine, \
+    ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, LineUser, Line, Timer, JobLine, \
     PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
 from tools.views import tools_update
 
@@ -1708,15 +1708,6 @@ class ParetoNSUpdateView(UpdateView):
     template_name = "form.html"
     form_class = NotScheduledToRunUpdateForm
     success_url = reverse_lazy("gemba_app:pareto-summary")
-
-
-class EditorChartView(TemplateView):
-    template_name = 'gemba/chart.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["qs"] = Editors.objects.all()
-        return context
 
 
 @staff_member_required

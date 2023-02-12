@@ -99,7 +99,6 @@ urlpatterns = [
     path("export_to_gemba/", views_export.gemba_export2, name="export-to-gemba"),
     path("tableau/<pk>/", views_export.tableau_export, name="tableau"),
     path("export_pareto_to_pdf/<pk>/", views_export.export_pareto_to_pdf, name="export-pareto-to-pdf"),
-    path("chart/", views.EditorChartView.as_view(), name="chart"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
     ]

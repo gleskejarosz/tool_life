@@ -233,14 +233,6 @@ class JobLine(models.Model):
         verbose_name = "Job vs Line"
 
 
-class Editors(models.Model):
-    editor_name = models.CharField(max_length=200)
-    num_users = models.IntegerField()
-
-    def __str__(self):
-        return "{}-{}".format(self.editor_name, self.num_users)
-
-
 # line setup as primary key
 class Line(models.Model):
     LINE_STATUS = (
