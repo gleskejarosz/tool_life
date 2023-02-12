@@ -1,19 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <h4>Select machine:</h4>
-<table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Machine Name</th>
-        </tr>
-        </thead>
-        <tbody>
         {% for object in machine_qs %}
             <tr>
+                </br>
                 <td><a href="{% url 'tools_app:tools-vs-jobs' machine_id=object.pk %}">{{ object.name }}</a></td>
+                </br>
             </tr>
         {% endfor %}
-        </tbody>
-    </table>
-
 {% endblock %}
