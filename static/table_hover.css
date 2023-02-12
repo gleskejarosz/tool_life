@@ -1,5 +1,8 @@
 table {
   overflow: hidden;
+  border-spacing: 0;
+  border-collapse: collapse;
+  z-index: 1;
 }
 
 td, th {
@@ -9,7 +12,7 @@ td, th {
 }
 
 body:not(.nohover) tbody tr:hover {
-  background-color: #ffa;
+  background-color: rgba(191, 191, 191, 0.5);
 }
 
 td:hover::after,
@@ -22,12 +25,12 @@ thead th:not(:empty):focus::after {
   position: absolute;
   top: -5000px;
   width: 100%;
-  z-index: -1;
+  z-index: 0;
 }
 
 td:hover::after,
 th:hover::after {
-  background-color: #ffa;
+  background-color: rgba(191, 191, 191, 0.5);
 }
 
 td:focus::after,
