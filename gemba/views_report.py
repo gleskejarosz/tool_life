@@ -130,12 +130,15 @@ def weekly_report_by_line(request):
         oee = obj.oee
         report[5][col] = str(oee) + "%"
 
-    counter = 0
+    indexes = [0, 0, 0, 0, 0, 0, 0, 0]
+    max_index = 0
     for obj in pareto_shift_qs:
         for pos, pareto_detail in enumerate(obj.jobs.all()):
             idx = obj.pareto_date.weekday() + 1
+            indexes[idx] += 1
             col = "col" + str(idx)
-            if idx > 0:
+            index = max(indexes)
+            if max_index < index:
                 for n in range(5):
                     report.append({
                         "col0": "",
@@ -147,6 +150,7 @@ def weekly_report_by_line(request):
                         "col6": 0,
                         "col7": 0,
                     })
+            max_index = index
             job = pareto_detail.job
             report[6 + pos * 5]["col0"] = "Job"
             report[6 + pos * 5][col] = job
@@ -162,10 +166,10 @@ def weekly_report_by_line(request):
             rework = pareto_detail.rework
             report[10 + pos * 5]["col0"] = "Rework"
             report[10 + pos * 5][col] = rework
-            counter += 1
 
     downtimes_qs = DowntimeUser.objects.filter(line=line_id, order__gte=0).order_by("order")
     downtimes_list = []
+    downtimes_sum = []
 
     for downtime_elem in downtimes_qs:
         downtime = downtime_elem.downtime.description
@@ -180,9 +184,9 @@ def weekly_report_by_line(request):
             "col7": 0,
         })
         downtimes_list.append(downtime)
+        downtimes_sum.append(0)
 
-    positions = []
-    row = 5 + 5 * counter + 1
+    row = 5 + 5 * max_index + 1
     for obj in pareto_shift_qs:
         idx = obj.pareto_date.weekday() + 1
         col = "col" + str(idx)
@@ -190,13 +194,20 @@ def weekly_report_by_line(request):
             down_desc = down_detail.downtime.description
             minutes = down_detail.minutes
             pos = downtimes_list.index(down_desc)
-            positions.append(positions)
             report[row + pos][col] += minutes
+            downtimes_sum[pos] += minutes
+
+    idx = 0
+    for down_elem in report[row:]:
+        if downtimes_sum[idx] == 0:
+            report.remove(down_elem)
+        idx += 1
 
     report_len = len(report)
 
     scraps_qs = ScrapUser.objects.filter(line=line_id, order__gte=0).order_by("order")
     scraps_list = []
+    scraps_sum = []
 
     for scrap_elem in scraps_qs:
         scrap = scrap_elem.scrap.description
@@ -211,8 +222,8 @@ def weekly_report_by_line(request):
             "col7": 0,
         })
         scraps_list.append(scrap)
+        scraps_sum.append(0)
 
-    positions2 = []
     for obj in pareto_shift_qs:
         idx = obj.pareto_date.weekday() + 1
         col = "col" + str(idx)
@@ -220,8 +231,14 @@ def weekly_report_by_line(request):
             scrap_desc = scrap_detail.scrap.description
             qty = scrap_detail.qty
             pos2 = scraps_list.index(scrap_desc)
-            positions2.append(positions2)
             report[report_len + pos2][col] += qty
+            scraps_sum[pos2] += qty
+
+    idx = 0
+    for scrap_elem in report[report_len:]:
+        if scraps_sum[idx] == 0:
+            report.remove(scrap_elem)
+        idx += 1
 
     return render(
         request,
