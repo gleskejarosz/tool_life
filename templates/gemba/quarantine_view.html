@@ -15,8 +15,8 @@
         <tbody>
         {% for object in quarantine_qs %}
             <tr>
-                <td><a href="{% url 'gemba_app:quarantine-detail' scrap_id=object.pk %}">
-                    {{ object.modified|date:'d-m-Y H:i' }}</a></td>
+                <th><a href="{% url 'gemba_app:quarantine-detail' scrap_id=object.pk %}">
+                    {{ object.modified|date:'d-m-Y H:i' }}</a></th>
                 <td>{{ object.line }}</td>
                 <td>{{ object.qty }}</td>
                 <td>{{ object.job }}</td>
