@@ -34,7 +34,7 @@
             <th scope="col" style="text-align: center;">Sunday</th>
         </tr>
     </thead>
-    <tbody class="framedtbody">
+    <tbody>
         {% for elem in report|slice:"0:6" %}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
@@ -48,7 +48,7 @@
         </tr>
         {% endfor %}
     </tbody>
-    <tbody class="framedtbody">
+    <tbody>
         {% for elem in report|slice:jobs_idx%}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
@@ -62,9 +62,9 @@
         </tr>
         {% endfor %}
     </tbody>
-    <tbody class="framedtbody">
+    <tbody>
         {% for elem in report|slice:down_idx%}
-        <tr>
+        <tr class="framedtr">
             <th scope="row">{{ elem.col0 }}</th>
             <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
             <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
@@ -76,7 +76,7 @@
         </tr>
         {% endfor %}
     </tbody>
-    <tbody class="framedtbody">
+    <tbody>
         {% for elem in report|slice:scrap_idx%}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>

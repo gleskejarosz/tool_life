@@ -9,7 +9,7 @@ table {
   z-index: 0;
 }
 
-.framedtbody tbody {
+.framedtr tr {
  border: 2px solid grey;
 }
 
