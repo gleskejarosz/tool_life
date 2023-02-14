@@ -1,3 +1,7 @@
+div.jumbotron.jumbotron-fluid {
+  background-color: transparent;
+}
+
 table {
   position: relative; /*my change*/
   overflow: hidden;
@@ -7,7 +11,6 @@ table {
 }
 
 body {
-  background-color: yellow; /*my change*/
   z-index: 0;
 }
 
@@ -56,3 +59,4 @@ tbody th:focus::before {
   width: 10000px;
   z-index: 0;
 }
+
