@@ -257,6 +257,8 @@ def weekly_report_by_line(request):
         template_name="gemba/weekly_report_by_line.html",
         context={
             "report": report,
+            "line_name": line_name,
+            "shift": shift,
             "jobs_idx": jobs_idx,
             "down_idx": down_idx,
             "down_len": down_len,
