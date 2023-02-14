@@ -1,5 +1,5 @@
 table {
-  position: relative;
+  position: relative; /*my change*/
   overflow: hidden;
   border-spacing: 0;
   border-collapse: collapse;
@@ -7,6 +7,7 @@ table {
 }
 
 body {
+  background-color: transparent; /*my change*/
   z-index: 0;
 }
 
