@@ -2,27 +2,27 @@ div.jumbotron.jumbotron-fluid {
   background-color: transparent;
 }
 
-table-bordered {
+.mytable table {
   overflow: hidden;
   border-spacing: 0;
   border-collapse: collapse;
   z-index: 0;
 }
 
-td, th {
+.mytable td, .mytable th {
   padding: 10px;
   position: relative;
   outline: 0;
 }
 
-body:not(.nohover) tbody tr:hover {
+body:not(.nohover) .mytable tbody,.mytable tr:hover {
   background-color: rgba(191, 191, 191, 0.5);
 }
 
-td:hover::after,
-thead th:not(:empty):hover::after,
-td:focus::after,
-thead th:not(:empty):focus::after {
+.mytable td:hover::after,
+.mytable thead, .mytable th:not(:empty):hover::after,
+.mytable td:focus::after,
+.mytable thead, .mytable th:not(:empty):focus::after {
   content: '';
   height: 10000px;
   left: 0;
@@ -32,19 +32,19 @@ thead th:not(:empty):focus::after {
   z-index: -1;
 }
 
-td:hover::after,
-th:hover::after {
+.mytable td:hover::after,
+.mytable th:hover::after {
   background-color: rgba(191, 191, 191, 0.5);
 }
 
-td:focus::after,
-th:focus::after {
+.mytable td:focus::after,
+.mytable th:focus::after {
   background-color: lightblue;
 }
 
 /* Focus stuff for mobile */
-td:focus::before,
-tbody th:focus::before {
+.mytable td:focus::before,
+.mytable tbody, .mytable th:focus::before {
   background-color: lightblue;
   content: '';
   height: 100%;
