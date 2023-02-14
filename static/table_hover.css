@@ -6,6 +6,7 @@ table {
   overflow: hidden;
   border-spacing: 0;
   border-collapse: collapse;
+  border: 2px solid grey;
   z-index: 0;
 }
 
