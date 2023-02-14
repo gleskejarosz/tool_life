@@ -9,9 +9,14 @@ table {
   z-index: 0;
 }
 
+td {
+ vertical-align: center;
+ text-align: center;
+}
+
 .mytable td, .mytable th {
   padding: 10px;
-  border: 2px solid grey;
+  border: 1px solid grey;
   position: relative;
   outline: 0;
 }
