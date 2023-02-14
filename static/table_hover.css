@@ -15,7 +15,7 @@ div.jumbotron.jumbotron-fluid {
   outline: 0;
 }
 
-body:not(.nohover) .mytable tbody tr:hover {
+.mytable body:not(.nohover) tbody tr:hover {
   background-color: rgba(191, 191, 191, 0.5);
 }
 
