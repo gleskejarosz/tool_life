@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 {% block content %}
+<head>
+    <style>
+        .high{
+            color: red;
+            font-weight: bold;
+    </style>
+</head>
 <h4>Downtime rate by week</h4>
 Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
 
@@ -7,52 +14,52 @@ Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
         <thead>
         <tr style="font-size:0.7vw;">
             <td> </td>
-            <th colspan="2">Week -8</th>
-             <th colspan="2">Week -7</th>
-             <th colspan="2">Week -6</th>
-             <th colspan="2">Week -5</th>
-             <th colspan="2">Week -4</th>
-             <th colspan="2">Week -3</th>
-             <th colspan="2">Week -2</th>
-            <th colspan="2">Week -1</th>
-            <th colspan="2">Current Week</th>
-            <th colspan="2">Total</th>
+            <th colspan="2" style="text-align: center;">Week -8</th>
+             <th colspan="2" style="text-align: center;">Week -7</th>
+             <th colspan="2" style="text-align: center;">Week -6</th>
+             <th colspan="2" style="text-align: center;">Week -5</th>
+             <th colspan="2" style="text-align: center;">Week -4</th>
+             <th colspan="2" style="text-align: center;">Week -3</th>
+             <th colspan="2" style="text-align: center;">Week -2</th>
+            <th colspan="2" style="text-align: center;">Week -1</th>
+            <th colspan="2" style="text-align: center;">Current Week</th>
+            <th colspan="2"  style="text-align: center;">Total</th>
         </tr>
         <tr style="font-size:0.7vw;">
             <th>W/C</th>
-            <th colspan="2">{{ totals.start_monday_0|date:'d-M' }}</th>
-             <th colspan="2">{{ totals.start_monday_1|date:'d-M' }}</th>
-             <th colspan="2">{{ totals.start_monday_2|date:'d-M' }}</th>
-             <th colspan="2">{{ totals.start_monday_3|date:'d-M' }}</th>
-             <th colspan="2">{{ totals.start_monday_4|date:'d-M' }}</th>
-             <th colspan="2">{{ totals.start_monday_5|date:'d-M' }}</th>
-             <th colspan="2">{{ totals.start_monday_6|date:'d-M' }}</th>
-            <th colspan="2">{{ totals.start_monday_7|date:'d-M' }}</th>
-            <th colspan="2">{{ totals.start_monday_8|date:'d-M' }}</th>
-            <th colspan="2">Total</th>
+            <th colspan="2" style="text-align: center;">{{ totals.start_monday_0|date:'d-M' }}</th>
+             <th colspan="2" style="text-align: center;">{{ totals.start_monday_1|date:'d-M' }}</th>
+             <th colspan="2" style="text-align: center;">{{ totals.start_monday_2|date:'d-M' }}</th>
+             <th colspan="2" style="text-align: center;">{{ totals.start_monday_3|date:'d-M' }}</th>
+             <th colspan="2" style="text-align: center;">{{ totals.start_monday_4|date:'d-M' }}</th>
+             <th colspan="2" style="text-align: center;">{{ totals.start_monday_5|date:'d-M' }}</th>
+             <th colspan="2" style="text-align: center;">{{ totals.start_monday_6|date:'d-M' }}</th>
+            <th colspan="2" style="text-align: center;">{{ totals.start_monday_7|date:'d-M' }}</th>
+            <th colspan="2" style="text-align: center;">{{ totals.start_monday_8|date:'d-M' }}</th>
+            <th colspan="2" style="text-align: center;">Total</th>
         </tr>
         <tr style="font-size:0.7vw;">
             <th scope="col">Downtime</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
-            <th scope="col">Min</th>
-            <th scope="col">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
+            <th scope="col" style="text-align: center;">Min</th>
+            <th scope="col" style="text-align: center;">%</th>
         </tr>
         </thead>
 
@@ -62,31 +69,31 @@ Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
                 <th>{{ object.down }}</th>
                 <td>{% if object.qty_0 == 0 %} {% else %} {{ object.qty_0 }} {% endif %}</td>
                 <td>{% if object.down_rate_0 == 0 %} {% elif object.down_rate_0 > 5 %}
-                    <div>{{ object.down_rate_0 }}%</div>{% else %}{{ object.down_rate_0 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_0 }}%</div>{% else %}{{ object.down_rate_0 }}%{% endif %}</td>
                 <td>{% if object.qty_1 == 0 %} {% else %} {{ object.qty_1 }} {% endif %}</td>
                 <td>{% if object.down_rate_1 == 0 %} {% elif object.down_rate_1 > 5 %}
-                    <div>{{ object.down_rate_1 }}%</div>{% else %}{{ object.down_rate_1 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_1 }}%</div>{% else %}{{ object.down_rate_1 }}%{% endif %}</td>
                 <td>{% if object.qty_2 == 0 %} {% else %} {{ object.qty_2 }} {% endif %}</td>
                 <td>{% if object.down_rate_2 == 0 %} {% elif object.down_rate_2 > 5 %}
-                    <div>{{ object.down_rate_2 }}%</div>{% else %}{{ object.down_rate_2 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_2 }}%</div>{% else %}{{ object.down_rate_2 }}%{% endif %}</td>
                 <td>{% if object.qty_3 == 0 %} {% else %} {{ object.qty_3 }} {% endif %}</td>
                 <td>{% if object.down_rate_3 == 0 %} {% elif object.down_rate_3 > 5 %}
-                    <div>{{ object.down_rate_3 }}%</div>{% else %}{{ object.down_rate_3 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_3 }}%</div>{% else %}{{ object.down_rate_3 }}%{% endif %}</td>
                 <td>{% if object.qty_4 == 0 %} {% else %} {{ object.qty_4 }} {% endif %}</td>
                 <td>{% if object.down_rate_4 == 0 %} {% elif object.down_rate_4 > 5 %}
-                    <div>{{ object.down_rate_4 }}%</div>{% else %}{{ object.down_rate_4 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_4 }}%</div>{% else %}{{ object.down_rate_4 }}%{% endif %}</td>
                 <td>{% if object.qty_5 == 0 %} {% else %} {{ object.qty_5 }} {% endif %}</td>
                 <td>{% if object.down_rate_5 == 0 %} {% elif object.down_rate_5 > 5 %}
-                    <div>{{ object.down_rate_5 }}%</div>{% else %}{{ object.down_rate_5 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_5 }}%</div>{% else %}{{ object.down_rate_5 }}%{% endif %}</td>
                 <td>{% if object.qty_6 == 0 %} {% else %} {{ object.qty_6 }} {% endif %}</td>
                 <td>{% if object.down_rate_6 == 0 %} {% elif object.down_rate_6 > 5 %}
-                    <div>{{ object.down_rate_6 }}%</div>{% else %}{{ object.down_rate_6 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_6 }}%</div>{% else %}{{ object.down_rate_6 }}%{% endif %}</td>
                 <td>{% if object.qty_7 == 0 %} {% else %} {{ object.qty_7 }} {% endif %}</td>
                 <td>{% if object.down_rate_7 == 0 %} {% elif object.down_rate_7 > 5 %}
-                    <div>{{ object.down_rate_7 }}%</div>{% else %}{{ object.down_rate_7 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_7 }}%</div>{% else %}{{ object.down_rate_7 }}%{% endif %}</td>
                 <td>{% if object.qty_8 == 0 %} {% else %} {{ object.qty_8 }} {% endif %}</td>
                 <td>{% if object.down_rate_8 == 0 %} {% elif object.down_rate_8 > 5 %}
-                    <div>{{ object.down_rate_8 }}%</div>{% else %}{{ object.down_rate_8 }}%{% endif %}</td>
+                    <div class="high">{{ object.down_rate_8 }}%</div>{% else %}{{ object.down_rate_8 }}%{% endif %}</td>
                 <td><b>{{ object.total }}</b></td>
                 <td><b>{{ object.total_down_rate }}%</b></td>
             </tr>
