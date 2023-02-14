@@ -2,8 +2,7 @@ div.jumbotron.jumbotron-fluid {
   background-color: transparent;
 }
 
-table {
-  position: relative; /*my change*/
+table-bordered {
   overflow: hidden;
   border-spacing: 0;
   border-collapse: collapse;
