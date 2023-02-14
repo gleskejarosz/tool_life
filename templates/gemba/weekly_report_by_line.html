@@ -21,48 +21,48 @@
 <br/>
 <br/>
 
-<table class="table table-bordered">
+<table class="mytable">
     <thead>
         <tr>
             <th scope="col">Day</th>
-            <th scope="col" class="central_pos">Monday</th>
-            <th scope="col" class="central_pos">Tuesday</th>
-            <th scope="col" class="central_pos">Wednesday</th>
-            <th scope="col" class="central_pos">Thursday</th>
-            <th scope="col" class="central_pos">Friday</th>
-            <th scope="col" class="central_pos">Saturday</th>
-            <th scope="col" class="central_pos">Sunday</th>
+            <th scope="col" style="text-align: center;">Monday</th>
+            <th scope="col" style="text-align: center;">Tuesday</th>
+            <th scope="col" style="text-align: center;">Wednesday</th>
+            <th scope="col" style="text-align: center;">Thursday</th>
+            <th scope="col" style="text-align: center;">Friday</th>
+            <th scope="col" style="text-align: center;">Saturday</th>
+            <th scope="col" style="text-align: center;">Sunday</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="framedtbody">
         {% for elem in report|slice:"0:6" %}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
-            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>
-    <tbody>
+    <tbody class="framedtbody">
         {% for elem in report|slice:jobs_idx%}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
-            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>
-    <tbody>
+    <tbody class="framedtbody">
         {% for elem in report|slice:down_idx%}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
@@ -76,7 +76,7 @@
         </tr>
         {% endfor %}
     </tbody>
-    <tbody>
+    <tbody class="framedtbody">
         {% for elem in report|slice:scrap_idx%}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
