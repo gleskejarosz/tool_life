@@ -9,11 +9,7 @@ table {
   z-index: 0;
 }
 
-.framedtr tr {
- border: 2px solid grey;
-}
-
-td {
+.mytable td {
  vertical-align: center;
  text-align: center;
 }

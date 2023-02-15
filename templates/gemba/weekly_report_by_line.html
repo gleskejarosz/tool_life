@@ -64,15 +64,15 @@
     </tbody>
     <tbody>
         {% for elem in report|slice:down_idx%}
-        <tr class="framedtr">
+        <tr>
             <th scope="row">{{ elem.col0 }}</th>
-            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>
@@ -80,13 +80,13 @@
         {% for elem in report|slice:scrap_idx%}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
-            <td class="central_pos">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
-            <td class="central_pos">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>
