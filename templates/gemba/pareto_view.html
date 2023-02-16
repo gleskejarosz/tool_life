@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
+{% load mathfilters %}
+
 <h4>Daily OEE Report:</h4>
 Select a date
  <form action="{% url 'gemba_app:daily-pareto-search-result' %}" method="get">
