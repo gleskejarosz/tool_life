@@ -23,9 +23,9 @@ def dashboard(request):
     # the best oee result from the day before
     paretos = Pareto.objects.filter(pareto_date=yesterday).order_by("-oee")[:5]
 
-    produced = ParetoDetail.objects.all().order_by("created")[:5]
-    downtimes_qs = DowntimeDetail.objects.all().order_by("created")[:5]
-    scrap_qs = ScrapDetail.objects.all().order_by("created")[:5]
+    produced = ParetoDetail.objects.all().order_by("-created")[:5]
+    downtimes_qs = DowntimeDetail.objects.all().order_by("-created")[:5]
+    scrap_qs = ScrapDetail.objects.all().order_by("-created")[:5]
 
     return render(request,
                   template_name='dashboard.html',
