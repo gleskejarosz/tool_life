@@ -1180,6 +1180,7 @@ def get_details_to_display(object_list):
         shift = pareto.shift
         user = pareto.user.username
         line = pareto.line
+        target = line.target
         status = pareto.completed
         hours = pareto.hours
         time_stamp = pareto.time_stamp
@@ -1236,6 +1237,7 @@ def get_details_to_display(object_list):
             "job_otg": job_otg,
             "user": user,
             "line": line,
+            "target": target,
             "availability": availability,
             "performance": performance,
             "quality": quality,

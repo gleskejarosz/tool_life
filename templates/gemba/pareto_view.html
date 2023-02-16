@@ -19,6 +19,7 @@ Select a date
             <th scope="col">Performance</th>
             <th scope="col">Quality</th>
             <th scope="col">OEE</th>
+            <th scope="col">Target</th>
         </tr>
         </thead>
         <tbody>
@@ -33,6 +34,8 @@ Select a date
             <td>{{ item.performance }}%</td>
             <td>{{ item.quality }}%</td>
             <td>{{ item.oee }}%</td>
+            <td>{% if item.target < item.oee %}&uarr;{% elif item.target|sub:5 > item.oee %}&darr;
+                {% else %}&#8275;{% endif %}{{ item.target }}%</td>
         </tr>
         {% endfor %}
         <tr>
@@ -43,6 +46,7 @@ Select a date
             <td><b>{{ avg_performance }}%</b></td>
             <td><b>{{ avg_quality }}%</b></td>
             <td><b>{{ avg_oee }}%</b></td>
+            <td></td>
         </tr>
         </tbody>
 </table>
