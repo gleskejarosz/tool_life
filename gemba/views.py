@@ -814,7 +814,8 @@ def count_downtimes(pareto):
                 })
                 downtimes.append(down_id)
             founded = 0
-    return downtimes_list
+    sorted_downtimes_list = sorted(downtimes_list, key=lambda d: d['minutes'], reverse=True)
+    return sorted_downtimes_list
 
 
 def count_scraps(pareto):
@@ -857,7 +858,8 @@ def count_scraps(pareto):
                 })
                 scraps.append(scrap_id)
             founded = 0
-    return scraps_list
+    sorted_scraps_list = sorted(scraps_list, key=lambda d: d['qty'], reverse=True)
+    return sorted_scraps_list
 
 
 @staff_member_required
