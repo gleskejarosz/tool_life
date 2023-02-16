@@ -17,7 +17,7 @@ def dashboard(request):
     month = today.strftime('%B')
 
     # monthly report of average oee elements
-    monthly_records_qs = MonthlyResults.objects.filter(year=year).order_by("-month", "line")
+    monthly_records_qs = MonthlyResults.objects.filter(year=year).order_by("-id", "line")
     items_filter = MonthlyResultFilter(request.GET, queryset=monthly_records_qs)
 
     # the best oee result from the day before
