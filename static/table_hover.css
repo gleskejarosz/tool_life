@@ -60,3 +60,65 @@ body:not(.nohover) .mytable tbody tr:hover {
   width: 10000px;
   z-index: -1;
 }
+
+
+.small-table td, .small-table th {
+  padding: 2px;
+  border: thin solid grey;
+  text-align: center;
+}
+
+.small-table {
+    width: 300px;
+}
+.border-start-primary {
+    border-left-color: #0061f2;
+}
+.border-start-secondary {
+    border-left-color: #BDE696;
+}
+.border-start-success {
+    border-left-color: #00ac69;
+}
+.border-end-blue {
+    border-right-color: #17A2B8;
+}
+.border-end-lg {
+    border-right-width: 0.25rem;
+}
+.border-start-lg {
+    border-left-width: 0.25rem;
+}
+.text-blue {
+    color: #17A2B8;
+}
+.h-100 {
+    height: 100%;
+}
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgb(33 40 50 / 15%);
+    margin-bottom: 1rem;
+}
+.card .card-header {
+    font-weight: 500;
+}
+.card-header:first-child {
+    border-radius: 0.35rem 0.35rem 0 0;
+}
+.card-header {
+    padding: 1rem 1.35rem;
+    margin-bottom: 0;
+    background-color: rgba(33, 40, 50, 0.03);
+    border-bottom: 1px solid rgba(33, 40, 50, 0.125);
+}
+.left-dashboard {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+}
+
+.right-dashboard {
+   position: absolute;
+   top: 70px;
+   right: 20px;
+}

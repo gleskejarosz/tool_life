@@ -5,7 +5,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render
 
 from gemba.filters import MonthlyResultFilter
-from gemba.models import MonthlyResults, Pareto, Line, PRODUCTIVE, AM, PM, NS, ParetoDetail, DowntimeUser, ScrapUser
+from gemba.models import MonthlyResults, Pareto, Line, PRODUCTIVE, AM, PM, NS, ParetoDetail, DowntimeUser, ScrapUser, \
+    DowntimeDetail, ScrapDetail
 
 
 @staff_member_required
@@ -22,10 +23,17 @@ def dashboard(request):
     # the best oee result from the day before
     paretos = Pareto.objects.filter(pareto_date=yesterday).order_by("-oee")[:5]
 
+    produced = ParetoDetail.objects.all().order_by("created")[:5]
+    downtimes_qs = DowntimeDetail.objects.all().order_by("created")[:5]
+    scrap_qs = ScrapDetail.objects.all().order_by("created")[:5]
+
     return render(request,
                   template_name='dashboard.html',
                   context={
                       "filter": items_filter,
+                      "produced": produced,
+                      "downtimes": downtimes_qs,
+                      "scraps": scrap_qs,
                       "year": year,
                       "paretos": paretos,
                       "yesterday": yesterday,

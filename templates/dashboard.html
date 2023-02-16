@@ -2,6 +2,110 @@
 {% block content %}
 {% load widget_tweaks %}
 {% load mathfilters %}
+<div class="container">
+    <div class="left-dashboard">
+        <div class="row">
+            <div class="card h-100 border-start-lg border-start-primary">
+                <div class="card-body">
+                    <div class="h5">Recently Produced</div>
+                    <table class="small-table">
+                        <thead>
+                            <tr>
+                                <th class="small"><b>Time</b></th>
+                                <th class="small"><b>Line</b></th>
+                                <th class="small"><b>Job</b></th>
+                                <th class="small"><b>Output</b></th>
+                                <th class="small"><b>Good</b></th>
+                                <th class="small"><b>Scrap</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in produced %}
+                            <tr>
+                                <td class="small text-muted">{{ object.created|date:"H:i" }}</td>
+                                <td class="small text-muted">{{ object.line }}</td>
+                                <td class="small text-muted">{{ object.job }}</td>
+                                <td class="small text-muted">{{ object.output }}</td>
+                                <td class="small text-muted">{{ object.good }}</td>
+                                <td class="small text-muted">{{ object.scrap }}</td>
+                           </tr>
+                        {% endfor %}
+                       </tbody>
+                    </table>
+                    </br>
+                    <a class="text-arrow-icon small text-primary" href="{% url 'gemba_app:pareto-details' %}">
+                        Display more produced
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card h-100 border-start-lg border-start-secondary">
+                <div class="card-body">
+                    <div class="h5">Recent Downtime Reasons</div>
+                    <table class="small-table">
+                        <thead>
+                            <tr>
+                                <th class="small"><b>Line</b></th>
+                                <th class="small"><b>Downtime</b></th>
+                                <th class="small"><b>Job</b></th>
+                                <th class="small"><b>Min</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in downtimes %}
+                            <tr>
+                                <td class="small text-muted">{{ object.line }}</td>
+                                <td class="small text-muted">{{ object.downtime.description }}</td>
+                                <td class="small text-muted">{{ object.job }}</td>
+                                <td class="small text-muted">{{ object.minutes }}</td>
+                           </tr>
+                        {% endfor %}
+                       </tbody>
+                    </table>
+                    </br>
+                    <a class="text-arrow-icon small text-secondary" href="{% url 'gemba_app:downtimes-view' %}">
+                        Display more downtime reasons
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card h-100 border-start-lg border-start-success">
+                <div class="card-body">
+                   <div class="h5">Recent Scrap Reasons</div>
+                    <table class="small-table">
+                        <thead>
+                            <tr>
+                                <th class="small"><b>Line</b></th>
+                                <th class="small"><b>Scrap</b></th>
+                                <th class="small"><b>Job</b></th>
+                                <th class="small"><b>Qty</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in scraps %}
+                            <tr>
+                                <td class="small text-muted">{{ object.line }}</td>
+                                <td class="small text-muted">{{ object.scrap.description }}</td>
+                                <td class="small text-muted">{{ object.job }}</td>
+                                <td class="small text-muted">{{ object.qty }}</td>
+                           </tr>
+                        {% endfor %}
+                       </tbody>
+                    </table>
+                    </br>
+                    <a class="text-arrow-icon small text-success" href="{% url 'gemba_app:scraps-view' %}">
+                        Display more scrap reasons
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
             <h4>Monthly line production summary - {{ year }}</h4>
             <form method="get">
                 <div class="well">
@@ -40,7 +144,7 @@
                 </thead>
                 <tbody>
                     {% for object in filter.qs %}
-                        <tr class="active-row">
+                        <tr>
                             <td>{{ object.month }}</td>
                             <td>{{ object.line }}</td>
                             <td>{{ object.total_output }}</td>
@@ -60,31 +164,46 @@
                     {% endfor %}
                 </tbody>
             </table>
-          <h4>Yesterday's 5 best results ({{ yesterday|date:'d-m-Y' }})</h4>
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th scope="col">Pos</th>
-                        <th scope="col">Line</th>
-                        <th scope="col">Shift</th>
-                        <th scope="col">Availability</th>
-                        <th scope="col">Performance</th>
-                        <th scope="col">Quality</th>
-                        <th scope="col">OEE</th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for pareto in paretos %}
-                    <tr>
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ pareto.line }}</td>
-                        <td>{{ pareto.shift }}</td>
-                        <td>{{ pareto.availability }}%</td>
-                        <td>{{ pareto.performance }}%</td>
-                        <td>{{ pareto.quality }}%</td>
-                        <td>{{ pareto.oee }}%</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+    </div>
+    <div class="right-dashboard">
+        <div class="row">
+            <div class="card h-100 border-end-lg border-end-blue">
+                <div class="card-body">
+                    <div class="h6">Yesterday's 5 best results ({{ yesterday|date:'d-m-Y' }})</div>
+                    <table class="small-table">
+                        <thead>
+                            <tr>
+                                <th class="small"><b>Pos</b></th>
+                                <th class="small"><b>Line</b></th>
+                                <th class="small"><b>Shift</b></th>
+                                <th class="small"><b>A</b></th>
+                                <th class="small"><b>P</b></th>
+                                <th class="small"><b>Q</b></th>
+                                <th class="small"><b>OEE</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for pareto in paretos %}
+                            <tr>
+                                <td class="small text-muted">{{ forloop.counter }}</td>
+                                <td class="small text-muted">{{ pareto.line }}</td>
+                                <td class="small text-muted">{{ pareto.shift }}</td>
+                                <td class="small text-muted">{{ pareto.availability }}%</td>
+                                <td class="small text-muted">{{ pareto.performance }}%</td>
+                                <td class="small text-muted">{{ pareto.quality }}%</td>
+                                <td class="small text-muted">{{ pareto.oee }}%</td>
+                           </tr>
+                        {% endfor %}
+                       </tbody>
+                    </table>
+                    </br>
+                    <a class="text-arrow-icon small text-blue" href="{% url 'gemba_app:report-choices-2' %}">
+                        Display more produced
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-right"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
