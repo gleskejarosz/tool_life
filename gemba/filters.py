@@ -58,6 +58,7 @@ OCTOBER = "October"
 NOVEMBER = "November"
 DECEMBER = "December"
 
+
 class MonthlyResultFilter(django_filters.FilterSet):
     MONTH_CHOICES = (
         (JANUARY, "January"),

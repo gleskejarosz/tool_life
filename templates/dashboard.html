@@ -53,10 +53,9 @@
                             <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
                             <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
                             <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
-                            <td>{% if object.line.target|sub:5 < object.total_oee %}&uarr; {{ object.line.target }}%
-                                {% elif object.line.target|sub:5 > object.total_oee %}&darr; {{ object.line.target }}%
-                                {% else %}&#8275; {{ object.line.target }}%
-                                {% endif %}
+                            <td>{% if object.line.target < object.total_oee|div:object.counter %}&uarr;
+                                {% elif object.line.target|sub:5 > object.total_oee|div:object.counter %}&darr;
+                                {% else %}&#8275;{% endif %}{{ object.line.target }}%
                             </td>
                         </tr>
                     {% endfor %}
