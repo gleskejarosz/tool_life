@@ -154,12 +154,12 @@ class LineHourModelAdmin(admin.ModelAdmin):
 
 class LineModelAdmin(admin.ModelAdmin):
     ordering = ("name",)
-    list_display = ("name", "id", "code", "description", "line_status", "calculation", )
+    list_display = ("name", "id", "code", "description", "line_status", "calculation", "target", )
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "name", "description", "calculation", "line_status"],
+            "fields": ["id", "code", "name", "description", "calculation", "line_status", "target"],
         }),
     ]
     readonly_fields = ["id"]

@@ -99,12 +99,18 @@ def weekly_report_by_line(request):
         "col7": "",
     })
 
+    if shift == NS:
+        display_date = this_sunday
+    else:
+        display_date = this_sunday + timedelta(days=1)
+
     pareto_date = this_sunday + timedelta(days=1)
+
     for num in range(7):
         day = num + 1
         col = "col" + str(day)
-        report[0][col] = pareto_date.date().strftime("%d-%m-%Y")
-        pareto_date += timedelta(days=1)
+        report[0][col] = display_date.date().strftime("%d-%m-%Y")
+        display_date += timedelta(days=1)
 
     for num in range(5):
         report.append({
@@ -126,6 +132,11 @@ def weekly_report_by_line(request):
 
     for obj in pareto_shift_qs:
         idx = obj.pareto_date.weekday() + 1
+        if shift == NS:
+            if idx == 7:
+                idx -= 6
+            else:
+                idx += 1
         col = "col" + str(idx)
         available_time = int(obj.hours) * 60
         report[1][col] = available_time
@@ -143,6 +154,11 @@ def weekly_report_by_line(request):
     for obj in pareto_shift_qs:
         for pos, pareto_detail in enumerate(obj.jobs.all()):
             idx = obj.pareto_date.weekday() + 1
+            if shift == NS:
+                if idx == 7:
+                    idx -= 6
+                else:
+                    idx += 1
             indexes[idx] += 1
             col = "col" + str(idx)
             index = max(indexes)
@@ -182,7 +198,7 @@ def weekly_report_by_line(request):
     for downtime_elem in downtimes_qs:
         downtime = downtime_elem.downtime.description
         report.append({
-            "col0": downtime,
+            "col0": downtime_elem.downtime,
             "col1": 0,
             "col2": 0,
             "col3": 0,
@@ -197,6 +213,11 @@ def weekly_report_by_line(request):
     row = 5 + 5 * max_index + 1
     for obj in pareto_shift_qs:
         idx = obj.pareto_date.weekday() + 1
+        if shift == NS:
+            if idx == 7:
+                idx -= 6
+            else:
+                idx += 1
         col = "col" + str(idx)
         for down_detail in obj.downtimes.all():
             down_desc = down_detail.downtime.description
@@ -220,7 +241,7 @@ def weekly_report_by_line(request):
     for scrap_elem in scraps_qs:
         scrap = scrap_elem.scrap.description
         report.append({
-            "col0": scrap,
+            "col0": scrap_elem.scrap,
             "col1": 0,
             "col2": 0,
             "col3": 0,
@@ -234,6 +255,11 @@ def weekly_report_by_line(request):
 
     for obj in pareto_shift_qs:
         idx = obj.pareto_date.weekday() + 1
+        if shift == NS:
+            if idx == 7:
+                idx -= 6
+            else:
+                idx += 1
         col = "col" + str(idx)
         for scrap_detail in obj.scrap.all():
             scrap_desc = scrap_detail.scrap.description

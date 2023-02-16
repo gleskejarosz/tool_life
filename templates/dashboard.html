@@ -3,86 +3,90 @@
 {% load widget_tweaks %}
 {% load mathfilters %}
 
-<h4>Monthly line production summary - {{ year }}</h4>
-<form method="get">
-    <div class="well">
-      <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
-      <div class="row">
-        <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.month.label_tag }}
-          {% render_field filter.form.month class="form-control" %}
-        </div>
-        <div class="form-group col-sm-4 col-md-3">
-          {{ filter.form.line.label_tag }}
-          {% render_field filter.form.line class="form-control" %}
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary">
-        <span class="glyphicon glyphicon-search"></span> Search
-      </button>
-    </div>
-</form>
-
-<table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Month</th>
-            <th scope="col">Line</th>
-            <th scope="col">Total Output</th>
-            <th scope="col">Total Good</th>
-            <th scope="col">Total Scrap</th>
-            <th scope="col">Total Rework</th>
-            <th scope="col">Total Available Time</th>
-            <th scope="col">Average Availability</th>
-            <th scope="col">Average Performance</th>
-            <th scope="col">Average Quality</th>
-            <th scope="col">Average OEE</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for object in filter.qs %}
-            <tr>
-                <td>{{ object.month }}</td>
-                <td>{{ object.line }}</td>
-                <td>{{ object.total_output }}</td>
-                <td>{{ object.total_good }}</td>
-                <td>{{ object.total_scrap }}</td>
-                <td>{{ object.total_rework }}</td>
-                <td>{{ object.total_available_time }}</td>
-                <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
-                <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
-                <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
-                <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-</table>
+            <h4>Monthly line production summary - {{ year }}</h4>
+            <form method="get">
+                <div class="well">
+                  <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
+                  <div class="row">
+                    <div class="form-group col-sm-4 col-md-3">
+                      {{ filter.form.month.label_tag }}
+                      {% render_field filter.form.month class="form-control" %}
+                    </div>
+                    <div class="form-group col-sm-4 col-md-3">
+                      {{ filter.form.line.label_tag }}
+                      {% render_field filter.form.line class="form-control" %}
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-search"></span> Search
+                  </button>
+                </div>
+            </form>
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Month</th>
+                        <th scope="col">Line</th>
+                        <th scope="col">Total Output</th>
+                        <th scope="col">Total Good</th>
+                        <th scope="col">Total Scrap</th>
+                        <th scope="col">Total Rework</th>
+                        <th scope="col">Total Available Time</th>
+                        <th scope="col">Average Availability</th>
+                        <th scope="col">Average Performance</th>
+                        <th scope="col">Average Quality</th>
+                        <th scope="col">Average OEE</th>
+                        <th scope="col">Target</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for object in filter.qs %}
+                        <tr class="active-row">
+                            <td>{{ object.month }}</td>
+                            <td>{{ object.line }}</td>
+                            <td>{{ object.total_output }}</td>
+                            <td>{{ object.total_good }}</td>
+                            <td>{{ object.total_scrap }}</td>
+                            <td>{{ object.total_rework }}</td>
+                            <td>{{ object.total_available_time }}</td>
+                            <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
+                            <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
+                            <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
+                            <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
+                            <td>{% if object.line.target|sub:5 < object.total_oee %}&uarr; {{ object.line.target }}%
+                                {% elif object.line.target|sub:5 > object.total_oee %}&darr; {{ object.line.target }}%
+                                {% else %}&#8275; {{ object.line.target }}%
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
           <h4>Yesterday's 5 best results ({{ yesterday|date:'d-m-Y' }})</h4>
-<table class="table table-hover">
-        <thead>
-        <tr>
-            <th scope="col">Pos</th>
-            <th scope="col">Line</th>
-            <th scope="col">Shift</th>
-            <th scope="col">Availability</th>
-            <th scope="col">Performance</th>
-            <th scope="col">Quality</th>
-            <th scope="col">OEE</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for pareto in paretos %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>{{ pareto.line }}</td>
-                <td>{{ pareto.shift }}</td>
-                <td>{{ pareto.availability }}%</td>
-                <td>{{ pareto.performance }}%</td>
-                <td>{{ pareto.quality }}%</td>
-                <td>{{ pareto.oee }}%</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-</table>
-
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Pos</th>
+                        <th scope="col">Line</th>
+                        <th scope="col">Shift</th>
+                        <th scope="col">Availability</th>
+                        <th scope="col">Performance</th>
+                        <th scope="col">Quality</th>
+                        <th scope="col">OEE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for pareto in paretos %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ pareto.line }}</td>
+                        <td>{{ pareto.shift }}</td>
+                        <td>{{ pareto.availability }}%</td>
+                        <td>{{ pareto.performance }}%</td>
+                        <td>{{ pareto.quality }}%</td>
+                        <td>{{ pareto.oee }}%</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
 {% endblock %}
