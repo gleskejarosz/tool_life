@@ -46,7 +46,7 @@ def dashboard(request):
     else:
         return render(
             request,
-            template_name='dashboard.html',
+            template_name='dashboard_mobile.html',
             context=context,
         )
 

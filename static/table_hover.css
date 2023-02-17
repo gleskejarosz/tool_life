@@ -120,9 +120,12 @@ body:not(.nohover) .mytable tbody tr:hover {
     top: 70px;
     left: 20px;
 }
-
 .right-dashboard {
    position: absolute;
    top: 70px;
    right: 20px;
+}
+.middle-dashboard {
+    position: relative;
+    align-items: center;
 }
