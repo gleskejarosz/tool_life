@@ -77,11 +77,11 @@ body:not(.nohover) .mytable tbody tr:hover {
 .border-start-secondary {
     border-left-color: #BDE696;
 }
-.border-start-success {
-    border-left-color: #00ac69;
-}
 .border-end-blue {
     border-right-color: #17A2B8;
+}
+.border-start-success {
+    border-left-color: #00ac69;
 }
 .border-end-lg {
     border-right-width: 0.25rem;
@@ -92,6 +92,10 @@ body:not(.nohover) .mytable tbody tr:hover {
 .text-blue {
     color: #17A2B8;
 }
+.text-secondary {
+    color: #BDE696;
+}
+
 .h-100 {
     height: 100%;
 }
