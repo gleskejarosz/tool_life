@@ -7,6 +7,7 @@ from django.shortcuts import render
 from gemba.filters import MonthlyResultFilter
 from gemba.models import MonthlyResults, Pareto, Line, PRODUCTIVE, AM, PM, NS, ParetoDetail, DowntimeUser, ScrapUser, \
     DowntimeDetail, ScrapDetail
+from gemba.views import mobile_browser_check
 
 
 @staff_member_required
@@ -27,18 +28,27 @@ def dashboard(request):
     downtimes_qs = DowntimeDetail.objects.all().order_by("-created")[:5]
     scrap_qs = ScrapDetail.objects.all().order_by("-created")[:5]
 
-    return render(request,
-                  template_name='dashboard.html',
-                  context={
-                      "filter": items_filter,
-                      "produced": produced,
-                      "downtimes": downtimes_qs,
-                      "scraps": scrap_qs,
-                      "year": year,
-                      "paretos": paretos,
-                      "yesterday": yesterday,
-                  },
-                  )
+    context = {
+        "filter": items_filter,
+        "produced": produced,
+        "downtimes": downtimes_qs,
+        "scraps": scrap_qs,
+        "year": year,
+        "paretos": paretos,
+        "yesterday": yesterday,
+    }
+    if mobile_browser_check(request):
+        return render(
+            request,
+            template_name="dashboard_mobile.html",
+            context=context,
+        )
+    else:
+        return render(
+            request,
+            template_name='dashboard.html',
+            context=context,
+        )
 
 
 @staff_member_required
