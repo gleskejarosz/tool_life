@@ -102,8 +102,8 @@
         </div>
     </div>
     <div>
+        <h4>Monthly line production summary - {{ year }}</h4>
         <div class="row">
-            <h4>Monthly line production summary - {{ year }}</h4>
             <form method="get">
                 <div class="well">
                   <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
@@ -123,16 +123,41 @@
                 </div>
             </form>
             <table class="table table-hover">
+                {% for object in filter.qs %}
                 <thead>
                     <tr>
                         <th scope="col">Month</th>
                         <th scope="col">Line</th>
                         <th scope="col">Total Output</th>
                         <th scope="col">Total Good</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr>
+                            <td>{{ object.month }}</td>
+                            <td>{{ object.line }}</td>
+                            <td>{{ object.total_output }}</td>
+                            <td>{{ object.total_good }}</td>
+                        </tr>
+                </tbody>
+                <thead>
+                    <tr>
                         <th scope="col">Total Scrap</th>
                         <th scope="col">Total Rework</th>
                         <th scope="col">Total Available Time</th>
                         <th scope="col">Average Availability</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ object.total_scrap }}</td>
+                        <td>{{ object.total_rework }}</td>
+                        <td>{{ object.total_available_time }}</td>
+                        <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
+                    </tr>
+                </tbody>
+                <thead>
+                    <tr>
                         <th scope="col">Average Performance</th>
                         <th scope="col">Average Quality</th>
                         <th scope="col">Average OEE</th>
@@ -140,26 +165,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for object in filter.qs %}
-                        <tr>
-                            <td>{{ object.month }}</td>
-                            <td>{{ object.line }}</td>
-                            <td>{{ object.total_output }}</td>
-                            <td>{{ object.total_good }}</td>
-                            <td>{{ object.total_scrap }}</td>
-                            <td>{{ object.total_rework }}</td>
-                            <td>{{ object.total_available_time }}</td>
-                            <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
-                            <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
-                            <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
-                            <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
-                            <td>{% if object.line.target < object.total_oee|div:object.counter %}&uarr;
+                    <tr>
+                        <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
+                        <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
+                        <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
+                        <td>{% if object.line.target < object.total_oee|div:object.counter %}&uarr;
                                 {% elif object.line.target|sub:5 > object.total_oee|div:object.counter %}&darr;
                                 {% else %}&#8275;{% endif %}{{ object.line.target }}%
-                            </td>
-                        </tr>
-                    {% endfor %}
+                        </td>
                 </tbody>
+                {% endfor %}
             </table>
         </div>
     </div>
