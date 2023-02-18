@@ -443,3 +443,23 @@ def export_pareto_to_pdf(request, pk):
     buffer.seek(0)
     return FileResponse(buffer, as_attachment=True, filename="hello.pdf")
 
+
+from django.http import HttpResponse
+from .resources import JobModelResource
+
+
+def export_job_model_csv(request):
+    job_model_resource = JobModelResource()
+    dataset = job_model_resource.export()
+    response = HttpResponse(dataset.csv, content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="jobs.csv"'
+    return response
+
+
+def export_job_model_xls(request):
+    job_model_resource = JobModelResource()
+    dataset = job_model_resource.export()
+    response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="jobs.xls"'
+    return response
+

@@ -78,6 +78,8 @@
             <th scope="col" class="central_pos">Output</th>
             <th scope="col" class="central_pos">Total Good</th>
             <th scope="col" class="central_pos">Reworked Good</th>
+            <th scope="col" class="central_pos">Inners</th>
+            <th scope="col" class="central_pos">Bags</th>
             <th scope="col" class="central_pos">Scrap</th>
             <th scope="col" class="central_pos">Takt time</th>
             <th scope="col" class="central_pos">OPs</th>
@@ -87,7 +89,7 @@
         <tbody>
         {% if pareto_list.jobs.all|length == 0 %}
               <tr>
-                <td colspan='6'>No records</td>
+                <td colspan='8'>No records</td>
               </tr>
         {% endif %}
         {% for pareto_item in pareto_list.jobs.all %}
@@ -97,6 +99,12 @@
             <td class="central_pos">{{ pareto_item.output }}</td>
             <td class="central_pos">{{ pareto_item.good }}</td>
             <td class="central_pos">{{ pareto_item.rework }}</td>
+            <td class="central_pos">{% if calc_option != TC %}
+            {{ pareto_item.good|intdiv:pareto_item.job.inner_size }}
+            {% else %}--{% endif %}</td>
+            <td class="central_pos">{% if calc_option != TC %}
+            {{ pareto_item.good|mod:pareto_item.job.inner_size }}
+            {% else %}--{% endif %}</td>
             <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="central_pos">{{ pareto_item.takt_time }}</td>
             <td class="central_pos">{{ pareto_item.ops }}</td>
@@ -108,6 +116,8 @@
             <td class="central_pos"> <b>{{ total_output }}</b> </td>
             <td class="central_pos"> <b>{{ total_good }}</b> </td>
             <td class="central_pos"> <b>{{ total_rework }}</b> </td>
+            <td> </td>
+            <td> </td>
             <td class="central_pos"> <b>{{ total_scrap_cal }}</b> </td>
             <td> </td>
             <td> </td>
@@ -179,7 +189,6 @@
         <tr>
             <td> <b>Total</b> </td>
             <td class="central_pos"><b>{{ total_down }}</b> </td>
-            <td> </td>
             <td> </td>
             <td> </td>
         </tr>

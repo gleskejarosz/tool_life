@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-=s&^=9^9e^qq3mozhg^8j!an)$*#(*7^u=uz-+^#1x2(uyb4ck
 DEBUG = True
 
 "elle2023.pythonanywhere.com"
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["elle2023.pythonanywhere.com", "elle022023.eu.pythonanywhere.com"]
 
 # Application definition
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'tools',
     'gemba',
     'mathfilters',
+    'import_export',
 ]
 
 MIDDLEWARE = [
@@ -141,3 +142,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_REDIRECT_URL = "homepage"
 
 LOGOUT_REDIRECT_URL = "homepage"
+
+IMPORT_EXPORT_USE_TRANSACTIONS = True

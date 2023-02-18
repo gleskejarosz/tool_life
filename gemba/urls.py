@@ -49,7 +49,7 @@ urlpatterns = [
     path("scrap_detail_add/<pk>/", views.scrap_detail_create, name="scrap-detail-create"),
     path("scrap_detail_view/<pk>/", staff_member_required(views.ScrapDetailView.as_view()), name="scrap-detail-view"),
     path("add_scrap_view/<pk>/", views.add_scrap_detail, name="add-scrap-view"),
-    path("scrap_update_view/<pk>/", staff_member_required(views.ScrapUpdateView.as_view()), name="scrap-update-view"),
+    path("scrap_update_view/<pk>/", views.scrap_update_view, name="scrap-update-view"),
     path("scrap_delete_view/<pk>/", staff_member_required(views.ScrapDeleteView.as_view()), name="scrap-delete-view"),
     # daily oee report
     path("daily_oee_view/", views.pareto_view, name="pareto-view"),
@@ -99,6 +99,8 @@ urlpatterns = [
     path("export_to_gemba/", views_export.gemba_export2, name="export-to-gemba"),
     path("tableau/<pk>/", views_export.tableau_export, name="tableau"),
     path("export_pareto_to_pdf/<pk>/", views_export.export_pareto_to_pdf, name="export-pareto-to-pdf"),
+    path("export_job_model_csv/", views_export.export_job_model_csv, name="export-job-model-csv"),
+    path("export_job_model_xls/", views_export.export_job_model_xls, name="export-job-model-xls"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
     ]

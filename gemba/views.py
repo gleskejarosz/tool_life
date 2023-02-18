@@ -17,7 +17,7 @@ from django.views.generic import TemplateView, UpdateView, DeleteView, DetailVie
 from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
-    ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm
+    ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm, ScrapUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, LineUser, Line, Timer, JobLine, \
     PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
@@ -224,6 +224,8 @@ def scrap_detail_create(request, pk):
         pareto_date = pareto.pareto_date
         job = pareto.job_otg
         line = pareto.line
+        line_qs = Line.objects.filter(name=line)
+        calc_option = line_qs[0].calculation
 
         if job is None:
             return redirect("gemba_app:pareto-summary")
@@ -272,6 +274,12 @@ def scrap_detail_create(request, pk):
             scrap_elem = ScrapDetail.objects.create(scrap=scrap, qty=qty, user=user, job=job, from_job=job_before,
                                                     pareto_id=pareto_id, pareto_date=pareto_date, line=line)
             pareto.scrap.add(scrap_elem)
+
+            if calc_option != TC:
+                pareto_detail = ParetoDetail.objects.get(user=request.user, completed=False, job=job)
+                pareto_detail.scrap += qty
+                pareto_detail.output += qty
+                pareto_detail.save()
             return redirect("gemba_app:pareto-summary")
 
         return render(
@@ -574,6 +582,9 @@ class ParetoSummary(LoginRequiredMixin, View):
         if pareto_qs.exists():
             pareto = pareto_qs[0]
 
+            line = pareto.line
+            line_qs = Line.objects.filter(name=line)
+            calc_option = line_qs[0].calculation
             pareto_id = pareto.id
             pareto_status = ""
             status = pareto.completed
@@ -643,7 +654,6 @@ class ParetoSummary(LoginRequiredMixin, View):
                                           downtime=total_down)
 
             oee = oee_cal(availability=availability, performance=performance, quality=quality)
-
             return render(self.request,
                           template_name='gemba/pareto.html',
                           context={
@@ -652,6 +662,8 @@ class ParetoSummary(LoginRequiredMixin, View):
                               "scrap_qs": scrap_qs,
                               "user": user,
                               "start_meter": start_meter,
+                              "calc_option": calc_option,
+                              "TC": TC,
                               "pareto_status": pareto_status,
                               "message_status": message_status,
                               "available_time": available_time,
@@ -1008,34 +1020,8 @@ def before_close_pareto(request):
     line = pareto.line
     line_qs = Line.objects.filter(name=line)
     calc_option = line_qs[0].calculation
-    if calc_option == HCI or calc_option == HCB:
-        pareto_details_qs = ParetoDetail.objects.filter(user=request.user, completed=False,
-                                                        pareto_id=pareto_id).order_by("-id")
-        if pareto_details_qs.exists():
-            last_detail = pareto_details_qs[0]
 
-            # balance amount of scraps and rework, only good is correct
-            good = last_detail.good
-            job = last_detail.job_id
-
-            scraps_qs = ScrapDetail.objects.filter(user=request.user, completed=False,
-                                                   pareto_id=pareto_id, job=job)
-            scrap = 0
-            rework = 0
-            for scrap_obj in scraps_qs:
-                scrap_id = scrap_obj.scrap_id
-                scrap_elem = ScrapModel.objects.get(id=scrap_id)
-                if scrap_elem.rework is False:
-                    scrap += scrap_obj.qty
-                else:
-                    rework += scrap_obj.qty
-            output = good + scrap
-
-            last_detail.output = output
-            last_detail.scrap = scrap
-            last_detail.good = good
-            last_detail.save()
-    elif calc_option == TC:
+    if calc_option == TC:
         pareto_details_qs = ParetoDetail.objects.filter(user=request.user, completed=False,
                                                         pareto_id=pareto_id).order_by("-id")
         if pareto_details_qs.exists():
@@ -1139,7 +1125,7 @@ def close_pareto(request):
     daily_available_time = calculation["available_time"]
 
     monthly_record_qs = MonthlyResults.objects.filter(line=line, year=year, month=month).order_by("id")
-    print(monthly_record_qs)
+
     if monthly_record_qs.exists():
         monthly_record = monthly_record_qs[0]
         monthly_record.total_output += daily_output
@@ -1337,9 +1323,13 @@ def pareto_create_new(request):
     if line_user_qs.exists():
         line = line_user_qs[0].line
     else:
+        message = "Your account is not assigned to any line. Please contact your administrator to set this up."
         return render(
             request,
-            template_name="gemba/error_pareto.html",
+            template_name="gemba/error_message.html",
+            context={
+                "message": message,
+            }
         )
 
     pareto_date = datetime.now(timezone.utc).date()
@@ -1385,17 +1375,61 @@ class ScrapDetailView(DetailView):
     template_name = "gemba/scrap_detail_view.html"
 
 
-class ScrapUpdateView(UpdateView):
-    model = ScrapDetail
-    fields = ("job", "qty",)
-    template_name = "form.html"
-    success_url = reverse_lazy("gemba_app:pareto-summary")
+@staff_member_required
+def scrap_update_view(request, pk):
+    scrap_obj = ScrapDetail.objects.get(pk=pk)
+    old_qty = scrap_obj.qty
+    job = scrap_obj.job
+    line = scrap_obj.line
+    line_qs = Line.objects.filter(name=line)
+    calc_option = line_qs[0].calculation
+
+    form = ScrapUpdateForm(instance=scrap_obj)
+
+    if request.method == "POST":
+        form = ScrapUpdateForm(request.POST, instance=scrap_obj)
+        if form.is_valid():
+            new_qty = form.cleaned_data["qty"]
+
+            scrap_obj.qty = new_qty
+            scrap_obj.save()
+
+            if calc_option != TC:
+                pareto_detail = ParetoDetail.objects.get(user=request.user, completed=False, job=job)
+                qty_diff = old_qty - new_qty
+                pareto_detail.scrap -= qty_diff
+                pareto_detail.output -= qty_diff
+                pareto_detail.save()
+
+            return redirect("gemba_app:pareto-summary")
+
+    return render(
+        request,
+        template_name="form.html",
+        context={"form": form}
+    )
 
 
 class ScrapDeleteView(DeleteView):
     model = ScrapDetail
     template_name = "gemba/delete_scrap.html"
     success_url = reverse_lazy("gemba_app:pareto-summary")
+
+    def delete(self, request, *args, **kwargs):
+        scrap = self.get_object()
+        job = scrap.job
+        qty = scrap.qty
+        line = scrap.line
+        line_qs = Line.objects.filter(name=line)
+        calc_option = line_qs[0].calculation
+
+        if calc_option != TC:
+            pareto_detail = ParetoDetail.objects.get(user=request.user, completed=False, job=job)
+            pareto_detail.scrap -= qty
+            pareto_detail.output -= qty
+            pareto_detail.save()
+
+        return super().delete(request, *args, **kwargs)
 
 
 class DowntimeDetailView(DetailView):
@@ -1498,6 +1532,11 @@ def pareto_detail_delete(request, pk):
 def add_scrap_detail(request, pk):
     scrap = get_object_or_404(ScrapDetail, pk=pk)
     old_qty = scrap.qty
+    job = scrap.job
+    line = scrap.line
+    line_qs = Line.objects.filter(name=line)
+    calc_option = line_qs[0].calculation
+
     form = ScrapQuantity(request.POST or None)
     if form.is_valid():
         qty = form.cleaned_data["qty"]
@@ -1505,6 +1544,13 @@ def add_scrap_detail(request, pk):
 
         scrap.qty = new_qty
         scrap.save()
+
+        if calc_option != TC:
+            pareto_detail = ParetoDetail.objects.get(user=request.user, completed=False, job=job)
+            pareto_detail.scrap += qty
+            pareto_detail.output += qty
+            pareto_detail.save()
+
         return redirect("gemba_app:pareto-summary")
 
     return render(
@@ -1719,6 +1765,25 @@ def open_pareto(request, pk):
     pareto = Pareto.objects.get(pk=pk)
     user = request.user
 
+    open_pareto_qs = Pareto.objects.filter(user=user, completed=False)
+
+    if len(open_pareto_qs) > 0:
+        message = "You can only have one pareto open at a time."
+        return render(
+            request,
+            template_name="gemba/error_message.html",
+            context={
+                "message": message,
+            },)
+    if pareto.completed is False:
+        message = "Not completed Pareto cannot be updated."
+        return render(
+            request,
+            template_name="gemba/error_message.html",
+            context={
+                "message": message,
+            },)
+
     down_items = pareto.downtimes.all()
     down_items.update(completed=False)
     down_items.update(user=user)
@@ -1731,15 +1796,50 @@ def open_pareto(request, pk):
     for item in scrap_items:
         item.save()
 
+    output = 0
+    good = 0
+    scrap = 0
+    rework = 0
     details_item = pareto.jobs.all()
     details_item.update(completed=False)
     details_item.update(user=user)
     for item in details_item:
+        output += item.output
+        good += item.good
+        scrap += item.scrap
+        rework += item.rework
         item.save()
 
     pareto.user = user
     pareto.completed = False
     pareto.save()
+
+    line = pareto.line
+    pareto_date = pareto.pareto_date
+    available_time = int(pareto.hours) * 60
+
+    availability = pareto.availability
+    quality = pareto.quality
+    performance = pareto.performance
+    oee = pareto.oee
+    year = pareto_date.strftime('%Y')
+    month = pareto_date.strftime('%B')
+
+    monthly_record_qs = MonthlyResults.objects.filter(line=line, year=year, month=month)
+
+    if monthly_record_qs.exists():
+        monthly_record = monthly_record_qs[0]
+        monthly_record.total_output -= output
+        monthly_record.total_good -= good
+        monthly_record.total_scrap -= scrap
+        monthly_record.total_rework -= rework
+        monthly_record.total_available_time -= available_time
+        monthly_record.total_availability -= decimal.Decimal(availability)
+        monthly_record.total_performance -= decimal.Decimal(performance)
+        monthly_record.total_quality -= decimal.Decimal(quality)
+        monthly_record.total_oee -= decimal.Decimal(oee)
+        monthly_record.counter -= 1
+        monthly_record.save()
 
     return redirect("gemba_app:pareto-summary")
 

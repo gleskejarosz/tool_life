@@ -1,11 +1,12 @@
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
 
 from gemba.models import DowntimeDetail, DowntimeModel, LineHourModel, LineUser, Pareto, \
     ParetoDetail, ScrapDetail, ScrapModel, DowntimeUser, ScrapUser, JobModel2, Line, Timer, JobLine, \
     MonthlyResults, QuarantineHistoryDetail
 
 
-class ScrapDetailAdmin(admin.ModelAdmin):
+class ScrapDetailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("-id",)
     list_display = ("id", "line", "pareto_date", "modified", "scrap", "user", "job", "qty", "pareto_id", "completed", )
     list_display_links = ("id",)
@@ -20,7 +21,7 @@ class ScrapDetailAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "user", "modified"]
 
 
-class DowntimeDetailAdmin(admin.ModelAdmin):
+class DowntimeDetailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     @admin.display(description='Pareto date')
     def admin_downtimes(self, obj):
         return obj.pareto_date.strftime('%d-%m-%Y')
@@ -38,7 +39,7 @@ class DowntimeDetailAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "user", "modified"]
 
 
-class ParetoDetailAdmin(admin.ModelAdmin):
+class ParetoDetailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("-id",)
     list_display = ("id", "line", "pareto_date", "created", "modified", "job", "output", "good", "scrap", "takt_time",
                     "ops", "pareto_id", "completed", )
@@ -54,7 +55,7 @@ class ParetoDetailAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "user", "created", "modified"]
 
 
-class ParetoAdmin(admin.ModelAdmin):
+class ParetoAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("-id",)
     list_display = ("id", "pareto_date", "user", "line", "shift", "hours", "not_scheduled_to_run",
                     "availability", "performance", "quality", "oee", "completed", "ops_otg", )
@@ -71,7 +72,7 @@ class ParetoAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "user", "jobs", "downtimes", "scrap", "availability", "performance", "quality", "oee"]
 
 
-class ScrapModelAdmin(admin.ModelAdmin):
+class ScrapModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("code",)
     list_display = ("code", "description", "rework", )
     list_display_links = ("code",)
@@ -84,7 +85,7 @@ class ScrapModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class DowntimeModelAdmin(admin.ModelAdmin):
+class DowntimeModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("code",)
     list_display = ("code", "description", )
     list_display_links = ("code",)
@@ -97,7 +98,7 @@ class DowntimeModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class DowntimeUserModelAdmin(admin.ModelAdmin):
+class DowntimeUserModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("id",)
     list_display = ("downtime", "line", "order", "gemba", )
     list_display_links = ("downtime",)
@@ -111,7 +112,7 @@ class DowntimeUserModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class ScrapUserModelAdmin(admin.ModelAdmin):
+class ScrapUserModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("id",)
     list_display = ("scrap", "line", "order", "gemba", )
     list_display_links = ("scrap",)
@@ -125,7 +126,7 @@ class ScrapUserModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class JobModelAdmin2(admin.ModelAdmin):
+class JobModelAdmin2(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("name",)
     list_display = ("id", "name", "inner_size", )
     list_display_links = ("name",)
@@ -152,7 +153,7 @@ class LineHourModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class LineModelAdmin(admin.ModelAdmin):
+class LineModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("name",)
     list_display = ("name", "id", "code", "description", "line_status", "calculation", "target", )
     list_display_links = ("name",)
@@ -165,7 +166,7 @@ class LineModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class JobLineModelAdmin(admin.ModelAdmin):
+class JobLineModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("job",)
     list_display = ("job", "target", "line", "factor")
     list_display_links = ("job",)
