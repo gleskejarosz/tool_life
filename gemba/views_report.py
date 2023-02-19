@@ -90,14 +90,20 @@ def weekly_report_by_line(request):
 
     this_sunday = monday_object - timedelta(days=1)
     end_sunday = this_sunday + timedelta(days=7)
-    pareto_detail_qs = ParetoDetail.objects.filter(created__gte=this_sunday,
-                                                   created__lt=end_sunday).filter(line=line_id).order_by("id")
 
-    pareto_qs = set()
-    for pareto_detail_obj in pareto_detail_qs:
-        pareto_id = pareto_detail_obj.pareto_id
-        pareto_obj = Pareto.objects.get(id=pareto_id)
-        pareto_qs.add(pareto_obj)
+    pareto_qs = Pareto.objects.filter(pareto_date__gte=this_sunday,
+                                      pareto_date__lt=end_sunday).filter(line=line_id).order_by("id")
+    pareto_sun_qs = Pareto.objects.filter(pareto_date=this_sunday).exclude(shift=NS)
+    pareto_qs.difference(pareto_sun_qs)
+
+    # pareto_detail_qs = ParetoDetail.objects.filter(created__gte=this_sunday,
+    #                                                created__lt=end_sunday).filter(line=line_id).order_by("id")
+    #
+    # pareto_qs = set()
+    # for pareto_detail_obj in pareto_detail_qs:
+    #     pareto_id = pareto_detail_obj.pareto_id
+    #     pareto_obj = Pareto.objects.get(id=pareto_id)
+    #     pareto_qs.add(pareto_obj)
 
     pareto_shift_qs = []
     for pareto_obj in pareto_qs:
