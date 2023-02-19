@@ -413,12 +413,26 @@ def scrap_rate_report_by_week(request, line_id):
 
         scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
                                                                    pareto_date__lt=end_sunday)
-        scrap_sun_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday).exclude(shift=NS)
+        scrap_sun_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
+        for scrap_elem in scrap_sun_qs:
+            pareto_id = scrap_elem.pareto_id
+            pareto = Pareto.objects.get(id=pareto_id)
+            shift = pareto.shift
+            if shift == NS:
+                scrap_sun_qs.difference(scrap_elem)
+
         scrap_qs.difference(scrap_sun_qs)
 
         total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
                                                                            pareto_date__lt=end_sunday)
-        total_output_sun_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday).exclude(shift=NS)
+        total_output_sun_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
+        for pareto_detail_elem in total_output_sun_qs:
+            pareto_id = pareto_detail_elem.pareto_id
+            pareto = Pareto.objects.get(id=pareto_id)
+            shift = pareto.shift
+            if shift == NS:
+                total_output_sun_qs.difference(pareto_detail_elem)
+
         total_output_qs.difference(total_output_sun_qs)
 
         # this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
