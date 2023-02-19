@@ -2,14 +2,12 @@ import csv
 
 import xlwt
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth.decorators import login_required
-from django.core.files.storage import FileSystemStorage
 from django.db.models import Q
-from django.http import HttpResponse
+from django.shortcuts import redirect
 from xlwt import XFStyle, Font
 
 from gemba.models import Pareto, AM, PM, NS, ScrapUser, ScrapModel, ScrapDetail, DowntimeUser, DowntimeModel,\
-    DowntimeDetail
+    DowntimeDetail, ParetoDetail
 from gemba.views import get_details_to_display, oee_calculation, count_downtimes, count_scraps
 
 
@@ -447,7 +445,7 @@ def export_pareto_to_pdf(request, pk):
 from django.http import HttpResponse
 from .resources import JobModelResource
 
-
+@staff_member_required
 def export_job_model_csv(request):
     job_model_resource = JobModelResource()
     dataset = job_model_resource.export()
@@ -456,10 +454,33 @@ def export_job_model_csv(request):
     return response
 
 
+@staff_member_required
 def export_job_model_xls(request):
     job_model_resource = JobModelResource()
     dataset = job_model_resource.export()
     response = HttpResponse(dataset.xls, content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename="jobs.xls"'
     return response
+
+
+@staff_member_required
+def update_database_many_to_many_field(request):
+    pareto_qs = Pareto.objects.all()
+
+    for pareto in pareto_qs:
+        pareto_id = pareto.id
+        pareto_details_qs = ParetoDetail.objects.filter(pareto_id=pareto_id)
+        scrap_details_qs = ScrapDetail.objects.filter(pareto_id=pareto_id)
+        downtime_details_qs = DowntimeDetail.objects.filter(pareto_id=pareto_id)
+        for pareto_detail in pareto_details_qs:
+            if pareto_detail not in pareto.jobs.all():
+                pareto.jobs.add(pareto_detail)
+        for scrap in scrap_details_qs:
+            if scrap not in pareto.scrap.all():
+                pareto.scrap.add(scrap)
+        for downtime in downtime_details_qs:
+            if downtime not in pareto.downtimes.all():
+                pareto.downtimes.add(downtime)
+
+    return redirect("gemba_app:index")
 

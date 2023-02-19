@@ -101,6 +101,7 @@ urlpatterns = [
     path("export_pareto_to_pdf/<pk>/", views_export.export_pareto_to_pdf, name="export-pareto-to-pdf"),
     path("export_job_model_csv/", views_export.export_job_model_csv, name="export-job-model-csv"),
     path("export_job_model_xls/", views_export.export_job_model_xls, name="export-job-model-xls"),
+    path("update_database/", views_export.update_database_many_to_many_field, name="update-database"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
     ]
