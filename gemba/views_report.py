@@ -321,7 +321,6 @@ def lines_2(request):
 @staff_member_required
 def scrap_rate_report_by_week(request, line_id):
     # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
-
     report = []
 
     scrap_list = []
@@ -403,7 +402,6 @@ def scrap_rate_report_by_week(request, line_id):
     range_list = [a for a in range(9)]
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
-
         today = datetime.now(tz=pytz.UTC)
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=idx * 7)
@@ -520,8 +518,7 @@ def scrap_rate_report_by_week(request, line_id):
 
 @staff_member_required
 def downtime_rate_report_by_week(request, line_id):
-    today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
-
+    # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
     report = []
 
     down_list = []
@@ -603,12 +600,31 @@ def downtime_rate_report_by_week(request, line_id):
     range_list = [a for a in range(9)]
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
+        today = datetime.now(tz=pytz.UTC)
         this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
-        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
+
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
+                                                                     pareto_date__lt=end_sunday)
+        down_sun_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
+        for down_elem in down_sun_qs:
+            pareto_id = down_elem.pareto_id
+            pareto = Pareto.objects.get(id=pareto_id)
+            shift = pareto.shift
+            if shift == NS:
+                down_sun_qs.difference(down_elem)
+
+        down_qs.difference(down_sun_qs)
+
+        # this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        # start_sunday = this_sunday - timedelta(days=idx * 7)
+        # key_monday = "start_monday_" + str(week_num)
+        # totals[key_monday] = start_sunday + timedelta(days=1)
+        # end_sunday = start_sunday + timedelta(days=7)
+        # down_qs = DowntimeDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
 
         # counting available time
         paretos_id = set()
