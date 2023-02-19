@@ -96,15 +96,6 @@ def weekly_report_by_line(request):
     pareto_sun_qs = Pareto.objects.filter(pareto_date=this_sunday).exclude(shift=NS)
     pareto_qs.difference(pareto_sun_qs)
 
-    # pareto_detail_qs = ParetoDetail.objects.filter(created__gte=this_sunday,
-    #                                                created__lt=end_sunday).filter(line=line_id).order_by("id")
-    #
-    # pareto_qs = set()
-    # for pareto_detail_obj in pareto_detail_qs:
-    #     pareto_id = pareto_detail_obj.pareto_id
-    #     pareto_obj = Pareto.objects.get(id=pareto_id)
-    #     pareto_qs.add(pareto_obj)
-
     pareto_shift_qs = []
     for pareto_obj in pareto_qs:
         shift_obj = pareto_obj.shift
@@ -127,8 +118,6 @@ def weekly_report_by_line(request):
         display_date = this_sunday
     else:
         display_date = this_sunday + timedelta(days=1)
-
-    pareto_date = this_sunday + timedelta(days=1)
 
     for num in range(7):
         day = num + 1
@@ -313,5 +302,376 @@ def weekly_report_by_line(request):
             "down_idx": down_idx,
             "down_len": down_len,
             "scrap_idx": scrap_idx,
+        },
+    )
+
+
+@staff_member_required
+def lines(request):
+    lines_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines.html", {"lines_qs": lines_qs})
+
+
+@staff_member_required
+def lines_2(request):
+    lines2_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines2.html", {"lines2_qs": lines2_qs})
+
+
+@staff_member_required
+def scrap_rate_report_by_week(request, line_id):
+    # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+
+    report = []
+
+    scrap_list = []
+    scrap_names_qs = ScrapUser.objects.filter(line=line_id, order__gt=0).order_by("order")
+    scrap_row_qty = []
+    for obj in scrap_names_qs:
+        scrap_name = obj.scrap.description
+        scrap_list.append(scrap_name)
+        scrap_row_qty.append(0)
+
+        report.append({
+            "scrap": scrap_name,
+            "qty_0": 0,
+            "scrap_rate_0": 0.00,
+            "qty_1": 0,
+            "scrap_rate_1": 0.00,
+            "qty_2": 0,
+            "scrap_rate_2": 0.00,
+            "qty_3": 0,
+            "scrap_rate_3": 0.00,
+            "qty_4": 0,
+            "scrap_rate_4": 0.00,
+            "qty_5": 0,
+            "scrap_rate_5": 0.00,
+            "qty_6": 0,
+            "scrap_rate_6": 0.00,
+            "qty_7": 0,
+            "scrap_rate_7": 0.00,
+            "qty_8": 0,
+            "scrap_rate_8": 0.00,
+            "total": 0,
+            "total_scrap_rate": 0.00,
+        })
+
+    totals = {
+        "total_weekly_0": 0,
+        "total_output_0": 0,
+        "overall_scrap_rate_0": 0.00,
+        "start_monday_0": "",
+        "total_weekly_1": 0,
+        "total_output_1": 0,
+        "overall_scrap_rate_1": 0.00,
+        "start_monday_1": "",
+        "total_weekly_2": 0,
+        "total_output_2": 0,
+        "overall_scrap_rate_2": 0.00,
+        "start_monday_2": "",
+        "total_weekly_3": 0,
+        "total_output_3": 0,
+        "overall_scrap_rate_3": 0.00,
+        "start_monday_3": "",
+        "total_weekly_4": 0,
+        "total_output_4": 0,
+        "overall_scrap_rate_4": 0.00,
+        "start_monday_4": "",
+        "total_weekly_5": 0,
+        "total_output_5": 0,
+        "overall_scrap_rate_5": 0.00,
+        "start_monday_5": "",
+        "total_weekly_6": 0,
+        "total_output_6": 0,
+        "overall_scrap_rate_6": 0.00,
+        "start_monday_6": "",
+        "total_weekly_7": 0,
+        "total_output_7": 0,
+        "overall_scrap_rate_7": 0.00,
+        "start_monday_7": "",
+        "total_weekly_8": 0,
+        "total_output_8": 0,
+        "overall_scrap_rate_8": 0.00,
+        "start_monday_8": "",
+        "total_all_weeks": 0,
+        "total_all_output": 0,
+        "all_scrap_rate": 0.00,
+    }
+
+    total_all_output = 0
+    total_all_weeks = 0
+    range_list = [a for a in range(9)]
+    reversed_range_list = reversed(range_list)
+    for week_num, idx in enumerate(reversed_range_list):
+
+        today = datetime.now(tz=pytz.UTC)
+        this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
+        key_monday = "start_monday_" + str(week_num)
+        totals[key_monday] = start_sunday + timedelta(days=1)
+        end_sunday = start_sunday + timedelta(days=7)
+
+        scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
+                                                                   pareto_date__lt=end_sunday)
+        scrap_sun_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday).exclude(shift=NS)
+        scrap_qs.difference(scrap_sun_qs)
+
+        total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
+                                                                           pareto_date__lt=end_sunday)
+        total_output_sun_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday).exclude(shift=NS)
+        total_output_qs.difference(total_output_sun_qs)
+
+        # this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        # start_sunday = this_sunday - timedelta(days=idx * 7)
+        # key_monday = "start_monday_" + str(week_num)
+        # totals[key_monday] = start_sunday + timedelta(days=1)
+        # end_sunday = start_sunday + timedelta(days=7)
+        # scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
+        # total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(created__gte=start_sunday,
+        #                                                                    created__lt=end_sunday)
+        total_weekly = 0
+        key_qty = "qty_" + str(week_num)
+
+        # total scrap per reason, for week, period summary total, row sum up
+        for obj in scrap_qs:
+            obj_name = obj.scrap.description
+            if obj_name in scrap_list:
+                pos = scrap_list.index(obj_name)
+                qty = obj.qty
+                total_weekly += qty
+                total_all_weeks += qty
+                report[pos]["total"] += qty
+                report[pos][key_qty] += qty
+
+        # assigning total weekly scrap qty to totals
+        key_total = "total_weekly_" + str(week_num)
+        totals[key_total] = total_weekly
+
+        # counting output per week
+        total_output = 0
+        for obj in total_output_qs:
+            output_obj = obj.output
+            total_output += output_obj
+
+        # assigning total weekly output to totals and counting period summary total output
+        key_output = "total_output_" + str(week_num)
+        totals[key_output] = total_output
+        total_all_output += total_output
+
+        # counting scrap rate
+        key_scrap = "scrap_rate_" + str(week_num)
+        for idx, elem in enumerate(report):
+            scrap_qty = elem[key_qty]
+            if total_output == 0:
+                scrap_rate = 0
+            else:
+                scrap_rate = round((scrap_qty / total_output) * 100, ndigits=2)
+            elem[key_scrap] = scrap_rate
+
+        # counting weekly scrap rate
+        key_rate = "overall_scrap_rate_" + str(week_num)
+        if total_output == 0:
+            overall_scrap_rate = 0
+        else:
+            overall_scrap_rate = round((total_weekly / total_output) * 100, ndigits=2)
+        totals[key_rate] = overall_scrap_rate
+
+    # counting total scrap rate by row
+    totals["total_all_output"] = total_all_output
+    for elem in report:
+        total_by_scrap_type = elem["total"]
+        if total_all_weeks == 0:
+            total_scrap_rate = 0.00
+        else:
+            total_scrap_rate = round((total_by_scrap_type / total_all_output) * 100, ndigits=2)
+        elem["total_scrap_rate"] = total_scrap_rate
+
+    # counting total scrap rate
+    totals["total_all_weeks"] = total_all_weeks
+    if total_all_output == 0:
+        all_scrap_rate = 0
+    else:
+        all_scrap_rate = round((total_all_weeks / total_all_output) * 100, ndigits=2)
+    totals["all_scrap_rate"] = all_scrap_rate
+
+    return render(
+        request,
+        template_name="gemba/scrap_rate.html",
+        context={
+            "report": report,
+            "totals": totals,
+        },
+    )
+
+
+@staff_member_required
+def downtime_rate_report_by_week(request, line_id):
+    today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+
+    report = []
+
+    down_list = []
+    down_names_qs = DowntimeUser.objects.filter(line=line_id, order__gt=0).order_by("order")
+
+    down_row_qty = []
+    for obj in down_names_qs:
+        down_name = obj.downtime.description
+        down_list.append(down_name)
+        down_row_qty.append(0)
+
+        report.append({
+            "down": down_name,
+            "qty_0": 0,
+            "down_rate_0": 0.00,
+            "qty_1": 0,
+            "down_rate_1": 0.00,
+            "qty_2": 0,
+            "down_rate_2": 0.00,
+            "qty_3": 0,
+            "down_rate_3": 0.00,
+            "qty_4": 0,
+            "down_rate_4": 0.00,
+            "qty_5": 0,
+            "down_rate_5": 0.00,
+            "qty_6": 0,
+            "down_rate_6": 0.00,
+            "qty_7": 0,
+            "down_rate_7": 0.00,
+            "qty_8": 0,
+            "down_rate_8": 0.00,
+            "total": 0,
+            "total_scrap_rate": 0.00,
+        })
+
+    totals = {
+        "total_weekly_0": 0,
+        "total_available_time_0": 0,
+        "overall_down_rate_0": 0.00,
+        "start_monday_0": "",
+        "total_weekly_1": 0,
+        "total_available_time_1": 0,
+        "overall_down_rate_1": 0.00,
+        "start_monday_1": "",
+        "total_weekly_2": 0,
+        "total_available_time_2": 0,
+        "overall_down_rate_2": 0.00,
+        "start_monday_2": "",
+        "total_weekly_3": 0,
+        "total_available_time_3": 0,
+        "overall_down_rate_3": 0.00,
+        "start_monday_3": "",
+        "total_weekly_4": 0,
+        "total_available_time_4": 0,
+        "overall_down_rate_4": 0.00,
+        "start_monday_4": "",
+        "total_weekly_5": 0,
+        "total_available_time_5": 0,
+        "overall_down_rate_5": 0.00,
+        "start_monday_5": "",
+        "total_weekly_6": 0,
+        "total_available_time_6": 0,
+        "overall_down_rate_6": 0.00,
+        "start_monday_6": "",
+        "total_weekly_7": 0,
+        "total_available_time_7": 0,
+        "overall_down_rate_7": 0.00,
+        "start_monday_7": "",
+        "total_weekly_8": 0,
+        "total_available_time_8": 0,
+        "overall_down_rate_8": 0.00,
+        "start_monday_8": "",
+        "total_all_weeks": 0,
+        "total_all_output": 0,
+        "all_down_rate": 0.00,
+    }
+    total_all_output = 0
+    total_all_weeks = 0
+    range_list = [a for a in range(9)]
+    reversed_range_list = reversed(range_list)
+    for week_num, idx in enumerate(reversed_range_list):
+        this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        start_sunday = this_sunday - timedelta(days=idx * 7)
+        key_monday = "start_monday_" + str(week_num)
+        totals[key_monday] = start_sunday + timedelta(days=1)
+        end_sunday = start_sunday + timedelta(days=7)
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
+
+        # counting available time
+        paretos_id = set()
+        total_available_time = 0
+        for obj in down_qs:
+            pareto_id = obj.pareto_id
+            paretos_id.add(pareto_id)
+
+        for elem_id in paretos_id:
+            pareto = Pareto.objects.get(id=elem_id)
+            hours = pareto.hours
+            total_available_time += int(hours) * 60
+
+        total_weekly = 0
+        key_qty = "qty_" + str(week_num)
+
+        # total downtime per reason, for week, period summary total, row sum up
+        for obj in down_qs:
+            obj_name = obj.downtime.description
+            if obj_name in down_list:
+                pos = down_list.index(obj_name)
+                minutes = obj.minutes
+                total_weekly += minutes
+                total_all_weeks += minutes
+                report[pos]["total"] += minutes
+                report[pos][key_qty] += minutes
+
+        # assigning total weekly downtime minutes to totals
+        key_total = "total_weekly_" + str(week_num)
+        totals[key_total] = total_weekly
+
+        # assigning total weekly output to totals and counting period summary total output
+        key_output = "total_available_time_" + str(week_num)
+        totals[key_output] = total_available_time
+        total_all_output += total_available_time
+
+        # counting downtime rate
+        key_scrap = "down_rate_" + str(week_num)
+        for idx, elem in enumerate(report):
+            down_qty = elem[key_qty]
+            if total_available_time == 0:
+                down_rate = 0
+            else:
+                down_rate = round((down_qty / total_available_time) * 100, ndigits=2)
+            elem[key_scrap] = down_rate
+
+        # counting weekly downtime rate
+        key_rate = "overall_down_rate_" + str(week_num)
+        if total_available_time == 0:
+            overall_down_rate = 0
+        else:
+            overall_down_rate = round((total_weekly / total_available_time) * 100, ndigits=2)
+        totals[key_rate] = overall_down_rate
+
+    # counting total downtime rate by row
+    totals["total_all_output"] = total_all_output
+    for elem in report:
+        total_by_down_type = elem["total"]
+        if total_all_weeks == 0:
+            total_down_rate = 0.00
+        else:
+            total_down_rate = round((total_by_down_type / total_all_output) * 100, ndigits=2)
+        elem["total_down_rate"] = total_down_rate
+
+    # counting total downtime rate
+    totals["total_all_weeks"] = total_all_weeks
+    if total_all_output == 0:
+        all_down_rate = 0
+    else:
+        all_down_rate = round((total_all_weeks / total_all_output) * 100, ndigits=2)
+    totals["all_down_rate"] = all_down_rate
+
+    return render(
+        request,
+        template_name="gemba/downtime_rate.html",
+        context={
+            "report": report,
+            "totals": totals,
         },
     )
