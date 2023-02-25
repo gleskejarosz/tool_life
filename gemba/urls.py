@@ -59,6 +59,7 @@ urlpatterns = [
     # pareto view
     path("report_choices_2/", views.report_choices_2, name="report-choices-2"),
     path("paretos_view/", views.paretos_view, name="paretos-view"),
+
     path("report_choices_3/", views_report.report_choices_3, name="report-choices-3"),
     path("weekly_report_by_line/", views_report.weekly_report_by_line, name="weekly-report-by-line"),
     # produced report

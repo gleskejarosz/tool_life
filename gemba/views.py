@@ -7,14 +7,15 @@ from django.core.paginator import Paginator
 from datetime import datetime, timezone, timedelta
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.template import loader
+from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 
-
-from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
+from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter, ShiftFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm, ScrapUpdateForm
@@ -96,12 +97,12 @@ def report_choices_2(request):
 
 @staff_member_required
 def paretos_view(request):
-    line_name = request.GET.get("Lines")
-    if line_name is None:
+    line = request.GET.get("line")
+    if line is None:
         line_qs = Line.objects.all()
         line_id = line_qs[0]
     else:
-        line_qs = Line.objects.filter(name=line_name)
+        line_qs = Line.objects.filter(name=line)
         line_id = line_qs[0]
 
     date_from = request.GET.get("date_from")
@@ -118,9 +119,15 @@ def paretos_view(request):
         date_to = datetime.now(tz=pytz.UTC)
         paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
             Q(pareto_date=date_to)).order_by("-pareto_date", "id")
+    elif date_from is None and date_to is None:
+        date_to = datetime.now(tz=pytz.UTC)
+        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
+            Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
     else:
         paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
             Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+
+    items_filter = ShiftFilter(request.GET, queryset=paretos)
 
     paginator = Paginator(paretos, 100)
 
@@ -130,7 +137,10 @@ def paretos_view(request):
     return render(request,
                   template_name="gemba/paretos_view.html",
                   context={
-                      "filter": paretos,
+                      "filter": items_filter,
+                      "line": line,
+                      "date_from": date_from,
+                      "date_to": date_to,
                       "page_obj": page_obj,
                   })
 
@@ -1774,7 +1784,7 @@ def open_pareto(request, pk):
             template_name="gemba/error_message.html",
             context={
                 "message": message,
-            },)
+            }, )
     if pareto.completed is False:
         message = "Not completed Pareto cannot be updated."
         return render(
@@ -1782,7 +1792,7 @@ def open_pareto(request, pk):
             template_name="gemba/error_message.html",
             context={
                 "message": message,
-            },)
+            }, )
 
     down_items = pareto.downtimes.all()
     down_items.update(completed=False)
@@ -2096,4 +2106,3 @@ def create_quarantined_scrap(request, pk):
         template_name="form.html",
         context={"form": form}
     )
-

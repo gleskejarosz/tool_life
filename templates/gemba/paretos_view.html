@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% block content %}
+{% load widget_tweaks %}
 <h4>Pareto View:</h4>
+Line: {{ line }}
+Date from {{ date_from|date:"d-m-Y" }}
+to {{ date_to|date:"d-m-Y" }}
+
+<form method="get">
+    <div class="well">
+        <div class="row">
+            <div class="form-group col-sm-4 col-md-3">
+                {{ filter.form.shift.label_tag }}
+                {% render_field filter.form.shift class="form-control" %}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            <span class="glyphicon glyphicon-search"></span> Search
+        </button>
+    </div>
+</form>
+
 <table class="table table-hover">
         <thead>
         <tr>
@@ -16,7 +35,7 @@
         </tr>
         </thead>
         <tbody>
-        {% for item in page_obj %}
+        {% for item in filter.qs %}
         <tr>
             <th><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.id }}</a></th>
             <td>{{ item.pareto_date|date:"d-m-Y" }}</td>
