@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% load mathfilters %}
+
+{% block scripts %}
+<script>
+        if (screen.width < 500) {
+
+          $("body").addClass("nohover");
+          $("td, th")
+            .attr("tabindex", "1")
+            .on("touchstart", function() {
+              $(this).focus();
+            });
+
+        }
+</script>
+{% endblock scripts %}
+
+{% block content %}
+<h4>Pareto Weekly Compare Report</h4>
+<h5>{{ line_name }} - {{ shift }} </h5>
+<br/>
+<p><a href="{% url 'gemba_app:previous-weekly-report-by-line line_name=line_name shift=shift this_week_sunday=this_week_sunday' %}">Previous Week</a></p>
+<table class="mytable">
+    <thead>
+        <tr>
+            <th scope="col">Day</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Sunday {% else %}
+                Monday {% endif %}</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Monday {% else %}
+                Tuesday {% endif %}</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Tuesday {% else %}
+                Wednesday {% endif %}</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Wednesday {% else %}
+                Thursday {% endif %}</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Thursday {% else %}
+                Friday {% endif %}</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Friday {% else %}
+                Saturday {% endif %}</th>
+            <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Saturday {% else %}
+                Sunday {% endif %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for elem in report|slice:"0:6" %}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        {% for elem in report|slice:jobs_idx%}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        {% for elem in report|slice:down_idx%}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }} min{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }} min{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }} min{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }} min{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }} min{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }} min{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }} min{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tbody>
+        {% for elem in report|slice:scrap_idx%}
+        <tr>
+            <th scope="row">{{ elem.col0 }}</th>
+            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }} parts{% endif %}</td>
+            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }} parts{% endif %}</td>
+            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }} parts{% endif %}</td>
+            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }} parts{% endif %}</td>
+            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }} parts{% endif %}</td>
+            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }} parts{% endif %}</td>
+            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }} parts{% endif %}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

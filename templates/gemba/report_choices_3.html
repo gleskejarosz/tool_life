@@ -3,14 +3,10 @@
 
  <form action="{% url 'gemba_app:weekly-report-by-line' %}" method="get">
     </br>
-     <h4>Select the Monday that starts the week:</h4>
-        {% for w in week_list %}
-        <tr>
-            <td>{{w}}&nbsp;&nbsp;<input type="radio" name="Week" value="{{w}}"></td>
-            </br>
-        </tr>
-        {% endfor %}
-      </br>
+     <h4>Select any day to specify week:</h4>
+     <input name="day" type="date">
+     </br>
+     </br>
      <h4>Select a shift:</h4>
         {% for s in shift_list %}
         <tr>

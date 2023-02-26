@@ -3,13 +3,13 @@
 {% load widget_tweaks %}
 {% load mathfilters %}
 {% load static %}
-<div class="container">
-    <div class="left-dashboard">
-        <div class="row">
-            <div class="card h-100 border-start-lg border-start-primary">
-                <div class="card-body">
-                    <div class="h6"><img src="{% static 'pics/done.png' %}" alt="Done" width="23" height="23">
-                        Recently Produced</div>
+<div class="container mt-5 pt-4">
+
+    <div class="row">
+        <div class="col-lg-4 col-md-6 col-12 mt-4 pt-2">
+            <div class="card border-0 bg-light rounded shadow">
+                <div class="card-body p-4">
+                    Recently Produced
                     <table class="small-table">
                         <thead>
                             <tr>
@@ -34,77 +34,14 @@
                         {% endfor %}
                        </tbody>
                     </table>
-                    </br>
-                    <a class="small text-primary" href="{% url 'gemba_app:pareto-details' %}">
-                        Display more produced &#11166;</a>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="card h-100 border-start-lg border-start-secondary">
-                <div class="card-body">
-                    <div class="h6"><img src="{% static 'pics/stop.png' %}" alt="Stop" width="23" height="23">
-                        Recent causes of downtime</div>
-                    <table class="small-table">
-                        <thead>
-                            <tr>
-                                <th class="small"><b>Line</b></th>
-                                <th class="small"><b>Downtime</b></th>
-                                <th class="small"><b>Job</b></th>
-                                <th class="small"><b>Min</b></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for object in downtimes %}
-                            <tr>
-                                <td class="small text-muted">{{ object.line }}</td>
-                                <td class="small text-muted">{{ object.downtime.description }}</td>
-                                <td class="small text-muted">{{ object.job }}</td>
-                                <td class="small text-muted">{{ object.minutes }}</td>
-                           </tr>
-                        {% endfor %}
-                       </tbody>
-                    </table>
-                    </br>
-                    <a class="small text-secondary" href="{% url 'gemba_app:downtimes-view' %}">
-                        Display more downtime reasons &#11166;</a>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="card h-100 border-start-lg border-start-success">
-                <div class="card-body">
-                   <div class="h6"><img src="{% static 'pics/bin.png' %}" alt="Bin" width="18" height="23"> Latest reasons for scrapping</div>
-                    <table class="small-table">
-                        <thead>
-                            <tr>
-                                <th class="small"><b>Line</b></th>
-                                <th class="small"><b>Scrap</b></th>
-                                <th class="small"><b>Job</b></th>
-                                <th class="small"><b>Qty</b></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for object in scraps %}
-                            <tr>
-                                <td class="small text-muted">{{ object.line }}</td>
-                                <td class="small text-muted">{{ object.scrap.description }}</td>
-                                <td class="small text-muted">{{ object.job }}</td>
-                                <td class="small text-muted">{{ object.qty }}</td>
-                           </tr>
-                        {% endfor %}
-                       </tbody>
-                    </table>
-                    </br>
-                    <a class="small text-success" href="{% url 'gemba_app:scraps-view' %}">
-                        Display more scrap reasons &#11166;</a>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div>
-        <div class="middle-dashboard">
-            <h4>Monthly line production summary - {{ year }}</h4>
+        </div><!--end col-->
+
+        <div class="col-lg-4 col-md-6 col-12 mt-4 pt-2">
+            <div class="card border-0 bg-light rounded shadow">
+                <div class="card-body p-4">
+                    <h4>Monthly line production summary - {{ year }}</h4>
             <form method="get">
                 <div class="well">
                   <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
@@ -149,7 +86,7 @@
                             <td>{{ object.total_good }}</td>
                             <td>{{ object.total_scrap }}</td>
                             <td>{{ object.total_rework }}</td>
-                             <td>{{ object.total_available_time }}</td>
+                            <td>{{ object.total_available_time }}</td>
                             <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
                             <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
                             <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
@@ -158,19 +95,83 @@
                                 {% elif object.line.target|sub:5 > object.total_oee|div:object.counter %}&darr;
                                 {% else %}&#8275;{% endif %}{{ object.line.target }}%
                             </td>
-                            {% endfor %}
+                           {% endfor %}
                         </tr>
                 </tbody>
             </table>
-        </div>
-    </div>
-    <div class="right-dashboard">
-        <div class="row">
-            <div class="card h-100 border-end-lg border-end-blue">
-                <div class="card-body">
-                    <div class="h6"><img src="{% static 'pics/winner.png' %}" alt="Winner" width="18" height="25">
-                        Yesterday's 5 best results ({{ yesterday|date:'d-m' }})</div>
+                </div>
+            </div>
+        </div><!--end col-->
+
+        <div class="col-lg-4 col-md-6 col-12 mt-4 pt-2">
+            <div class="card border-0 bg-light rounded shadow">
+                <div class="card-body p-4">
+                     Latest reasons for scrapping
                     <table class="small-table">
+                        <thead>
+                            <tr>
+                                <th class="small"><b>Line</b></th>
+                                <th class="small"><b>Scrap</b></th>
+                                <th class="small"><b>Job</b></th>
+                                <th class="small"><b>Qty</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in scraps %}
+                            <tr>
+                                <td class="small text-muted">{{ object.line }}</td>
+                                <td class="small text-muted">{{ object.scrap.description }}</td>
+                                <td class="small text-muted">{{ object.job }}</td>
+                                <td class="small text-muted">{{ object.qty }}</td>
+                           </tr>
+                        {% endfor %}
+                       </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!--end col-->
+
+        <div class="col-lg-4 col-md-6 col-12 mt-4 pt-2">
+            <div class="card border-0 bg-light rounded shadow">
+                <div class="card-body p-4">
+                    Recent causes of downtime
+                    <table class="small-table">
+                        <thead>
+                            <tr>
+                                <th class="small"><b>Line</b></th>
+                                <th class="small"><b>Downtime</b></th>
+                                <th class="small"><b>Job</b></th>
+                                <th class="small"><b>Min</b></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in downtimes %}
+                            <tr>
+                                <td class="small text-muted">{{ object.line }}</td>
+                                <td class="small text-muted">{{ object.downtime.description }}</td>
+                                <td class="small text-muted">{{ object.job }}</td>
+                                <td class="small text-muted">{{ object.minutes }}</td>
+                           </tr>
+                        {% endfor %}
+                       </tbody>
+                    </table>
+                </div>
+            </div>
+        </div><!--end col-->
+
+        <div class="col-lg-4 col-md-6 col-12 mt-4 pt-2">
+            <div class="card border-0 bg-light rounded shadow">
+                <div class="card-body p-4">
+
+                </div>
+            </div>
+        </div><!--end col-->
+
+        <div class="col-lg-4 col-md-6 col-12 mt-4 pt-2">
+            <div class="card border-0 bg-light rounded shadow">
+                <div class="card-body p-4">
+                    Yesterday's 5 best results ({{ yesterday|date:'d-m' }})
+                     <table class="small-table">
                         <thead>
                             <tr>
                                 <th class="small"><b>Pos</b></th>
@@ -196,12 +197,10 @@
                         {% endfor %}
                        </tbody>
                     </table>
-                    </br>
-                    <a class="small text-blue" href="{% url 'gemba_app:report-choices-2' %}">
-                        Display more produced &#11166;</a>
                 </div>
             </div>
-        </div>
-    </div>
+        </div><!--end col-->
+
+    </div><!--end row-->
 </div>
 {% endblock %}
