@@ -118,14 +118,16 @@ def paretos_view(request):
         line_id = line_qs[0]
 
     date_from = request.GET.get("date_from")
-    print(date_from)
     date_to = request.GET.get("date_to")
-    print(date_to)
+
     if date_from == "":
         date_from = datetime.now(tz=pytz.UTC).date() - timedelta(days=30)
 
     if date_to == "":
         date_to = datetime.now(tz=pytz.UTC).date()
+
+    date_from_ = datetime.strptime(str(date_from), "%Y-%m-%d")
+    date_to_ = datetime.strptime(str(date_to), "%Y-%m-%d")
 
     paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
         Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
@@ -143,6 +145,8 @@ def paretos_view(request):
                       "line": line,
                       "date_from": date_from,
                       "date_to": date_to,
+                      "date_from_": date_from_,
+                      "date_to_": date_to_,
                       "page_obj": page_obj,
                       "shift_list": shift,
                   })
