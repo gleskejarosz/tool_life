@@ -1301,23 +1301,49 @@ def get_details_to_display(object_list):
     return report_list
 
 
-class DailyParetoSearchResultsView(ListView):
-    model = Pareto
-    template_name = "gemba/daily_oee_report.html"
+@staff_member_required
+def daily_oee_report(request):
+    query = request.GET.get("q")
+    if query == "":
+        report_list = Pareto.objects.filter(
+            Q(pareto_date__exact=datetime.now(tz=pytz.UTC).date())
+        ).order_by("line__name", "id")
+    else:
+        report_list = Pareto.objects.filter(
+            Q(pareto_date__exact=query)
+        ).order_by("line__name", "id")
+    object_list = get_details_to_display(object_list=report_list)
+    shift = [AM, PM, NS]
+    pareto_date = datetime.strptime(query, "%Y-%m-%d")
+    return render(request,
+                  template_name="gemba/daily_oee_report.html",
+                  context={
+                      "object_list": object_list,
+                      "pareto_date": pareto_date,
+                      "shift_list": shift,
+                  },
+                  )
 
-    def get_queryset(self):
-        query = self.request.GET.get("q")
-        if query == "":
-            report_list = Pareto.objects.filter(
-                Q(pareto_date__exact=datetime.now(tz=pytz.UTC).date())
-            ).order_by("line__name", "id")
-        else:
-            report_list = Pareto.objects.filter(
-                Q(pareto_date__exact=query)
-            ).order_by("line__name", "id")
-        object_list = get_details_to_display(object_list=report_list)
+@staff_member_required
+def daily_oee_report_by_shift(request, pareto_date):
+    shift = request.GET.get("Shift")
+    pareto_date_str = pareto_date[:10]
+    pareto_date_ = datetime.strptime(pareto_date_str, "%Y-%m-%d")
 
-        return object_list
+    report_list = Pareto.objects.filter(shift=shift).filter(
+        Q(pareto_date__exact=pareto_date_)
+    ).order_by("line__name", "id")
+
+    object_list = get_details_to_display(object_list=report_list)
+
+    return render(request,
+                  template_name="gemba/daily_oee_report_by_shift.html",
+                  context={
+                      "object_list": object_list,
+                      "pareto_date": pareto_date_,
+                      "shift": shift,
+                  },
+                  )
 
 
 @staff_member_required

@@ -53,8 +53,9 @@ urlpatterns = [
     path("scrap_delete_view/<pk>/", staff_member_required(views.ScrapDeleteView.as_view()), name="scrap-delete-view"),
     # daily oee report
     path("daily_oee_view/", views.pareto_view, name="pareto-view"),
-    path("daily_pareto_search_result", staff_member_required(views.DailyParetoSearchResultsView.as_view()),
-         name="daily-pareto-search-result"),
+    path("daily_oee_report/", views.daily_oee_report, name="daily-oee-report"),
+    path("daily_oee_report_by_shift/<pareto_date>/", views.daily_oee_report_by_shift, name="daily-oee-report_by-shift"),
+
     path("pareto_details_view/<pk>/", views.pareto_detail_view, name="pareto-detail-view"),
     # pareto view
     path("report_choices_2/", views.report_choices_2, name="report-choices-2"),
