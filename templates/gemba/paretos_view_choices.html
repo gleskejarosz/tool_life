@@ -2,23 +2,9 @@
 {% block content %}
 {% load widget_tweaks %}
 <h4>Pareto View for {{ line }}:</h4>
-Date range: {{ date_from|date:"d-m-Y" }} - {{ date_to|date:"d-m-Y" }}
-
+Date range: {{ date_from_|date:"d-m-Y" }} - {{ date_to_|date:"d-m-Y" }}
 </br>
 </br>
-<form action="{% url 'gemba_app:paretos-view-choices' line=line date_from=date_from date_to=date_to %}" method="get">
-     <h5>Select a shift:</h5>
-        {% for s in shift_list %}
-        <tr>
-            <td>{{s}}&nbsp;&nbsp;<input type="radio" name="Shift" value="{{s}}"></td>
-            </br>
-        </tr>
-        {% endfor %}
-      </br>
-     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
-    </button>
- </form>
-
 <table class="table table-hover">
         <thead>
         <tr>
@@ -34,7 +20,7 @@ Date range: {{ date_from|date:"d-m-Y" }} - {{ date_to|date:"d-m-Y" }}
         </tr>
         </thead>
         <tbody>
-        {% for item in page_obj %}
+        {% for item in paretos %}
         <tr>
             <th><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.id }}</a></th>
             <td>{{ item.pareto_date|date:"d-m-Y" }}</td>

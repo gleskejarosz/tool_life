@@ -80,10 +80,3 @@ class MonthlyResultFilter(django_filters.FilterSet):
         model = MonthlyResults
         fields = ("month", "line", )
 
-
-class ShiftFilter(django_filters.FilterSet):
-    # shift = django_filters.CharFilter(choices=SHIFT_CHOICES, label="Shift")
-
-    class Meta:
-        model = Pareto
-        fields = ("shift", )

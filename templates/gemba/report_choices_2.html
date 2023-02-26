@@ -1,6 +1,10 @@
 {% extends "base.html" %}
 {% block content %}
-
+{% if message != "" %}
+    <div class="alert alert-primary">
+    <strong>Info!</strong> {{ message}}
+    </div>
+{% endif %}
  <form action="{% url 'gemba_app:paretos-view' %}" method="get">
      <h4>Select a date range:</h4>
      </br>

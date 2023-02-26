@@ -10,18 +10,19 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.template import loader
+from django.template.response import TemplateResponse
 from django.urls import reverse_lazy, reverse
 from django.db.models import Q
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, DeleteView, DetailView, ListView
 
-from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter, ShiftFilter
+from gemba.filters import DowntimeFilter, ScrapFilter, JobFilter
 from gemba.forms import DowntimeMinutes, ScrapQuantity, NewPareto, ParetoUpdateForm, \
     NotScheduledToRunUpdateForm, ParetoTotalQtyDetailForm, ParetoDetailUpdateForm, ParetoDetailHCBForm, \
     ParetoDetailHCIForm, ParetoMeterForm, ParetoMeterStartForm, GoodUpdateForm, ScrapUpdateForm
 from gemba.models import Pareto, ParetoDetail, DowntimeModel, DowntimeDetail, ScrapModel, ScrapDetail, DowntimeUser, \
     ScrapUser, LineHourModel, JobModel2, SHIFT_CHOICES, TC, LineUser, Line, Timer, JobLine, \
-    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail
+    PRODUCTIVE, HCI, HCB, MC, MonthlyResults, QuarantineHistoryDetail, AM, PM, NS
 from tools.views import tools_update
 
 
@@ -85,12 +86,14 @@ def pareto_details_view(request):
 
 @staff_member_required
 def report_choices_2(request):
+    message = ""
     lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
     return render(
         request,
         template_name="gemba/report_choices_2.html",
         context={
             "lines_qs": lines_qs,
+            "message": message,
         },
     )
 
@@ -98,50 +101,72 @@ def report_choices_2(request):
 @staff_member_required
 def paretos_view(request):
     line = request.GET.get("line")
+
     if line is None:
-        line_qs = Line.objects.all()
-        line_id = line_qs[0]
+        message = "You must select any line"
+        lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
+        return render(
+            request,
+            template_name="gemba/report_choices_2.html",
+            context={
+                "lines_qs": lines_qs,
+                "message": message,
+            },
+        )
     else:
         line_qs = Line.objects.filter(name=line)
         line_id = line_qs[0]
 
     date_from = request.GET.get("date_from")
+    print(date_from)
     date_to = request.GET.get("date_to")
+    print(date_to)
+    if date_from == "":
+        date_from = datetime.now(tz=pytz.UTC).date() - timedelta(days=30)
 
-    if date_from == "" and date_to != "":
-        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")[:100]
-    elif date_from != "" and date_to == "":
-        date_to = datetime.now(tz=pytz.UTC)
-        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
-    elif date_from == "" and date_to == "":
-        date_to = datetime.now(tz=pytz.UTC)
-        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date=date_to)).order_by("-pareto_date", "id")
-    elif date_from is None and date_to is None:
-        date_to = datetime.now(tz=pytz.UTC)
-        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
-    else:
-        paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-            Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+    if date_to == "":
+        date_to = datetime.now(tz=pytz.UTC).date()
 
-    items_filter = ShiftFilter(request.GET, queryset=paretos)
+    paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
+        Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
 
     paginator = Paginator(paretos, 100)
 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
+    shift = [AM, PM, NS]
+
     return render(request,
                   template_name="gemba/paretos_view.html",
                   context={
-                      "filter": items_filter,
                       "line": line,
                       "date_from": date_from,
                       "date_to": date_to,
                       "page_obj": page_obj,
+                      "shift_list": shift,
+                  })
+
+
+@staff_member_required
+def paretos_view_choices(request, line, date_from, date_to):
+    shift = request.GET.get("Shift")
+    line_qs = Line.objects.filter(name=line)
+    line_id = line_qs[0]
+
+    date_from_ = datetime.strptime(date_from, "%Y-%m-%d")
+    date_to_ = datetime.strptime(date_to, "%Y-%m-%d")
+
+    paretos = Pareto.objects.filter(line=line_id, completed=True, shift=shift).filter(
+        Q(pareto_date__gte=date_from_) & Q(pareto_date__lte=date_to_)).order_by("-pareto_date", "id")
+
+    return render(request,
+                  template_name="gemba/paretos_view_choices.html",
+                  context={
+                      "paretos": paretos,
+                      "line": line,
+                      "date_from_": date_from_,
+                      "date_to_": date_to_,
                   })
 
 
