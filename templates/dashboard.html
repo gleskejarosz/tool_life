@@ -123,6 +123,7 @@
                   </button>
                 </div>
             </form>
+            {% for object in filter.qs %}
             <table class="table table-hover">
                 <thead>
                     <tr>
@@ -132,6 +133,20 @@
                         <th scope="col">Total Good</th>
                         <th scope="col">Total Scrap</th>
                         <th scope="col">Total Rework</th>
+                    </tr>
+                </thead>
+                <tbody>
+                        <tr>
+                            <td>{{ object.month }}</td>
+                            <td>{{ object.line }}</td>
+                            <td>{{ object.total_output }}</td>
+                            <td>{{ object.total_good }}</td>
+                            <td>{{ object.total_scrap }}</td>
+                            <td>{{ object.total_rework }}</td>
+                        </tr>
+                </tbody>
+                <thead>
+                    <tr>
                         <th scope="col">Total Available Time</th>
                         <th scope="col">Average Availability</th>
                         <th scope="col">Average Performance</th>
@@ -141,14 +156,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for object in filter.qs %}
                         <tr>
-                            <td>{{ object.month }}</td>
-                            <td>{{ object.line }}</td>
-                            <td>{{ object.total_output }}</td>
-                            <td>{{ object.total_good }}</td>
-                            <td>{{ object.total_scrap }}</td>
-                            <td>{{ object.total_rework }}</td>
                             <td>{{ object.total_available_time }}</td>
                             <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
                             <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
@@ -159,9 +167,9 @@
                                 {% else %}&#8275;{% endif %}{{ object.line.target }}%
                             </td>
                         </tr>
-                    {% endfor %}
                 </tbody>
             </table>
+            {% endfor %}
         </div>
     </div>
     <div class="right-dashboard">

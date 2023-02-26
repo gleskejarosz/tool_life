@@ -51,6 +51,38 @@ def dashboard(request):
         )
 
 
+def test_page(request):
+    today = datetime.now(tz=pytz.UTC)
+    yesterday = today - timedelta(days=1)
+    year = today.strftime('%Y')
+    month = today.strftime('%B')
+
+    # monthly report of average oee elements
+    monthly_records_qs = MonthlyResults.objects.filter(year=year).order_by("-id", "line")
+    items_filter = MonthlyResultFilter(request.GET, queryset=monthly_records_qs)
+
+    # the best oee result from the day before
+    paretos = Pareto.objects.filter(pareto_date=yesterday).order_by("-oee")[:5]
+
+    produced = ParetoDetail.objects.all().order_by("-created")[:5]
+    downtimes_qs = DowntimeDetail.objects.all().order_by("-created")[:5]
+    scrap_qs = ScrapDetail.objects.all().order_by("-created")[:5]
+
+    context = {
+        "filter": items_filter,
+        "produced": produced,
+        "downtimes": downtimes_qs,
+        "scraps": scrap_qs,
+        "year": year,
+        "paretos": paretos,
+        "yesterday": yesterday,
+    }
+    return render(
+        request,
+        template_name='gemba/test_page.html',
+        context=context,
+    )
+
 @staff_member_required
 def report_choices_3(request):
     lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")

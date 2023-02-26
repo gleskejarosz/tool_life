@@ -107,4 +107,5 @@ urlpatterns = [
     path("update_database/", views_export.update_database_many_to_many_field, name="update-database"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
+    path("dashboard2/", views_report.test_page, name="dashboard2"),
     ]
