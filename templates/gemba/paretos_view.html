@@ -7,7 +7,7 @@ Date range: {{ date_from_|date:"d-m-Y" }} - {{ date_to_|date:"d-m-Y" }}
 </br>
 </br>
 <form action="{% url 'gemba_app:paretos-view-choices' line=line date_from=date_from date_to=date_to %}" method="get">
-     <h5>Select a shift:</h5>
+     <h5>Select shift:</h5>
         {% for s in shift_list %}
         <tr>
             <td>{{s}}&nbsp;&nbsp;<input type="radio" name="Shift" value="{{s}}"></td>
@@ -26,7 +26,6 @@ Date range: {{ date_from_|date:"d-m-Y" }} - {{ date_to_|date:"d-m-Y" }}
             <th scope="col">Pareto Date</th>
             <th scope="col">Line</th>
             <th scope="col">Shift</th>
-            <th scope="col">Operators</th>
             <th scope="col">Availability</th>
             <th scope="col">Performance</th>
             <th scope="col">Quality</th>
@@ -40,13 +39,20 @@ Date range: {{ date_from_|date:"d-m-Y" }} - {{ date_to_|date:"d-m-Y" }}
             <td>{{ item.pareto_date|date:"d-m-Y" }}</td>
             <td>{{ item.line }}</td>
             <td>{{ item.shift }}</td>
-            <td>{{ item.ops_otg }}</td>
             <td>{{ item.availability }}%</td>
             <td>{{ item.performance }}%</td>
             <td>{{ item.quality }}%</td>
             <td>{{ item.oee }}%</td>
         </tr>
         {% endfor %}
+        <tr>
+            <th colspan="3">Average OEE Elements</th>
+            <td></td>
+            <td><b>{{ calculation.avg_availability }}%</b></td>
+            <td><b>{{ calculation.avg_performance }}%</b></td>
+            <td><b>{{ calculation.avg_quality }}%</b></td>
+            <td><b>{{ calculation.avg_oee }}%</b></td>
+        </tr>
         </tbody>
 </table>
 <div class="pagination">

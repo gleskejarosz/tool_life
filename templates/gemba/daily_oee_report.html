@@ -6,7 +6,7 @@
 <p><a href="{% url 'gemba_app:pareto-view' %}">Go back</a></p>
 
 <form action="{% url 'gemba_app:daily-oee-report_by-shift' pareto_date=pareto_date %}" method="get">
-     <h5>Select a shift:</h5>
+     <h5>Select shift:</h5>
         {% for s in shift_list %}
         <tr>
             <td>{{s}}&nbsp;&nbsp;<input type="radio" name="Shift" value="{{s}}"></td>

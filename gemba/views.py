@@ -130,14 +130,16 @@ def paretos_view(request):
     date_to_ = datetime.strptime(str(date_to), "%Y-%m-%d")
 
     paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-        Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")
+        Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")[:100]
 
-    paginator = Paginator(paretos, 100)
+    paginator = Paginator(paretos, 30)
 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     shift = [AM, PM, NS]
+
+    calculation = average_calculation(paretos=paretos)
 
     return render(request,
                   template_name="gemba/paretos_view.html",
@@ -149,7 +151,45 @@ def paretos_view(request):
                       "date_to_": date_to_,
                       "page_obj": page_obj,
                       "shift_list": shift,
+                      "calculation": calculation,
                   })
+
+
+def average_calculation(paretos):
+    sum_availability = 0
+    sum_performance = 0
+    sum_quality = 0
+    sum_oee = 0
+    counter = 0
+    for pareto_obj in paretos:
+        availability = pareto_obj.availability
+        performance = pareto_obj.performance
+        quality = pareto_obj.quality
+        oee = pareto_obj.oee
+        sum_availability += decimal.Decimal(availability)
+        sum_performance += decimal.Decimal(performance)
+        sum_quality += decimal.Decimal(quality)
+        sum_oee += decimal.Decimal(oee)
+        counter += 1
+
+    if counter > 0:
+        avg_availability = round(sum_availability / counter, ndigits=2)
+        avg_performance = round(sum_performance / counter, ndigits=2)
+        avg_quality = round(sum_quality / counter, ndigits=2)
+        avg_oee = round(sum_oee / counter, ndigits=2)
+    else:
+        avg_availability = 0
+        avg_performance = 0
+        avg_quality = 0
+        avg_oee = 0
+
+    calculation = {
+        "avg_availability": avg_availability,
+        "avg_performance": avg_performance,
+        "avg_quality": avg_quality,
+        "avg_oee": avg_oee,
+    }
+    return calculation
 
 
 @staff_member_required
@@ -162,15 +202,24 @@ def paretos_view_choices(request, line, date_from, date_to):
     date_to_ = datetime.strptime(date_to, "%Y-%m-%d")
 
     paretos = Pareto.objects.filter(line=line_id, completed=True, shift=shift).filter(
-        Q(pareto_date__gte=date_from_) & Q(pareto_date__lte=date_to_)).order_by("-pareto_date", "id")
+        Q(pareto_date__gte=date_from_) & Q(pareto_date__lte=date_to_)).order_by("-pareto_date", "id")[:100]
+
+    calculation = average_calculation(paretos=paretos)
+
+    paginator = Paginator(paretos, 30)
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
     return render(request,
                   template_name="gemba/paretos_view_choices.html",
                   context={
                       "paretos": paretos,
+                      "page_obj": page_obj,
                       "line": line,
                       "date_from_": date_from_,
                       "date_to_": date_to_,
+                      "calculation": calculation,
                   })
 
 
@@ -1323,6 +1372,7 @@ def daily_oee_report(request):
                       "shift_list": shift,
                   },
                   )
+
 
 @staff_member_required
 def daily_oee_report_by_shift(request, pareto_date):
