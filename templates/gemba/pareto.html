@@ -84,6 +84,10 @@
             <th scope="col" class="central_pos">Takt time</th>
             <th scope="col" class="central_pos">OPs</th>
             <th scope="col" class="central_pos">Last Entry</th>
+            <th scope="col" class="central_pos">A</th>
+            <th scope="col" class="central_pos">P</th>
+            <th scope="col" class="central_pos">Q</th>
+            <th scope="col" class="central_pos">OEE</th>
         </tr>
         </thead>
         <tbody>
@@ -92,10 +96,10 @@
                 <td colspan='8'>No records</td>
               </tr>
         {% endif %}
-        {% for pareto_item in pareto_list.jobs.all %}
+        {% for pareto_item in pareto_details_list %}
         <tr>
-            <td><a href="{% url 'gemba_app:pareto-details-view' pk=pareto_item.pk %}">
-                {{ pareto_item.job.name }}</a></td>
+            <td><a href="{% url 'gemba_app:pareto-details-view' pk=pareto_item.id %}">
+                {{ pareto_item.job }}</a></td>
             <td class="central_pos">{{ pareto_item.output }}</td>
             <td class="central_pos">{{ pareto_item.good }}</td>
             <td class="central_pos">{{ pareto_item.rework }}</td>
@@ -108,14 +112,20 @@
             <td class="central_pos">{{ pareto_item.scrap }}</td>
             <td class="central_pos">{{ pareto_item.takt_time }}</td>
             <td class="central_pos">{{ pareto_item.ops }}</td>
-            <td class="central_pos">{{ pareto_item.modified|date:"H:i" }}</td>
+            <td class="central_pos"><a href="{% url 'gemba_app:finished-update-view' pk=pareto_item.id %}">
+                {{ pareto_item.finished|date:"H:i" }}</a></td>
+            <td class="central_pos">{{ pareto_item.availability }}%</td>
+            <td class="central_pos">{{ pareto_item.performance }}%</td>
+            <td class="central_pos">{{ pareto_item.quality }}%</td>
+            <td class="central_pos">{{ pareto_item.oee }}%</td>
+
         </tr>
         {% endfor %}
         <tr>
             <td> <b>Total</b> </td>
             <td class="central_pos"> <b>{{ total_output }}</b> </td>
-            <td class="central_pos"> <b>{{ total_good }}</b> </td>
-            <td class="central_pos"> <b>{{ total_rework }}</b> </td>
+            <td class="central_pos"> <b>{{ total_good }}({{ total_rework }})</b> </td>
+            <td> </td>
             <td> </td>
             <td> </td>
             <td class="central_pos"> <b>{{ total_scrap_cal }}</b> </td>

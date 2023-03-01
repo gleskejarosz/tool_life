@@ -41,15 +41,15 @@ class DowntimeDetailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
 
 class ParetoDetailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("-id",)
-    list_display = ("id", "line", "pareto_date", "created", "modified", "job", "output", "good", "scrap", "takt_time",
-                    "ops", "pareto_id", "completed", )
+    list_display = ("id", "line", "pareto_date", "created", "modified", "finished", "job", "output", "good", "scrap",
+                    "takt_time", "ops", "pareto_id", "completed", )
     list_display_links = ("id",)
     list_filter = ("line",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "line", "pareto_id", "pareto_date", "created", "modified", "job", "output", "good", "scrap",
-                       "ops", "takt_time", "user", "completed"],
+            "fields": ["id", "line", "pareto_id", "pareto_date", "created", "modified", "finished", "job", "output",
+                       "good", "scrap", "ops", "takt_time", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "created", "modified"]
@@ -155,12 +155,12 @@ class LineHourModelAdmin(admin.ModelAdmin):
 
 class LineModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("name",)
-    list_display = ("name", "id", "code", "description", "line_status", "calculation", "target", )
+    list_display = ("name", "id", "description", "line_status", "calculation", "target", )
     list_display_links = ("name",)
     list_per_page = 20
     fieldsets = [
         ("General", {
-            "fields": ["id", "code", "name", "description", "calculation", "line_status", "target"],
+            "fields": ["id", "name", "description", "calculation", "line_status", "target"],
         }),
     ]
     readonly_fields = ["id"]

@@ -42,6 +42,10 @@
             <th scope="col">Scrap</th>
             <th scope="col">Takt time</th>
             <th scope="col">Operators</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Performance</th>
+            <th scope="col">Quality</th>
+            <th scope="col">OEE</th>
         </tr>
         </thead>
         <tbody>
@@ -54,6 +58,10 @@
             <td>{{ pareto_item.scrap }}</td>
             <td>{{ pareto_item.takt_time }}</td>
             <td>{{ pareto_item.ops}}</td>
+            <td>{{ pareto_item.availability}}%</td>
+            <td>{{ pareto_item.performance}}%</td>
+            <td>{{ pareto_item.quality}}%</td>
+            <td>{{ pareto_item.oee}}%</td>
         </tr>
         {% endfor %}
         <tr>

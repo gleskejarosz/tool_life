@@ -23,6 +23,8 @@ urlpatterns = [
     path("pareto_update_view/<pk>/", staff_member_required(views.ParetoUpdateView.as_view()),
          name="pareto-update-view"),
     path("select_job/<pk>/", views.select_job, name="select-job"),
+    path("finished_update_view/<pk>/", staff_member_required(views.FinishedUpdateView.as_view()),
+         name="finished-update-view"),
     # pareto detail
     path("job_user_view/", views.job_user_list, name="job-user-view"),
     path("pareto_details_create_view/", views.pareto_detail_create, name="pareto-details-create-view"),
@@ -64,7 +66,7 @@ urlpatterns = [
 
     path("report_choices_3/", views_report.report_choices_3, name="report-choices-3"),
     path("weekly_report_by_line/", views_report.weekly_report_by_line, name="weekly-report-by-line"),
-    path("previuos_weekly_report_by_line/<this_week_sunday>/<line_name>/<shift>/", views_report.previous_weekly_report_by_line,
+    path("previous_weekly_report_by_line/<this_week_sunday>/<line_name>/<shift>/", views_report.previous_weekly_report_by_line,
          name="previous-weekly-report-by-line"),
 
     # produced report

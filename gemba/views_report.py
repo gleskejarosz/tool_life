@@ -822,46 +822,67 @@ def downtime_rate_report_by_week(request, line_id):
     totals = {
         "total_weekly_0": 0,
         "total_available_time_0": 0,
+        "total_uptime_0": 0,
         "overall_down_rate_0": 0.00,
+        "uptime_rate_0": 0.00,
         "start_monday_0": "",
         "total_weekly_1": 0,
         "total_available_time_1": 0,
+        "total_uptime_1": 0,
         "overall_down_rate_1": 0.00,
+        "uptime_rate_1": 0.00,
         "start_monday_1": "",
         "total_weekly_2": 0,
         "total_available_time_2": 0,
+        "total_uptime_2": 0,
         "overall_down_rate_2": 0.00,
+        "uptime_rate_2": 0.00,
         "start_monday_2": "",
         "total_weekly_3": 0,
         "total_available_time_3": 0,
+        "total_uptime_3": 0,
         "overall_down_rate_3": 0.00,
+        "uptime_rate_3": 0.00,
         "start_monday_3": "",
         "total_weekly_4": 0,
         "total_available_time_4": 0,
+        "total_uptime_4": 0,
         "overall_down_rate_4": 0.00,
+        "uptime_rate_4": 0.00,
         "start_monday_4": "",
         "total_weekly_5": 0,
         "total_available_time_5": 0,
+        "total_uptime_5": 0,
         "overall_down_rate_5": 0.00,
+        "uptime_rate_5": 0.00,
         "start_monday_5": "",
         "total_weekly_6": 0,
         "total_available_time_6": 0,
+        "total_uptime_6": 0,
         "overall_down_rate_6": 0.00,
+        "uptime_rate_6": 0.00,
         "start_monday_6": "",
         "total_weekly_7": 0,
         "total_available_time_7": 0,
+        "total_uptime_7": 0,
         "overall_down_rate_7": 0.00,
+        "uptime_rate_7": 0.00,
         "start_monday_7": "",
         "total_weekly_8": 0,
         "total_available_time_8": 0,
+        "total_uptime_8": 0,
         "overall_down_rate_8": 0.00,
+        "uptime_rate_8": 0.00,
         "start_monday_8": "",
         "total_all_weeks": 0,
         "total_all_output": 0,
+        "total_all_uptime": 0,
+        "all_uptime_rate": 0.00,
         "all_down_rate": 0.00,
     }
     total_all_output = 0
     total_all_weeks = 0
+    total_all_uptime = 0
     range_list = [a for a in range(9)]
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
@@ -926,6 +947,12 @@ def downtime_rate_report_by_week(request, line_id):
         totals[key_output] = total_available_time
         total_all_output += total_available_time
 
+        # assigning total weekly uptime
+        key_output = "total_uptime_" + str(week_num)
+        total_uptime = total_available_time - total_weekly
+        totals[key_output] = total_uptime
+        total_all_uptime += total_uptime
+
         # counting downtime rate
         key_scrap = "down_rate_" + str(week_num)
         for idx, elem in enumerate(report):
@@ -935,6 +962,14 @@ def downtime_rate_report_by_week(request, line_id):
             else:
                 down_rate = round((down_qty / total_available_time) * 100, ndigits=2)
             elem[key_scrap] = down_rate
+
+        # counting weekly uptime rate
+        key_rate = "uptime_rate_" + str(week_num)
+        if total_available_time == 0:
+            uptime_rate = 0
+        else:
+            uptime_rate = round((total_uptime / total_available_time) * 100, ndigits=2)
+        totals[key_rate] = uptime_rate
 
         # counting weekly downtime rate
         key_rate = "overall_down_rate_" + str(week_num)
@@ -946,6 +981,7 @@ def downtime_rate_report_by_week(request, line_id):
 
     # counting total downtime rate by row
     totals["total_all_output"] = total_all_output
+    totals["total_all_uptime"] = total_all_uptime
     for elem in report:
         total_by_down_type = elem["total"]
         if total_all_weeks == 0:
@@ -953,6 +989,13 @@ def downtime_rate_report_by_week(request, line_id):
         else:
             total_down_rate = round((total_by_down_type / total_all_output) * 100, ndigits=2)
         elem["total_down_rate"] = total_down_rate
+
+    # counting total uptime rate
+    if total_all_output == 0:
+        all_uptime_rate = 0
+    else:
+        all_uptime_rate = round((total_all_uptime / total_all_output) * 100, ndigits=2)
+    totals["all_uptime_rate"] = all_uptime_rate
 
     # counting total downtime rate
     totals["total_all_weeks"] = total_all_weeks

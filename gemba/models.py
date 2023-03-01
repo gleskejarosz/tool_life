@@ -80,10 +80,15 @@ class ParetoDetail(models.Model):
     pareto_id = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True, blank=True)
     modified = models.DateTimeField(auto_now_add=True, blank=True)
+    finished = models.DateTimeField(blank=True)
     pareto_date = models.DateField(blank=True, null=True)
     start_meter = models.PositiveIntegerField(default=0)
     takt_time = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines3", blank=True, null=True)
+    availability = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    performance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    quality = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    oee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
         return f"{self.job}"
@@ -239,7 +244,6 @@ class Line(models.Model):
         (PRODUCTIVE, "Productive"),
         (NOT_IN_USE, "Not in use"),
     )
-    code = models.CharField(max_length=8)
     name = models.CharField(max_length=16)
     description = models.CharField(max_length=64, blank=True, null=True)
     line_status = models.CharField(max_length=64, choices=LINE_STATUS, default=PRODUCTIVE)
