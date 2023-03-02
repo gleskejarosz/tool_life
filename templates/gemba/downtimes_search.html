@@ -24,7 +24,7 @@
                 <td>{{ object.minutes }}</td>
                 <td>{% if object.from_job is None %} {% else %} {{ object.from_job }} {% endif %}</td>
                 <td>{{ object.job }}</td>
-                <td>{{ object.pareto_id }}</td>
+                <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pareto_id %}">{{ object.pareto_id }}</a></td>
                 <td>{{ object.pareto_date }}</td>
            {% endfor %}
             </tr>

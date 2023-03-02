@@ -442,6 +442,8 @@ def pareto_detail_create(request):
 
                     # tools update
                     modified = pareto_elem.modified
+                    pareto_elem.finished = modified
+                    pareto_elem.save()
                     tools_update(job=job, output=new_output, target=target, modified=modified)
 
                     return redirect("gemba_app:pareto-summary")
@@ -451,6 +453,9 @@ def pareto_detail_create(request):
                                                               pareto_id=pareto_id, line=line, ops=ops,
                                                               rework=rework_cal,
                                                               pareto_date=pareto_date, scrap=scrap, takt_time=takt_time)
+                    modified = pareto_elem.modified
+                    pareto_elem.finished = modified
+                    pareto_elem.save()
                     pareto.jobs.add(pareto_elem)
 
                     # tools update
@@ -667,6 +672,8 @@ class ParetoSummary(LoginRequiredMixin, View):
         user = self.request.user
         pareto_qs = Pareto.objects.filter(user=user, completed=False)
         start_meter = 0
+        calculation_by_job = []
+
         if pareto_qs.exists():
             pareto = pareto_qs[0]
 
@@ -772,17 +779,30 @@ class ParetoSummary(LoginRequiredMixin, View):
             oee = oee_cal(availability=availability, performance=performance, quality=quality)
 
             calculation_by_job = final_oee_calculation_by_job(pareto)
-            for cal in calculation_by_job:
-                job_elem = cal["job"]
-                idx = jobs.index(job_elem)
-                availability_elem = cal["availability"]
-                performance_elem = cal["performance"]
-                quality_elem = cal["quality"]
-                oee_elem = cal["oee"]
-                pareto_details_list[idx]["availability"] = availability_elem
-                pareto_details_list[idx]["performance"] = performance_elem
-                pareto_details_list[idx]["quality"] = quality_elem
-                pareto_details_list[idx]["oee"] = oee_elem
+
+            if len(calculation_by_job) == 1:
+                pareto_details_list[0]["available_time"] = available_time
+                pareto_details_list[0]["downtime"] = total_down
+                pareto_details_list[0]["availability"] = availability
+                pareto_details_list[0]["performance"] = performance
+                pareto_details_list[0]["quality"] = quality
+                pareto_details_list[0]["oee"] = oee
+            else:
+                for cal in calculation_by_job:
+                    job_elem = cal["job"]
+                    idx = jobs.index(job_elem)
+                    available_time_elem = cal["available_time"]
+                    downtime_elem = cal["downtime"]
+                    availability_elem = cal["availability"]
+                    performance_elem = cal["performance"]
+                    quality_elem = cal["quality"]
+                    oee_elem = cal["oee"]
+                    pareto_details_list[idx]["available_time"] = available_time_elem
+                    pareto_details_list[idx]["downtime"] = downtime_elem
+                    pareto_details_list[idx]["availability"] = availability_elem
+                    pareto_details_list[idx]["performance"] = performance_elem
+                    pareto_details_list[idx]["quality"] = quality_elem
+                    pareto_details_list[idx]["oee"] = oee_elem
 
             return render(self.request,
                           template_name='gemba/pareto.html',
@@ -1158,6 +1178,16 @@ def final_oee_calculation_by_job(pareto):
 
     len_pareto_details_qs = len(pareto_details_qs)
     if len_pareto_details_qs == 1:
+        job = pareto_details_qs[0].job
+        calculation.append({
+            "job": job,
+            "available_time": 0,
+            "downtime": 0,
+            "availability": 0.00,
+            "performance": 0.00,
+            "quality": 0.00,
+            "oee": 0.00,
+        })
         return calculation
 
     prev_finished = time_stamp
@@ -1210,6 +1240,7 @@ def final_oee_calculation_by_job(pareto):
         calculation.append({
             "job": job,
             "available_time": available_time,
+            "downtime": downtime,
             "availability": availability,
             "performance": performance,
             "quality": quality,
@@ -1263,6 +1294,12 @@ def before_close_pareto(request):
     scrap = calculation["scrap"]
     rework = calculation["rework"]
     scrap_compare = output - good - scrap
+
+    if len(calculation_by_job) == 1:
+        calculation_by_job[0]["availability"] = availability
+        calculation_by_job[0]["performance"] = performance
+        calculation_by_job[0]["quality"] = quality
+        calculation_by_job[0]["oee"] = oee
 
     return render(request,
                   template_name='gemba/pareto_before_close.html',

@@ -37,7 +37,7 @@
                 <td>{{ object.quality }}%</td>
                 <td>{{ object.oee }}%</td>
                 <td>{{ object.takt_time }}</td>
-                <td>{{ object.pareto_id }}</td>
+                <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pareto_id %}">{{ object.pareto_id }}</a></td>
                 <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
             </tr>
         {% endfor %}

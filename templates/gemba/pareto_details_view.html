@@ -16,6 +16,10 @@
                 <th scope="col">Good</th>
                 <th scope="col">Rework Good</th>
                 <th scope="col">Scrap</th>
+                <th scope="col">A</th>
+                <th scope="col">P</th>
+                <th scope="col">Q</th>
+                <th scope="col">OEE</th>
                 <th scope="col">Takt time</th>
                 <th scope="col">Operators</th>
                 <th scope="col">Pareto ID</th>
@@ -32,9 +36,13 @@
                 <td>{{ object.good }}</td>
                 <td>{{ object.rework }}</td>
                 <td>{{ object.scrap }}</td>
+                <td>{{ object.availability }}%</td>
+                <td>{{ object.performance }}%</td>
+                <td>{{ object.quality }}%</td>
+                <td>{{ object.oee }}%</td>
                 <td>{{ object.takt_time }}</td>
                 <td>{{ object.ops }}</td>
-                <td>{{ object.pareto_id }}</td>
+                <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pareto_id %}">{{ object.pareto_id }}</a></td>
                 <td>{{ object.pareto_date|date:"d-m-Y" }}</td>
             </tr>
         {% endfor %}

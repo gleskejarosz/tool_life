@@ -84,6 +84,8 @@
             <th scope="col" class="central_pos">Takt time</th>
             <th scope="col" class="central_pos">OPs</th>
             <th scope="col" class="central_pos">Last Entry</th>
+            <th scope="col" class="central_pos">A Time</th>
+            <th scope="col" class="central_pos">D Time</th>
             <th scope="col" class="central_pos">A</th>
             <th scope="col" class="central_pos">P</th>
             <th scope="col" class="central_pos">Q</th>
@@ -114,6 +116,8 @@
             <td class="central_pos">{{ pareto_item.ops }}</td>
             <td class="central_pos"><a href="{% url 'gemba_app:finished-update-view' pk=pareto_item.id %}">
                 {{ pareto_item.finished|date:"H:i" }}</a></td>
+            <td class="central_pos">{{ pareto_item.available_time }}</td>
+            <td class="central_pos">{{ pareto_item.downtime }}</td>
             <td class="central_pos">{{ pareto_item.availability }}%</td>
             <td class="central_pos">{{ pareto_item.performance }}%</td>
             <td class="central_pos">{{ pareto_item.quality }}%</td>
@@ -124,8 +128,8 @@
         <tr>
             <td> <b>Total</b> </td>
             <td class="central_pos"> <b>{{ total_output }}</b> </td>
-            <td class="central_pos"> <b>{{ total_good }}({{ total_rework }})</b> </td>
-            <td> </td>
+            <td class="central_pos"> <b>{{ total_good }}</b> </td>
+            <td class="central_pos"><b>{{ total_rework }}</b></td>
             <td> </td>
             <td> </td>
             <td class="central_pos"> <b>{{ total_scrap_cal }}</b> </td>
