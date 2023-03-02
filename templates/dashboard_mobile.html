@@ -3,6 +3,66 @@
 {% load widget_tweaks %}
 {% load mathfilters %}
 {% load static %}
+<h4>Monthly line production summary - {{ year }}</h4>
+        <div>
+            <form method="get">
+                <div class="well">
+                  <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
+                  <div class="row">
+                    <div class="form-group col-sm-4 col-md-3">
+                      {{ filter.form.month.label_tag }}
+                      {% render_field filter.form.month class="form-control" %}
+                    </div>
+                    <div class="form-group col-sm-4 col-md-3">
+                      {{ filter.form.line.label_tag }}
+                      {% render_field filter.form.line class="form-control" %}
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-search"></span> Search
+                  </button>
+                </div>
+            </form>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Month</th>
+                                <th scope="col">Line</th>
+                                <th scope="col">Total Output</th>
+                                <th scope="col">Total Good</th>
+                                <th scope="col">Total Scrap</th>
+                                <th scope="col">Total Rework</th>
+                                <th scope="col">Total Available Time</th>
+                                <th scope="col">Average Availability</th>
+                                <th scope="col">Average Performance</th>
+                                <th scope="col">Average Quality</th>
+                                <th scope="col">Average OEE</th>
+                                <th scope="col">Target</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for object in filter.qs %}
+                                <tr>
+                                    <td>{{ object.month }}</td>
+                                    <td>{{ object.line }}</td>
+                                    <td>{{ object.total_output }}</td>
+                                    <td>{{ object.total_good }}</td>
+                                    <td>{{ object.total_scrap }}</td>
+                                    <td>{{ object.total_rework }}</td>
+                                    <td>{{ object.total_available_time }}</td>
+                                    <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
+                                    <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
+                                    <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
+                                    <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
+                                    <td>{% if object.line.target < object.total_oee|div:object.counter %}&uarr;
+                                        {% elif object.line.target|sub:5 > object.total_oee|div:object.counter %}&darr;
+                                        {% else %}&#8275;{% endif %}{{ object.line.target }}%
+                                     </td>
+                                </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+        </div>
 <div class="container">
         <div class="row">
             <div class="card h-100 border-start-lg border-start-primary">
@@ -100,90 +160,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div>
-        <h4>Monthly line production summary - {{ year }}</h4>
-        <div class="middle-dashboard">
-            <form method="get">
-                <div class="well">
-                  <p><a href="{% url 'gemba_app:dashboard' %}">Clear all filters</a></p>
-                  <div class="row">
-                    <div class="form-group col-sm-4 col-md-3">
-                      {{ filter.form.month.label_tag }}
-                      {% render_field filter.form.month class="form-control" %}
-                    </div>
-                    <div class="form-group col-sm-4 col-md-3">
-                      {{ filter.form.line.label_tag }}
-                      {% render_field filter.form.line class="form-control" %}
-                    </div>
-                  </div>
-                  <button type="submit" class="btn btn-primary">
-                    <span class="glyphicon glyphicon-search"></span> Search
-                  </button>
-                </div>
-            </form>
-        <div class="row">
-            {% for object in filter.qs %}
-            <div class="card h-100 border-start-lg border-start-dark">
-                <div class="card-body">
-                    <div class="h6"> {{ object.month }}-{{ object.line }}</div>
-                    <table class="small-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Month</th>
-                                <th scope="col">Line</th>
-                                <th scope="col">Total Output</th>
-                                <th scope="col">Total Good</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                                <tr>
-                                    <td>{{ object.month }}</td>
-                                    <td>{{ object.line }}</td>
-                                    <td>{{ object.total_output }}</td>
-                                    <td>{{ object.total_good }}</td>
-                                </tr>
-                        </tbody>
-                        <thead>
-                            <tr>
-                                <th scope="col">Total Scrap</th>
-                                <th scope="col">Total Rework</th>
-                                <th scope="col">Total Available Time</th>
-                                <th scope="col">Average Availability</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{{ object.total_scrap }}</td>
-                                <td>{{ object.total_rework }}</td>
-                                <td>{{ object.total_available_time }}</td>
-                                <td>{{ object.total_availability|div:object.counter|floatformat:"2" }}%</td>
-                            </tr>
-                        </tbody>
-                        <thead>
-                            <tr>
-                                <th scope="col">Average Performance</th>
-                                <th scope="col">Average Quality</th>
-                                <th scope="col">Average OEE</th>
-                                <th scope="col">Target</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>{{ object.total_performance|div:object.counter|floatformat:"2" }}%</td>
-                                <td>{{ object.total_quality|div:object.counter|floatformat:"2" }}%</td>
-                                <td>{{ object.total_oee|div:object.counter|floatformat:"2" }}%</td>
-                                <td>{% if object.line.target < object.total_oee|div:object.counter %}&uarr;
-                                        {% elif object.line.target|sub:5 > object.total_oee|div:object.counter %}&darr;
-                                        {% else %}&#8275;{% endif %}{{ object.line.target }}%
-                                </td>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
         <div class="row">
             <div class="card h-100 border-end-lg border-end-blue">
                 <div class="card-body">
