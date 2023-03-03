@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 {% block content %}
-<h4>Downtime in a week:</h4>
+<h4>{{ line_name }}: {{ scrap_code }} - {{ scrap_description }} in a W/C {{ monday|date:'d-m-y' }}</h4>
 
 <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Minutes</th>
+            <th scope="col">Qty</th>
             <th scope="col">Job</th>
             <th scope="col">Pareto ID</th>
             <th scope="col">Pareto Date</th>
         </tr>
         </thead>
         <tbody>
-        {% for object in down_qs %}
+        {% for object in scrap_qs %}
             <tr>
-                <td>{{ object.minutes }}</td>
+                <td>{{ object.qty }}</td>
                 <td>{{ object.job }}</td>
                 <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pareto_id %}">{{ object.pareto_id }}</a></td>
                 <td>{{ object.pareto_date }}</td>

@@ -80,13 +80,15 @@ urlpatterns = [
     path("lines_2/", views_report.lines_2, name="lines-2"),
     path("downtime_rate_report/<line_id>/", views_report.downtime_rate_report_by_week, name="downtime-rate-report"),
     path("display_downtime_in_a_week/<line_id>/<week_no>/<down_id>/", views_report.display_downtime_in_a_week,
-         name="display_downtime_in_a_week"),
+         name="display-downtime-in-a-week"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("scrap_search_result/", staff_member_required(views.ScrapSearchResultsView.as_view()),
          name="scrap-search-result"),
     path("lines/", views_report.lines, name="lines"),
     path("scrap_rate_report/<line_id>/", views_report.scrap_rate_report_by_week, name="scrap-rate-report"),
+    path("display_scrap_in_a_week/<line_id>/<week_no>/<scrap_id>/", views_report.display_scrap_in_a_week,
+         name="display-scrap-in-a-week"),
     # downtimes & scrap report
     path("report_choices/", views.report_choices, name="report-choices"),
     path("scrap_downtime_compare/", views.scrap_downtime_compare, name="scrap-downtime-compare"),

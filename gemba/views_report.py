@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 from gemba.filters import MonthlyResultFilter
 from gemba.models import MonthlyResults, Pareto, Line, PRODUCTIVE, AM, PM, NS, ParetoDetail, DowntimeUser, ScrapUser, \
-    DowntimeDetail, ScrapDetail, DowntimeModel
+    DowntimeDetail, ScrapDetail, DowntimeModel, ScrapModel
 from gemba.views import mobile_browser_check
 
 
@@ -593,27 +593,38 @@ def scrap_rate_report_by_week(request, line_id):
     scrap_row_qty = []
     for obj in scrap_names_qs:
         scrap_name = obj.scrap.description
+        scrap_id = obj.scrap.id
         scrap_list.append(scrap_name)
         scrap_row_qty.append(0)
 
         report.append({
             "scrap": scrap_name,
+            "scrap_id": scrap_id,
+            "week_0": 8,
             "qty_0": 0,
             "scrap_rate_0": 0.00,
+            "week_1": 7,
             "qty_1": 0,
             "scrap_rate_1": 0.00,
+            "week_2": 6,
             "qty_2": 0,
             "scrap_rate_2": 0.00,
+            "week_3": 5,
             "qty_3": 0,
             "scrap_rate_3": 0.00,
+            "week_4": 4,
             "qty_4": 0,
             "scrap_rate_4": 0.00,
+            "week_5": 3,
             "qty_5": 0,
             "scrap_rate_5": 0.00,
+            "week_6": 2,
             "qty_6": 0,
             "scrap_rate_6": 0.00,
+            "week_7": 1,
             "qty_7": 0,
             "scrap_rate_7": 0.00,
+            "week_8": 0,
             "qty_8": 0,
             "scrap_rate_8": 0.00,
             "total": 0,
@@ -782,6 +793,7 @@ def scrap_rate_report_by_week(request, line_id):
         context={
             "report": new_report,
             "totals": totals,
+            "line_id": line_id,
         },
     )
 
@@ -797,27 +809,38 @@ def downtime_rate_report_by_week(request, line_id):
     down_row_qty = []
     for obj in down_names_qs:
         down_name = obj.downtime.description
+        down_id = obj.downtime.id
         down_list.append(down_name)
         down_row_qty.append(0)
 
         report.append({
             "down": down_name,
+            "down_id": down_id,
+            "week_0": 8,
             "qty_0": 0,
             "down_rate_0": 0.00,
+            "week_1": 7,
             "qty_1": 0,
             "down_rate_1": 0.00,
+            "week_2": 6,
             "qty_2": 0,
             "down_rate_2": 0.00,
+            "week_3": 5,
             "qty_3": 0,
             "down_rate_3": 0.00,
+            "week_4": 4,
             "qty_4": 0,
             "down_rate_4": 0.00,
+            "week_5": 3,
             "qty_5": 0,
             "down_rate_5": 0.00,
+            "week_6": 2,
             "qty_6": 0,
             "down_rate_6": 0.00,
+            "week_7": 1,
             "qty_7": 0,
             "down_rate_7": 0.00,
+            "week_8": 0,
             "qty_8": 0,
             "down_rate_8": 0.00,
             "total": 0,
@@ -959,14 +982,14 @@ def downtime_rate_report_by_week(request, line_id):
         total_all_uptime += total_uptime
 
         # counting downtime rate
-        key_scrap = "down_rate_" + str(week_num)
+        key_down = "down_rate_" + str(week_num)
         for idx, elem in enumerate(report):
             down_qty = elem[key_qty]
             if total_available_time == 0:
                 down_rate = 0
             else:
                 down_rate = round((down_qty / total_available_time) * 100, ndigits=2)
-            elem[key_scrap] = down_rate
+            elem[key_down] = down_rate
 
         # counting weekly uptime rate
         key_rate = "uptime_rate_" + str(week_num)
@@ -1021,25 +1044,66 @@ def downtime_rate_report_by_week(request, line_id):
         context={
             "report": new_report,
             "totals": totals,
+            "line_id": line_id,
         },
     )
 
 
 def display_downtime_in_a_week(request, line_id, week_no, down_id):
+    line = Line.objects.get(id=line_id)
+    line_name = line.name
+    down = DowntimeModel.objects.get(id=down_id)
+    down_code = down.code
+    down_description = down.description
+
     today = datetime.now(tz=pytz.UTC).date()
     this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
 
     start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
     end_sunday = start_sunday + timedelta(days=7)
+    monday = start_sunday + timedelta(days=1)
 
     down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
                                             line=line_id).filter(downtime=down_id)
 
     return render(
         request,
-        template_name="gemba/display_downtimes_in_a_week.html",
+        template_name="gemba/display_downtime_in_a_week.html",
         context={
             "down_qs": down_qs,
+            "line_name": line_name,
+            "down_code": down_code,
+            "down_description": down_description,
+            "monday": monday,
         },
     )
 
+
+def display_scrap_in_a_week(request, line_id, week_no, scrap_id):
+    line = Line.objects.get(id=line_id)
+    line_name = line.name
+    scrap = ScrapModel.objects.get(id=scrap_id)
+    scrap_code = scrap.code
+    scrap_description = scrap.description
+
+    today = datetime.now(tz=pytz.UTC).date()
+    this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+
+    start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
+    end_sunday = start_sunday + timedelta(days=7)
+    monday = start_sunday + timedelta(days=1)
+
+    scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
+                                          line=line_id).filter(scrap=scrap_id)
+
+    return render(
+        request,
+        template_name="gemba/display_scrap_in_a_week.html",
+        context={
+            "scrap_qs": scrap_qs,
+            "line_name": line_name,
+            "scrap_code": scrap_code,
+            "scrap_description": scrap_description,
+            "monday": monday,
+        },
+    )
