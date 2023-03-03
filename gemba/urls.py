@@ -79,6 +79,8 @@ urlpatterns = [
          name="search-result"),
     path("lines_2/", views_report.lines_2, name="lines-2"),
     path("downtime_rate_report/<line_id>/", views_report.downtime_rate_report_by_week, name="downtime-rate-report"),
+    path("display_downtime_in_a_week/<line_id>/<week_no>/<down_id>/", views_report.display_downtime_in_a_week,
+         name="display_downtime_in_a_week"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("scrap_search_result/", staff_member_required(views.ScrapSearchResultsView.as_view()),

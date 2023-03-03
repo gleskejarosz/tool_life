@@ -14,6 +14,20 @@
 
         }
 </script>
+<style>
+    .job-color {
+    background-color: rgba(132, 245, 39, 0.03);
+    }
+    .down-color {
+    background-color: rgba(245, 97, 39, 0.03);
+    }
+    .scrap-color {
+    background-color: rgba(39, 149, 245, 0.03);
+    }
+    .extra-border {
+    border: 2px solid grey;
+    }
+</style>
 {% endblock scripts %}
 
 {% block content %}
@@ -22,7 +36,7 @@
 <br/>
 
 <table class="mytable">
-    <thead>
+    <thead class="extra-border">
         <tr>
             <th scope="col">Day</th>
             <th scope="col" style="text-align: center;">{% if shift == "Night shift" %} Sunday {% else %}
@@ -41,7 +55,7 @@
                 Sunday {% endif %}</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="extra-border">
         {% for elem in report|slice:"0:6" %}
         <tr>
             <th scope="row">{{ elem.col0 }}</th>
@@ -55,45 +69,45 @@
         </tr>
         {% endfor %}
     </tbody>
-    <tbody>
+    <tbody class="extra-border">
         {% for elem in report|slice:jobs_idx%}
         <tr>
-            <th scope="row">{{ elem.col0 }}</th>
-            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }}{% endif %}</td>
-            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }}{% endif %}</td>
-            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }}{% endif %}</td>
-            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }}{% endif %}</td>
-            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }}{% endif %}</td>
-            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }}{% endif %}</td>
-            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }}{% endif %}</td>
+            <th scope="row" class="job-color">{{ elem.col0 }}</th>
+            <td class="job-color">{% if elem.col1 == 0 %} {% elif elem.col1 > 0 %}{{ elem.col1 }} parts {% else %}<b>{{ elem.col1 }}</b>{% endif %}</td>
+            <td class="job-color">{% if elem.col2 == 0 %} {% elif elem.col2 > 0 %}{{ elem.col2 }} parts {% else %}<b>{{ elem.col2 }}</b>{% endif %}</td>
+            <td class="job-color">{% if elem.col3 == 0 %} {% elif elem.col3 > 0 %}{{ elem.col3 }} parts {% else %}<b>{{ elem.col3 }}</b>{% endif %}</td>
+            <td class="job-color">{% if elem.col4 == 0 %} {% elif elem.col4 > 0 %}{{ elem.col4 }} parts {% else %}<b>{{ elem.col4 }}</b>{% endif %}</td>
+            <td class="job-color">{% if elem.col5 == 0 %} {% elif elem.col5 > 0 %}{{ elem.col5 }} parts {% else %}<b>{{ elem.col5 }}</b>{% endif %}</td>
+            <td class="job-color">{% if elem.col6 == 0 %} {% elif elem.col6 > 0 %}{{ elem.col6 }} parts {% else %}<b>{{ elem.col6 }}</b>{% endif %}</td>
+            <td class="job-color">{% if elem.col7 == 0 %} {% elif elem.col7 > 0 %}{{ elem.col7 }} parts {% else %}<b>{{ elem.col7 }}</b>{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>
-    <tbody>
+    <tbody class="extra-border">
         {% for elem in report|slice:down_idx%}
         <tr>
-            <th scope="row">{{ elem.col0 }}</th>
-            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }} min{% endif %}</td>
-            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }} min{% endif %}</td>
-            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }} min{% endif %}</td>
-            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }} min{% endif %}</td>
-            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }} min{% endif %}</td>
-            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }} min{% endif %}</td>
-            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }} min{% endif %}</td>
+            <th scope="row" class="down-color">{{ elem.col0 }}</th>
+            <td class="down-color">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }} min{% endif %}</td>
+            <td class="down-color">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }} min{% endif %}</td>
+            <td class="down-color">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }} min{% endif %}</td>
+            <td class="down-color">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }} min{% endif %}</td>
+            <td class="down-color">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }} min{% endif %}</td>
+            <td class="down-color">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }} min{% endif %}</td>
+            <td class="down-color">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }} min{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>
-    <tbody>
+    <tbody class="extra-border">
         {% for elem in report|slice:scrap_idx%}
         <tr>
-            <th scope="row">{{ elem.col0 }}</th>
-            <td>{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }} parts{% endif %}</td>
-            <td>{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }} parts{% endif %}</td>
-            <td>{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }} parts{% endif %}</td>
-            <td>{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }} parts{% endif %}</td>
-            <td>{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }} parts{% endif %}</td>
-            <td>{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }} parts{% endif %}</td>
-            <td>{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }} parts{% endif %}</td>
+            <th scope="row" class="scrap-color">{{ elem.col0 }}</th>
+            <td class="scrap-color">{% if elem.col1 == 0 %} {% else %}{{ elem.col1 }} parts{% endif %}</td>
+            <td class="scrap-color">{% if elem.col2 == 0 %} {% else %}{{ elem.col2 }} parts{% endif %}</td>
+            <td class="scrap-color">{% if elem.col3 == 0 %} {% else %}{{ elem.col3 }} parts{% endif %}</td>
+            <td class="scrap-color">{% if elem.col4 == 0 %} {% else %}{{ elem.col4 }} parts{% endif %}</td>
+            <td class="scrap-color">{% if elem.col5 == 0 %} {% else %}{{ elem.col5 }} parts{% endif %}</td>
+            <td class="scrap-color">{% if elem.col6 == 0 %} {% else %}{{ elem.col6 }} parts{% endif %}</td>
+            <td class="scrap-color">{% if elem.col7 == 0 %} {% else %}{{ elem.col7 }} parts{% endif %}</td>
         </tr>
         {% endfor %}
     </tbody>

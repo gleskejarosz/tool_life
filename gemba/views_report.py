@@ -6,7 +6,7 @@ from django.shortcuts import render
 
 from gemba.filters import MonthlyResultFilter
 from gemba.models import MonthlyResults, Pareto, Line, PRODUCTIVE, AM, PM, NS, ParetoDetail, DowntimeUser, ScrapUser, \
-    DowntimeDetail, ScrapDetail
+    DowntimeDetail, ScrapDetail, DowntimeModel
 from gemba.views import mobile_browser_check
 
 
@@ -149,7 +149,7 @@ def weekly_report_by_line(request):
     for num in range(7):
         day = num + 1
         col = "col" + str(day)
-        report[0][col] = display_date.date().strftime("%d-%m-%Y")
+        report[0][col] = display_date.date().strftime("%d-%m-%y")
         display_date += timedelta(days=1)
 
     for num in range(5):
@@ -179,7 +179,7 @@ def weekly_report_by_line(request):
                 idx += 1
         col = "col" + str(idx)
         available_time = int(obj.hours) * 60
-        report[1][col] = available_time
+        report[1][col] = str(available_time) + " min"
         availability = obj.availability
         report[2][col] = str(availability) + "%"
         performance = obj.performance
@@ -771,11 +771,16 @@ def scrap_rate_report_by_week(request, line_id):
         all_scrap_rate = round((total_all_weeks / total_all_output) * 100, ndigits=2)
     totals["all_scrap_rate"] = all_scrap_rate
 
+    new_report = []
+    for elem in report:
+        if elem["total"] != 0:
+            new_report.append(elem)
+
     return render(
         request,
         template_name="gemba/scrap_rate.html",
         context={
-            "report": report,
+            "report": new_report,
             "totals": totals,
         },
     )
@@ -816,7 +821,7 @@ def downtime_rate_report_by_week(request, line_id):
             "qty_8": 0,
             "down_rate_8": 0.00,
             "total": 0,
-            "total_scrap_rate": 0.00,
+            "total_down_rate": 0.00,
         })
 
     totals = {
@@ -1005,11 +1010,36 @@ def downtime_rate_report_by_week(request, line_id):
         all_down_rate = round((total_all_weeks / total_all_output) * 100, ndigits=2)
     totals["all_down_rate"] = all_down_rate
 
+    new_report = []
+    for elem in report:
+        if elem["total"] != 0:
+            new_report.append(elem)
+
     return render(
         request,
         template_name="gemba/downtime_rate.html",
         context={
-            "report": report,
+            "report": new_report,
             "totals": totals,
         },
     )
+
+
+def display_downtime_in_a_week(request, line_id, week_no, down_id):
+    today = datetime.now(tz=pytz.UTC).date()
+    this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+
+    start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
+    end_sunday = start_sunday + timedelta(days=7)
+
+    down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
+                                            line=line_id).filter(downtime=down_id)
+
+    return render(
+        request,
+        template_name="gemba/display_downtimes_in_a_week.html",
+        context={
+            "down_qs": down_qs,
+        },
+    )
+

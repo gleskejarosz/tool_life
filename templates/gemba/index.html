@@ -13,6 +13,7 @@
         <p><a href="{% url 'gemba_app:quarantine-view' %}">Quarantine View</a></p>
         </br>
         {% if user.is_superuser %}
+        <p><a href="{% url 'gemba_app:display_downtime_in_a_week' line_id=1 week_no=6 down_id=28 %}">Downtime in a week</a></p>
         <p><a href="{% url 'gemba_app:export-job-model-csv' %}">Export Job Model to csv</a></p>
         <p><a href="{% url 'gemba_app:export-job-model-xls' %}">Export Job Model to xls</a></p>
         <p><a href="{% url 'gemba_app:update-database' %}">Update Many to Many field</a></p>
