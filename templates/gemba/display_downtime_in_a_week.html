@@ -5,20 +5,34 @@
 <table class="table table-hover">
         <thead>
         <tr>
-            <th scope="col">Minutes</th>
-            <th scope="col">Job</th>
             <th scope="col">Pareto ID</th>
+            <th scope="col">Minutes</th>
+            <th scope="col">Detailed Downtime Rate</th>
+            <th scope="col">Overall Downtime Rate</th>
+            <th scope="col">Job</th>
             <th scope="col">Pareto Date</th>
         </tr>
         </thead>
         <tbody>
-        {% for object in down_qs %}
+        {% for object in report %}
             <tr>
-                <td>{{ object.minutes }}</td>
-                <td>{{ object.job }}</td>
                 <td><a href="{% url 'gemba_app:pareto-detail-view' pk=object.pareto_id %}">{{ object.pareto_id }}</a></td>
+                <td>{{ object.minutes }} min</td>
+                <td>{{ object.down_rate_1 }}%</td>
+                <td>{{ object.down_rate_2 }}%</td>
+                <td>{{ object.job }}</td>
                 <td>{{ object.pareto_date }}</td>
-           {% endfor %}
+            </tr>
+        {% endfor %}
+        {% for object in total %}
+            <tr>
+                <td></td>
+                <td><b>{{ object.minutes }} min</b></td>
+                <td><b>{{ object.down_rate_1 }}%</b></td>
+                <td><b>{{ object.down_rate_2 }}%</b></td>
+                <td></td>
+                <td></td>
+        {% endfor %}
             </tr>
         </tbody>
     </table>
