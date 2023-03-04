@@ -51,39 +51,6 @@ def dashboard(request):
         )
 
 
-def test_page(request):
-    today = datetime.now(tz=pytz.UTC)
-    yesterday = today - timedelta(days=1)
-    year = today.strftime('%Y')
-    month = today.strftime('%B')
-
-    # monthly report of average oee elements
-    monthly_records_qs = MonthlyResults.objects.filter(year=year).order_by("-id", "line")
-    items_filter = MonthlyResultFilter(request.GET, queryset=monthly_records_qs)
-
-    # the best oee result from the day before
-    paretos = Pareto.objects.filter(pareto_date=yesterday).order_by("-oee")[:5]
-
-    produced = ParetoDetail.objects.all().order_by("-created")[:5]
-    downtimes_qs = DowntimeDetail.objects.all().order_by("-created")[:5]
-    scrap_qs = ScrapDetail.objects.all().order_by("-created")[:5]
-
-    context = {
-        "filter": items_filter,
-        "produced": produced,
-        "downtimes": downtimes_qs,
-        "scraps": scrap_qs,
-        "year": year,
-        "paretos": paretos,
-        "yesterday": yesterday,
-    }
-    return render(
-        request,
-        template_name='gemba/test_page.html',
-        context=context,
-    )
-
-
 @staff_member_required
 def report_choices_3(request):
     lines_qs = Line.objects.filter(line_status=PRODUCTIVE).order_by("name")
@@ -99,22 +66,8 @@ def report_choices_3(request):
     )
 
 
-@staff_member_required
-def weekly_report_by_line(request):
-    line_name = request.GET.get("Line")
-    if line_name is None:
-        line_qs = Line.objects.all()
-        line_id = line_qs[0]
-    else:
-        line_qs = Line.objects.filter(name=line_name)
-        line_id = line_qs[0]
-
-    day_str = request.GET.get("day") + " 21:45:00"
-    shift = request.GET.get("Shift")
-
-    day_object = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
-
-    week_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
+def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
+    week_sunday = base_sunday - timedelta(days=idx_diff * 7)
     next_sunday = week_sunday + timedelta(days=7)
 
     this_week_sunday = week_sunday
@@ -318,12 +271,53 @@ def weekly_report_by_line(request):
     down_idx = str(row) + ":" + str(report_len)
     down_len = str(report_len - row)
     scrap_idx = str(report_len) + ":"
+
+    return {
+        "report": report,
+        "line_id": line_id,
+        "this_week_sunday": this_week_sunday,
+        "shift": shift,
+        "jobs_idx": jobs_idx,
+        "down_idx": down_idx,
+        "down_len": down_len,
+        "scrap_idx": scrap_idx,
+    }
+
+
+@staff_member_required
+def weekly_report_by_line(request):
+    line_name = request.GET.get("Line")
+    if line_name is None:
+        line_qs = Line.objects.all()
+        line_id = line_qs[0].id
+    else:
+        line_qs = Line.objects.filter(name=line_name)
+        line_id = line_qs[0].id
+
+    day_str = request.GET.get("day") + " 21:45:00"
+    shift = request.GET.get("Shift")
+
+    day_object = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
+    base_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
+
+    idx_diff = 0
+
+    calculation = calculation_weekly_report(line_id=line_id, base_sunday=base_sunday, shift=shift, idx_diff=idx_diff)
+
+    this_week_sunday = calculation["this_week_sunday"]
+    jobs_idx = calculation["jobs_idx"]
+    down_idx = calculation["down_idx"]
+    down_len = calculation["down_len"]
+    scrap_idx = calculation["scrap_idx"]
+    report = calculation["report"]
+
     return render(
         request,
         template_name="gemba/weekly_report_by_line.html",
         context={
             "report": report,
             "line_name": line_name,
+            "line_id": line_id,
             "this_week_sunday": this_week_sunday,
             "shift": shift,
             "jobs_idx": jobs_idx,
@@ -335,6 +329,69 @@ def weekly_report_by_line(request):
 
 
 @staff_member_required
+def previous_weekly_report(request, line_id, base_sunday, shift):
+    line = Line.objects.get(id=line_id)
+    line_name = line.name
+    idx_diff = 1
+
+    day_object = datetime.strptime(base_sunday, '%Y-%m-%d %H:%M:%S')
+    calculation = calculation_weekly_report(line_id=line_id, base_sunday=day_object, shift=shift, idx_diff=idx_diff)
+
+    this_week_sunday = calculation["this_week_sunday"]
+    jobs_idx = calculation["jobs_idx"]
+    down_idx = calculation["down_idx"]
+    down_len = calculation["down_len"]
+    scrap_idx = calculation["scrap_idx"]
+    report = calculation["report"]
+
+    return render(
+        request,
+        template_name="gemba/weekly_report_by_line.html",
+        context={
+            "report": report,
+            "line_name": line_name,
+            "line_id": line_id,
+            "this_week_sunday": this_week_sunday,
+            "shift": shift,
+            "jobs_idx": jobs_idx,
+            "down_idx": down_idx,
+            "down_len": down_len,
+            "scrap_idx": scrap_idx,
+        },
+    )
+
+
+@staff_member_required
+def next_weekly_report(request, line_id, base_sunday, shift):
+    line = Line.objects.get(id=line_id)
+    line_name = line.name
+    idx_diff = -1
+
+    day_object = datetime.strptime(base_sunday, '%Y-%m-%d %H:%M:%S')
+    calculation = calculation_weekly_report(line_id=line_id, base_sunday=day_object, shift=shift, idx_diff=idx_diff)
+
+    this_week_sunday = calculation["this_week_sunday"]
+    jobs_idx = calculation["jobs_idx"]
+    down_idx = calculation["down_idx"]
+    down_len = calculation["down_len"]
+    scrap_idx = calculation["scrap_idx"]
+    report = calculation["report"]
+
+    return render(
+        request,
+        template_name="gemba/weekly_report_by_line.html",
+        context={
+            "report": report,
+            "line_name": line_name,
+            "line_id": line_id,
+            "this_week_sunday": this_week_sunday,
+            "shift": shift,
+            "jobs_idx": jobs_idx,
+            "down_idx": down_idx,
+            "down_len": down_len,
+            "scrap_idx": scrap_idx,
+        },
+    )
 
 
 @staff_member_required

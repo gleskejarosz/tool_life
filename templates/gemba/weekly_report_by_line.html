@@ -33,8 +33,10 @@
 {% block content %}
 <h4>Pareto Weekly Compare Report</h4>
 <h5>{{ line_name }} - {{ shift }} </h5>
-<br/>
-
+<a href="{% url 'gemba_app:previous-weekly-report' line_id=line_id base_sunday=this_week_sunday shift=shift %}">
+    <<<- Previous </a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'gemba_app:next-weekly-report' line_id=line_id base_sunday=this_week_sunday shift=shift %}">
+    Next ->>></a></br>
 <table class="mytable">
     <thead class="extra-border">
         <tr>

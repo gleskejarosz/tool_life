@@ -63,10 +63,13 @@ urlpatterns = [
     path("report_choices_2/", views.report_choices_2, name="report-choices-2"),
     path("paretos_view/", views.paretos_view, name="paretos-view"),
     path("paretos_view_choices/<line>/<date_from>/<date_to>/", views.paretos_view_choices, name="paretos-view-choices"),
-
+    # weekly report
     path("report_choices_3/", views_report.report_choices_3, name="report-choices-3"),
     path("weekly_report_by_line/", views_report.weekly_report_by_line, name="weekly-report-by-line"),
-
+    path("previous_weekly_report/<line_id>/<base_sunday>/<shift>/", views_report.previous_weekly_report,
+         name="previous-weekly-report"),
+    path("next_weekly_report/<line_id>/<base_sunday>/<shift>/", views_report.next_weekly_report,
+         name="next-weekly-report"),
     # produced report
     path("pareto_produced_details/", views.pareto_details_view, name="pareto-details"),
     path("pareto_details_search_result/", staff_member_required(views.ParetoDetailsSearchResultsView.as_view()),
@@ -123,5 +126,4 @@ urlpatterns = [
     path("update_database/", views_export.update_database_many_to_many_field, name="update-database"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
-    path("dashboard2/", views_report.test_page, name="dashboard2"),
     ]
