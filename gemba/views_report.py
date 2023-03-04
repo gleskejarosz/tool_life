@@ -335,241 +335,7 @@ def weekly_report_by_line(request):
 
 
 @staff_member_required
-def previous_weekly_report_by_line(request, line_name, this_week_sunday, shift):
-    # line_name = request.GET.get("Line")
-    if line_name is None:
-        line_qs = Line.objects.all()
-        line_id = line_qs[0]
-    else:
-        line_qs = Line.objects.filter(name=line_name)
-        line_id = line_qs[0]
 
-    print(line_name)
-    print(this_week_sunday)
-    print(shift)
-
-    # day_str = day + " 21:45:00"
-
-    # day_object = datetime.strptime(day_str, '%Y-%m-%d %H:%M:%S')
-
-    # week_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
-    week_sunday = this_week_sunday - timedelta(days=7)
-    next_sunday = this_week_sunday
-
-    pareto_qs = Pareto.objects.filter(pareto_date__gte=week_sunday,
-                                      pareto_date__lt=next_sunday).filter(line=line_id).order_by("id")
-    pareto_sun_qs = Pareto.objects.filter(pareto_date=week_sunday).exclude(shift=NS)
-    pareto_qs.difference(pareto_sun_qs)
-
-    pareto_shift_qs = []
-    for pareto_obj in pareto_qs:
-        shift_obj = pareto_obj.shift
-        if shift == shift_obj:
-            pareto_shift_qs.append(pareto_obj)
-
-    report = []
-    report.append({
-        "col0": "Date",
-        "col1": "",
-        "col2": "",
-        "col3": "",
-        "col4": "",
-        "col5": "",
-        "col6": "",
-        "col7": "",
-    })
-
-    if shift == NS:
-        display_date = week_sunday
-    else:
-        display_date = week_sunday + timedelta(days=1)
-
-    for num in range(7):
-        day = num + 1
-        col = "col" + str(day)
-        report[0][col] = display_date.date().strftime("%d-%m-%Y")
-        display_date += timedelta(days=1)
-
-    for num in range(5):
-        report.append({
-            "col0": "",
-            "col1": 0,
-            "col2": 0,
-            "col3": 0,
-            "col4": 0,
-            "col5": 0,
-            "col6": 0,
-            "col7": 0,
-        })
-
-    report[1]["col0"] = "Available time"
-    report[2]["col0"] = "Availability"
-    report[3]["col0"] = "Performance"
-    report[4]["col0"] = "Quality"
-    report[5]["col0"] = "OEE"
-
-    for obj in pareto_shift_qs:
-        idx = obj.pareto_date.weekday() + 1
-        if shift == NS:
-            if idx == 7:
-                idx -= 6
-            else:
-                idx += 1
-        col = "col" + str(idx)
-        available_time = int(obj.hours) * 60
-        report[1][col] = available_time
-        availability = obj.availability
-        report[2][col] = str(availability) + "%"
-        performance = obj.performance
-        report[3][col] = str(performance) + "%"
-        quality = obj.quality
-        report[4][col] = str(quality) + "%"
-        oee = obj.oee
-        report[5][col] = str(oee) + "%"
-
-    indexes = [0, 0, 0, 0, 0, 0, 0, 0]
-    max_index = 0
-    for obj in pareto_shift_qs:
-        for pos, pareto_detail in enumerate(obj.jobs.all()):
-            idx = obj.pareto_date.weekday() + 1
-            if shift == NS:
-                if idx == 7:
-                    idx -= 6
-                else:
-                    idx += 1
-            indexes[idx] += 1
-            col = "col" + str(idx)
-            index = max(indexes)
-            if max_index < index:
-                for n in range(5):
-                    report.append({
-                        "col0": "",
-                        "col1": 0,
-                        "col2": 0,
-                        "col3": 0,
-                        "col4": 0,
-                        "col5": 0,
-                        "col6": 0,
-                        "col7": 0,
-                    })
-            max_index = index
-            job = pareto_detail.job
-            report[6 + pos * 5]["col0"] = "Job"
-            report[6 + pos * 5][col] = job
-            output = pareto_detail.output
-            report[7 + pos * 5]["col0"] = "Output"
-            report[7 + pos * 5][col] = output
-            good = pareto_detail.good
-            report[8 + pos * 5]["col0"] = "Good"
-            report[8 + pos * 5][col] = good
-            scrap = pareto_detail.scrap
-            report[9 + pos * 5]["col0"] = "Scrap"
-            report[9 + pos * 5][col] = scrap
-            rework = pareto_detail.rework
-            report[10 + pos * 5]["col0"] = "Rework"
-            report[10 + pos * 5][col] = rework
-
-    downtimes_qs = DowntimeUser.objects.filter(line=line_id, order__gte=0).order_by("order")
-    downtimes_list = []
-    downtimes_sum = []
-
-    for downtime_elem in downtimes_qs:
-        downtime = downtime_elem.downtime.description
-        report.append({
-            "col0": downtime_elem.downtime,
-            "col1": 0,
-            "col2": 0,
-            "col3": 0,
-            "col4": 0,
-            "col5": 0,
-            "col6": 0,
-            "col7": 0,
-        })
-        downtimes_list.append(downtime)
-        downtimes_sum.append(0)
-
-    row = 5 + 5 * max_index + 1
-    for obj in pareto_shift_qs:
-        idx = obj.pareto_date.weekday() + 1
-        if shift == NS:
-            if idx == 7:
-                idx -= 6
-            else:
-                idx += 1
-        col = "col" + str(idx)
-        for down_detail in obj.downtimes.all():
-            down_desc = down_detail.downtime.description
-            minutes = down_detail.minutes
-            pos = downtimes_list.index(down_desc)
-            report[row + pos][col] += minutes
-            downtimes_sum[pos] += minutes
-
-    idx = 0
-    for down_elem in report[row:]:
-        if downtimes_sum[idx] == 0:
-            report.remove(down_elem)
-        idx += 1
-
-    report_len = len(report)
-
-    scraps_qs = ScrapUser.objects.filter(line=line_id, order__gte=0).order_by("order")
-    scraps_list = []
-    scraps_sum = []
-
-    for scrap_elem in scraps_qs:
-        scrap = scrap_elem.scrap.description
-        report.append({
-            "col0": scrap_elem.scrap,
-            "col1": 0,
-            "col2": 0,
-            "col3": 0,
-            "col4": 0,
-            "col5": 0,
-            "col6": 0,
-            "col7": 0,
-        })
-        scraps_list.append(scrap)
-        scraps_sum.append(0)
-
-    for obj in pareto_shift_qs:
-        idx = obj.pareto_date.weekday() + 1
-        if shift == NS:
-            if idx == 7:
-                idx -= 6
-            else:
-                idx += 1
-        col = "col" + str(idx)
-        for scrap_detail in obj.scrap.all():
-            scrap_desc = scrap_detail.scrap.description
-            qty = scrap_detail.qty
-            pos2 = scraps_list.index(scrap_desc)
-            report[report_len + pos2][col] += qty
-            scraps_sum[pos2] += qty
-
-    idx = 0
-    for scrap_elem in report[report_len:]:
-        if scraps_sum[idx] == 0:
-            report.remove(scrap_elem)
-        idx += 1
-
-    jobs_idx = "6:" + str(row)
-    down_idx = str(row) + ":" + str(report_len)
-    down_len = str(report_len - row)
-    scrap_idx = str(report_len) + ":"
-    return render(
-        request,
-        template_name="gemba/previous_weekly_report_by_line.html",
-        context={
-            "report": report,
-            "line_name": line_name,
-            "shift": shift,
-            "this_week_sunday": this_week_sunday,
-            "jobs_idx": jobs_idx,
-            "down_idx": down_idx,
-            "down_len": down_len,
-            "scrap_idx": scrap_idx,
-        },
-    )
 
 @staff_member_required
 def lines(request):
@@ -579,14 +345,27 @@ def lines(request):
 
 @staff_member_required
 def lines_2(request):
-    lines2_qs = Line.objects.all().order_by("name")
-    return render(request, "gemba/lines2.html", {"lines2_qs": lines2_qs})
+    lines_qs = Line.objects.all().order_by("name")
+    return render(request, "gemba/lines2.html", {"lines_qs": lines_qs})
 
 
 @staff_member_required
-def scrap_rate_report_by_week(request, line_id):
+def scrap_rate_report_by_week(request):
     # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+    line_name = request.GET.get("Line")
+    if line_name is None:
+        line_qs = Line.objects.all()
+        line_id = line_qs[0].id
+    else:
+        line_qs = Line.objects.filter(name=line_name)
+        line_id = line_qs[0].id
     report = []
+
+    base_day = request.GET.get("base_day")
+
+    if base_day == "":
+        base_day = datetime.now(tz=pytz.UTC)
+    day_object = datetime.strptime(base_day, '%Y-%m-%d')
 
     scrap_list = []
     scrap_names_qs = ScrapUser.objects.filter(line=line_id, order__gt=0).order_by("order")
@@ -678,8 +457,7 @@ def scrap_rate_report_by_week(request, line_id):
     range_list = [a for a in range(9)]
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
-        today = datetime.now(tz=pytz.UTC)
-        this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
@@ -794,13 +572,28 @@ def scrap_rate_report_by_week(request, line_id):
             "report": new_report,
             "totals": totals,
             "line_id": line_id,
+            "base_day": base_day,
         },
     )
 
 
 @staff_member_required
-def downtime_rate_report_by_week(request, line_id):
+def downtime_rate_report_by_week(request):
     # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+    line_name = request.GET.get("Line")
+    if line_name is None:
+        line_qs = Line.objects.all()
+        line_id = line_qs[0].id
+    else:
+        line_qs = Line.objects.filter(name=line_name)
+        line_id = line_qs[0].id
+
+    base_day = request.GET.get("base_day")
+
+    if base_day == "":
+        base_day = datetime.now(tz=pytz.UTC)
+    day_object = datetime.strptime(base_day, '%Y-%m-%d')
+
     report = []
 
     down_list = []
@@ -914,8 +707,7 @@ def downtime_rate_report_by_week(request, line_id):
     range_list = [a for a in range(9)]
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
-        today = datetime.now(tz=pytz.UTC)
-        this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+        this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=idx * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
@@ -1045,19 +837,20 @@ def downtime_rate_report_by_week(request, line_id):
             "report": new_report,
             "totals": totals,
             "line_id": line_id,
+            "base_day": base_day,
         },
     )
 
 
-def display_downtime_in_a_week(request, line_id, week_no, down_id):
+def display_downtime_in_a_week(request, line_id, base_day, week_no, down_id):
     line = Line.objects.get(id=line_id)
     line_name = line.name
     down = DowntimeModel.objects.get(id=down_id)
     down_code = down.code
     down_description = down.description
 
-    today = datetime.now(tz=pytz.UTC).date()
-    this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+    day_object = datetime.strptime(base_day, '%Y-%m-%d')
+    this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
 
     start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
     end_sunday = start_sunday + timedelta(days=7)
@@ -1079,15 +872,15 @@ def display_downtime_in_a_week(request, line_id, week_no, down_id):
     )
 
 
-def display_scrap_in_a_week(request, line_id, week_no, scrap_id):
+def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id):
     line = Line.objects.get(id=line_id)
     line_name = line.name
     scrap = ScrapModel.objects.get(id=scrap_id)
     scrap_code = scrap.code
     scrap_description = scrap.description
 
-    today = datetime.now(tz=pytz.UTC).date()
-    this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
+    day_object = datetime.strptime(base_day, '%Y-%m-%d')
+    this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
 
     start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
     end_sunday = start_sunday + timedelta(days=7)

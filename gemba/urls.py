@@ -66,8 +66,6 @@ urlpatterns = [
 
     path("report_choices_3/", views_report.report_choices_3, name="report-choices-3"),
     path("weekly_report_by_line/", views_report.weekly_report_by_line, name="weekly-report-by-line"),
-    path("previous_weekly_report_by_line/<this_week_sunday>/<line_name>/<shift>/", views_report.previous_weekly_report_by_line,
-         name="previous-weekly-report-by-line"),
 
     # produced report
     path("pareto_produced_details/", views.pareto_details_view, name="pareto-details"),
@@ -78,16 +76,17 @@ urlpatterns = [
     path("downtime_search_result/", staff_member_required(views.DowntimeSearchResultsView.as_view()),
          name="search-result"),
     path("lines_2/", views_report.lines_2, name="lines-2"),
-    path("downtime_rate_report/<line_id>/", views_report.downtime_rate_report_by_week, name="downtime-rate-report"),
-    path("display_downtime_in_a_week/<line_id>/<week_no>/<down_id>/", views_report.display_downtime_in_a_week,
+    path("downtime_rate_report/", views_report.downtime_rate_report_by_week,
+         name="downtime-rate-report"),
+    path("display_downtime_in_a_week/<line_id>/<base_day>/<week_no>/<down_id>/", views_report.display_downtime_in_a_week,
          name="display-downtime-in-a-week"),
     # scraps report
     path("scraps_view/", views.scraps_view, name="scraps-view"),
     path("scrap_search_result/", staff_member_required(views.ScrapSearchResultsView.as_view()),
          name="scrap-search-result"),
     path("lines/", views_report.lines, name="lines"),
-    path("scrap_rate_report/<line_id>/", views_report.scrap_rate_report_by_week, name="scrap-rate-report"),
-    path("display_scrap_in_a_week/<line_id>/<week_no>/<scrap_id>/", views_report.display_scrap_in_a_week,
+    path("scrap_rate_report/", views_report.scrap_rate_report_by_week, name="scrap-rate-report"),
+    path("display_scrap_in_a_week/<line_id>/<base_day>/<week_no>/<scrap_id>/", views_report.display_scrap_in_a_week,
          name="display-scrap-in-a-week"),
     # downtimes & scrap report
     path("report_choices/", views.report_choices, name="report-choices"),
