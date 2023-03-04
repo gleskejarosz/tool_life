@@ -359,7 +359,6 @@ def scrap_rate_report_by_week(request):
     else:
         line_qs = Line.objects.filter(name=line_name)
         line_id = line_qs[0].id
-    report = []
 
     base_day = request.GET.get("base_day")
 
@@ -367,6 +366,183 @@ def scrap_rate_report_by_week(request):
         base_day = str(datetime.now(tz=pytz.UTC).date())
     day_object = datetime.strptime(base_day, '%Y-%m-%d')
 
+    idx_diff = 0
+
+    result = calculation_scrap_rate(line_id=line_id, day_object=day_object, idx_diff=idx_diff)
+
+    new_report = result["report"]
+    totals = result["totals"]
+
+    return render(
+        request,
+        template_name="gemba/scrap_rate.html",
+        context={
+            "report": new_report,
+            "totals": totals,
+            "line_id": line_id,
+            "base_day": base_day,
+        },
+    )
+
+
+@staff_member_required
+def downtime_rate_report_by_week(request):
+    # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
+    line_name = request.GET.get("Line")
+    if line_name is None:
+        line_qs = Line.objects.all()
+        line_id = line_qs[0].id
+    else:
+        line_qs = Line.objects.filter(name=line_name)
+        line_id = line_qs[0].id
+
+    base_day = request.GET.get("base_day")
+
+    if base_day == "":
+        base_day = str(datetime.now(tz=pytz.UTC).date())
+    day_object = datetime.strptime(base_day, '%Y-%m-%d')
+
+    idx_diff = 0
+
+    result = calculation_downtime_rate(line_id=line_id, day_object=day_object, idx_diff=idx_diff)
+
+    new_report = result["report"]
+    totals = result["totals"]
+
+    return render(
+        request,
+        template_name="gemba/downtime_rate.html",
+        context={
+            "report": new_report,
+            "totals": totals,
+            "line_id": line_id,
+            "base_day": base_day,
+        },
+    )
+
+
+def display_downtime_in_a_week(request, line_id, base_day, week_no, down_id, down_rate):
+    line = Line.objects.get(id=line_id)
+    line_name = line.name
+    down = DowntimeModel.objects.get(id=down_id)
+    down_code = down.code
+    down_description = down.description
+
+    day_object = datetime.strptime(base_day[:10], '%Y-%m-%d')
+    this_sunday = day_object - timedelta(days=1)
+
+    start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
+    end_sunday = start_sunday + timedelta(days=7)
+    monday = start_sunday + timedelta(days=1)
+
+    down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
+                                            line=line_id).filter(downtime=down_id).order_by("-minutes")
+
+    report = []
+    total_minutes = 0
+
+    for down_elem in down_qs:
+        minutes = down_elem.minutes
+        total_minutes += minutes
+        job = down_elem.job
+        pareto_id = down_elem.pareto_id
+        pareto_date = down_elem.pareto_date
+        report.append({
+            "minutes": minutes,
+            "job": job,
+            "pareto_id": pareto_id,
+            "pareto_date": pareto_date,
+        })
+
+    for idx, elem in enumerate(report):
+        minutes = elem["minutes"]
+        down_rate_1 = round((minutes / total_minutes) * 100, ndigits=2)
+        down_rate_2 = round(((minutes / total_minutes) * (float(down_rate) / 100)) * 100, ndigits=2)
+        report[idx]["down_rate_1"] = down_rate_1
+        report[idx]["down_rate_2"] = down_rate_2
+
+    total = [{
+        "minutes": total_minutes,
+        "down_rate_1": 100.00,
+        "down_rate_2": float(down_rate),
+    }]
+
+    return render(
+        request,
+        template_name="gemba/display_downtime_in_a_week.html",
+        context={
+            "report": report,
+            "total": total,
+            "line_name": line_name,
+            "down_code": down_code,
+            "down_description": down_description,
+            "monday": monday,
+        },
+    )
+
+
+def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id, scrap_rate):
+    line = Line.objects.get(id=line_id)
+    line_name = line.name
+    scrap = ScrapModel.objects.get(id=scrap_id)
+    scrap_code = scrap.code
+    scrap_description = scrap.description
+
+    day_object = datetime.strptime(base_day[:10], '%Y-%m-%d')
+    this_sunday = day_object - timedelta(days=1)
+
+    start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
+    end_sunday = start_sunday + timedelta(days=7)
+    monday = start_sunday + timedelta(days=1)
+
+    scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
+                                          line=line_id).filter(scrap=scrap_id).order_by("-qty")
+
+    report = []
+    total_qty = 0
+
+    for scrap_elem in scrap_qs:
+        qty = scrap_elem.qty
+        total_qty += qty
+        job = scrap_elem.job
+        pareto_id = scrap_elem.pareto_id
+        pareto_date = scrap_elem.pareto_date
+        report.append({
+            "qty": qty,
+            "job": job,
+            "pareto_id": pareto_id,
+            "pareto_date": pareto_date,
+        })
+
+    for idx, elem in enumerate(report):
+        qty = elem["qty"]
+        scrap_rate_1 = round((qty / total_qty) * 100, ndigits=2)
+        scrap_rate_2 = round(((qty / total_qty) * (float(scrap_rate) / 100)) * 100, ndigits=2)
+        report[idx]["scrap_rate_1"] = scrap_rate_1
+        report[idx]["scrap_rate_2"] = scrap_rate_2
+
+    total = [{
+        "qty": total_qty,
+        "scrap_rate_1": 100.00,
+        "scrap_rate_2": float(scrap_rate),
+    }]
+
+    return render(
+        request,
+        template_name="gemba/display_scrap_in_a_week.html",
+        context={
+            "report": report,
+            "total": total,
+            "line_name": line_name,
+            "scrap_code": scrap_code,
+            "scrap_description": scrap_description,
+            "monday": monday,
+        },
+    )
+
+
+def calculation_scrap_rate(line_id, day_object, idx_diff):
+    report = []
     scrap_list = []
     scrap_names_qs = ScrapUser.objects.filter(line=line_id, order__gt=0).order_by("order")
     scrap_row_qty = []
@@ -458,7 +634,7 @@ def scrap_rate_report_by_week(request):
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
         this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=idx * 7)
+        start_sunday = this_sunday - timedelta(days=(idx + idx_diff) * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
@@ -487,14 +663,6 @@ def scrap_rate_report_by_week(request):
 
         total_output_qs.difference(total_output_sun_qs)
 
-        # this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        # start_sunday = this_sunday - timedelta(days=idx * 7)
-        # key_monday = "start_monday_" + str(week_num)
-        # totals[key_monday] = start_sunday + timedelta(days=1)
-        # end_sunday = start_sunday + timedelta(days=7)
-        # scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
-        # total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(created__gte=start_sunday,
-        #                                                                    created__lt=end_sunday)
         total_weekly = 0
         key_qty = "qty_" + str(week_num)
 
@@ -565,37 +733,12 @@ def scrap_rate_report_by_week(request):
         if elem["total"] != 0:
             new_report.append(elem)
 
-    return render(
-        request,
-        template_name="gemba/scrap_rate.html",
-        context={
-            "report": new_report,
-            "totals": totals,
-            "line_id": line_id,
-            "base_day": base_day,
-        },
-    )
+    return {"report": new_report,
+            "totals": totals}
 
 
-@staff_member_required
-def downtime_rate_report_by_week(request):
-    # today = datetime.now(tz=pytz.UTC).replace(hour=21, minute=45, second=0, microsecond=0)
-    line_name = request.GET.get("Line")
-    if line_name is None:
-        line_qs = Line.objects.all()
-        line_id = line_qs[0].id
-    else:
-        line_qs = Line.objects.filter(name=line_name)
-        line_id = line_qs[0].id
-
-    base_day = request.GET.get("base_day")
-
-    if base_day == "":
-        base_day = str(datetime.now(tz=pytz.UTC).date())
-    day_object = datetime.strptime(base_day, '%Y-%m-%d')
-
+def calculation_downtime_rate(line_id, day_object, idx_diff):
     report = []
-
     down_list = []
     down_names_qs = DowntimeUser.objects.filter(line=line_id, order__gt=0).order_by("order")
 
@@ -708,7 +851,7 @@ def downtime_rate_report_by_week(request):
     reversed_range_list = reversed(range_list)
     for week_num, idx in enumerate(reversed_range_list):
         this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
-        start_sunday = this_sunday - timedelta(days=idx * 7)
+        start_sunday = this_sunday - timedelta(days=(idx + idx_diff) * 7)
         key_monday = "start_monday_" + str(week_num)
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
@@ -724,13 +867,6 @@ def downtime_rate_report_by_week(request):
                 down_sun_qs.difference(down_elem)
 
         down_qs.difference(down_sun_qs)
-
-        # this_sunday = today - timedelta(days=today.weekday()) - timedelta(days=1)
-        # start_sunday = this_sunday - timedelta(days=idx * 7)
-        # key_monday = "start_monday_" + str(week_num)
-        # totals[key_monday] = start_sunday + timedelta(days=1)
-        # end_sunday = start_sunday + timedelta(days=7)
-        # down_qs = DowntimeDetail.objects.filter(line=line_id).filter(created__gte=start_sunday, created__lt=end_sunday)
 
         # counting available time
         paretos_id = set()
@@ -830,6 +966,20 @@ def downtime_rate_report_by_week(request):
         if elem["total"] != 0:
             new_report.append(elem)
 
+    return {"report": new_report,
+            "totals": totals}
+
+
+@staff_member_required
+def previous_downtime_rate_report_by_week(request, line_id, base_day):
+    day_object = datetime.strptime(base_day[:10], '%Y-%m-%d')
+    idx_diff = 1
+
+    result = calculation_downtime_rate(line_id=line_id, day_object=day_object, idx_diff=idx_diff)
+
+    new_report = result["report"]
+    totals = result["totals"]
+
     return render(
         request,
         template_name="gemba/downtime_rate.html",
@@ -842,121 +992,68 @@ def downtime_rate_report_by_week(request):
     )
 
 
-def display_downtime_in_a_week(request, line_id, base_day, week_no, down_id, down_rate):
-    line = Line.objects.get(id=line_id)
-    line_name = line.name
-    down = DowntimeModel.objects.get(id=down_id)
-    down_code = down.code
-    down_description = down.description
+@staff_member_required
+def next_downtime_rate_report_by_week(request, line_id, base_day):
+    day_object = datetime.strptime(base_day[:10], '%Y-%m-%d')
+    idx_diff = -1
 
-    day_object = datetime.strptime(base_day, '%Y-%m-%d')
-    this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
+    result = calculation_downtime_rate(line_id=line_id, day_object=day_object, idx_diff=idx_diff)
 
-    start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
-    end_sunday = start_sunday + timedelta(days=7)
-    monday = start_sunday + timedelta(days=1)
-
-    down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
-                                            line=line_id).filter(downtime=down_id).order_by("-minutes")
-
-    report = []
-    total_minutes = 0
-
-    for down_elem in down_qs:
-        minutes = down_elem.minutes
-        total_minutes += minutes
-        job = down_elem.job
-        pareto_id = down_elem.pareto_id
-        pareto_date = down_elem.pareto_date
-        report.append({
-            "minutes": minutes,
-            "job": job,
-            "pareto_id": pareto_id,
-            "pareto_date": pareto_date,
-        })
-
-    for idx, elem in enumerate(report):
-        minutes = elem["minutes"]
-        down_rate_1 = round((minutes / total_minutes) * 100, ndigits=2)
-        down_rate_2 = round(((minutes / total_minutes) * (float(down_rate) / 100)) * 100, ndigits=2)
-        report[idx]["down_rate_1"] = down_rate_1
-        report[idx]["down_rate_2"] = down_rate_2
-
-    total = [{
-        "minutes": total_minutes,
-        "down_rate_1": 100.00,
-        "down_rate_2": float(down_rate),
-    }]
+    new_report = result["report"]
+    totals = result["totals"]
 
     return render(
         request,
-        template_name="gemba/display_downtime_in_a_week.html",
+        template_name="gemba/downtime_rate.html",
         context={
-            "report": report,
-            "total": total,
-            "line_name": line_name,
-            "down_code": down_code,
-            "down_description": down_description,
-            "monday": monday,
+            "report": new_report,
+            "totals": totals,
+            "line_id": line_id,
+            "base_day": base_day,
         },
     )
 
 
-def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id, scrap_rate):
-    line = Line.objects.get(id=line_id)
-    line_name = line.name
-    scrap = ScrapModel.objects.get(id=scrap_id)
-    scrap_code = scrap.code
-    scrap_description = scrap.description
+@staff_member_required
+def previous_scrap_rate_report_by_week(request, line_id, base_day):
+    day_object = datetime.strptime(base_day[:10], '%Y-%m-%d')
+    idx_diff = 1
 
-    day_object = datetime.strptime(base_day, '%Y-%m-%d')
-    this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
+    result = calculation_scrap_rate(line_id=line_id, day_object=day_object, idx_diff=idx_diff)
 
-    start_sunday = this_sunday - timedelta(days=int(week_no) * 7)
-    end_sunday = start_sunday + timedelta(days=7)
-    monday = start_sunday + timedelta(days=1)
-
-    scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
-                                          line=line_id).filter(scrap=scrap_id).order_by("-qty")
-
-    report = []
-    total_qty = 0
-
-    for scrap_elem in scrap_qs:
-        qty = scrap_elem.qty
-        total_qty += qty
-        job = scrap_elem.job
-        pareto_id = scrap_elem.pareto_id
-        pareto_date = scrap_elem.pareto_date
-        report.append({
-            "qty": qty,
-            "job": job,
-            "pareto_id": pareto_id,
-            "pareto_date": pareto_date,
-        })
-
-    for idx, elem in enumerate(report):
-        qty = elem["qty"]
-        scrap_rate_1 = round((qty / total_qty) * 100, ndigits=2)
-        scrap_rate_2 = round(((qty / total_qty) * (float(scrap_rate) / 100)) * 100, ndigits=2)
-        report[idx]["scrap_rate_1"] = scrap_rate_1
-        report[idx]["scrap_rate_2"] = scrap_rate_2
-
-    total = [{
-        "qty": total_qty,
-        "scrap_rate_1": 100.00,
-        "scrap_rate_2": float(scrap_rate),
-    }]
+    new_report = result["report"]
+    totals = result["totals"]
 
     return render(
         request,
-        template_name="gemba/display_scrap_in_a_week.html",
+        template_name="gemba/scrap_rate.html",
         context={
-            "report": report,
-            "total": total,
-            "line_name": line_name,
-            "scrap_code": scrap_code,
-            "scrap_description": scrap_description,
-            "monday": monday,
+            "report": new_report,
+            "totals": totals,
+            "line_id": line_id,
+            "base_day": base_day,
         },
     )
+
+
+@staff_member_required
+def next_scrap_rate_report_by_week(request, line_id, base_day):
+    day_object = datetime.strptime(base_day[:10], '%Y-%m-%d')
+    idx_diff = -1
+
+    result = calculation_scrap_rate(line_id=line_id, day_object=day_object, idx_diff=idx_diff)
+
+    new_report = result["report"]
+    totals = result["totals"]
+
+    return render(
+        request,
+        template_name="gemba/scrap_rate.html",
+        context={
+            "report": new_report,
+            "totals": totals,
+            "line_id": line_id,
+            "base_day": base_day,
+        },
+    )
+

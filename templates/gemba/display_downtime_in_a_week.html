@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
-<h4>{{ line_name }}: {{ down_code }} - {{ down_description }} in a W/C {{ monday|date:'d-m-y' }}</h4>
+<h4>{{ line_name }}: {{ down_code }} - {{ down_description }} in a W/C {{ monday|date:'d/m/Y' }}</h4>
 
 <table class="table table-hover">
         <thead>
@@ -21,7 +21,7 @@
                 <td>{{ object.down_rate_1 }}%</td>
                 <td>{{ object.down_rate_2 }}%</td>
                 <td>{{ object.job }}</td>
-                <td>{{ object.pareto_date }}</td>
+                <td>{{ object.pareto_date|date:'d/m/Y' }}</td>
             </tr>
         {% endfor %}
         {% for object in total %}
@@ -36,5 +36,4 @@
             </tr>
         </tbody>
     </table>
-
 {% endblock %}

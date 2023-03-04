@@ -8,6 +8,10 @@
     </style>
 </head>
 <h4>Downtime rate by week</h4>
+<a href="{% url 'gemba_app:previous-downtime-rate-report' line_id=line_id base_day=totals.start_monday_8 %}">
+    <<<- Previous </a>&nbsp;&nbsp;&nbsp;
+<a href="{% url 'gemba_app:next-downtime-rate-report' line_id=line_id base_day=totals.start_monday_8 %}">
+    Next ->>></a></br></br>
 Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
 
 <table class="mytable">
@@ -66,39 +70,39 @@ Week starts on Sunday at 21:45 for each line. W/C shows Monday dates.
         {% for object in report %}
             <tr style="font-size:0.7vw;">
                 <th>{{ object.down }}</th>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_0 down_id=object.down_id down_rate=object.down_rate_0 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_0 down_id=object.down_id down_rate=object.down_rate_0 %}">
                     {% if object.qty_0 == 0 %} {% else %} {{ object.qty_0 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_0 == 0 %} {% elif object.down_rate_0 > 5 %}
                     <div class="high">{{ object.down_rate_0 }}%</div>{% else %}{{ object.down_rate_0 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_1 down_id=object.down_id down_rate=object.down_rate_1 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_1 down_id=object.down_id down_rate=object.down_rate_1 %}">
                     {% if object.qty_1 == 0 %} {% else %} {{ object.qty_1 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_1 == 0 %} {% elif object.down_rate_1 > 5 %}
                     <div class="high">{{ object.down_rate_1 }}%</div>{% else %}{{ object.down_rate_1 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_2 down_id=object.down_id down_rate=object.down_rate_2 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_2 down_id=object.down_id down_rate=object.down_rate_2 %}">
                     {% if object.qty_2 == 0 %} {% else %} {{ object.qty_2 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_2 == 0 %} {% elif object.down_rate_2 > 5 %}
                     <div class="high">{{ object.down_rate_2 }}%</div>{% else %}{{ object.down_rate_2 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_3 down_id=object.down_id down_rate=object.down_rate_3 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_3 down_id=object.down_id down_rate=object.down_rate_3 %}">
                     {% if object.qty_3 == 0 %} {% else %} {{ object.qty_3 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_3 == 0 %} {% elif object.down_rate_3 > 5 %}
                     <div class="high">{{ object.down_rate_3 }}%</div>{% else %}{{ object.down_rate_3 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_4 down_id=object.down_id down_rate=object.down_rate_4 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_4 down_id=object.down_id down_rate=object.down_rate_4 %}">
                     {% if object.qty_4 == 0 %} {% else %} {{ object.qty_4 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_4 == 0 %} {% elif object.down_rate_4 > 5 %}
                     <div class="high">{{ object.down_rate_4 }}%</div>{% else %}{{ object.down_rate_4 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_5 down_id=object.down_id down_rate=object.down_rate_5 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_5 down_id=object.down_id down_rate=object.down_rate_5 %}">
                     {% if object.qty_5 == 0 %} {% else %} {{ object.qty_5 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_5 == 0 %} {% elif object.down_rate_5 > 5 %}
                     <div class="high">{{ object.down_rate_5 }}%</div>{% else %}{{ object.down_rate_5 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_6 down_id=object.down_id down_rate=object.down_rate_6 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_6 down_id=object.down_id down_rate=object.down_rate_6 %}">
                     {% if object.qty_6 == 0 %} {% else %} {{ object.qty_6 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_6 == 0 %} {% elif object.down_rate_6 > 5 %}
                     <div class="high">{{ object.down_rate_6 }}%</div>{% else %}{{ object.down_rate_6 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_7 down_id=object.down_id down_rate=object.down_rate_7 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_7 down_id=object.down_id down_rate=object.down_rate_7 %}">
                     {% if object.qty_7 == 0 %} {% else %} {{ object.qty_7 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_7 == 0 %} {% elif object.down_rate_7 > 5 %}
                     <div class="high">{{ object.down_rate_7 }}%</div>{% else %}{{ object.down_rate_7 }}%{% endif %}</td>
-                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=base_day week_no=object.week_8 down_id=object.down_id down_rate=object.down_rate_8 %}">
+                <td><a href="{% url 'gemba_app:display-downtime-in-a-week' line_id=line_id base_day=totals.start_monday_8 week_no=object.week_8 down_id=object.down_id down_rate=object.down_rate_8 %}">
                     {% if object.qty_8 == 0 %} {% else %} {{ object.qty_8 }} {% endif %}</a></td>
                 <td>{% if object.down_rate_8 == 0 %} {% elif object.down_rate_8 > 5 %}
                     <div class="high">{{ object.down_rate_8 }}%</div>{% else %}{{ object.down_rate_8 }}%{% endif %}</td>
