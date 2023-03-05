@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 {% load mathfilters %}
+{{ shift_end }}
 <a href="{% url 'gemba_app:final-confirmation-before-close-pareto' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
     </button>
@@ -95,14 +96,14 @@
         </thead>
         <tbody>
         </br>
-        OEE by job:
+        <b>OEE by job:</b>
         {% for job in calculation_by_job %}
         <tr>
             <td>{{ job.job }}</td>
-            <td>{{ job.availability }}</td>
-            <td>{{ job.performance }}</td>
-            <td>{{ job.quality }}</td>
-            <td>{{ job.oee }}</td>
+            <td>{{ job.availability }}%</td>
+            <td>{{ job.performance }}%</td>
+            <td>{{ job.quality }}%</td>
+            <td>{{ job.oee }}%</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -113,7 +114,7 @@
         <table class="table">
             <thead>
             <tr>
-                 <th scope="col" style="text-align:right;">OEE</th>
+                 <th scope="col" style="text-align:right;">Overall OEE</th>
                 <th scope="col">Results</th>
             </tr>
             </thead>
@@ -123,7 +124,7 @@
                 Performance<br/>
                 Quality<br/>
                     <br/>
-                <p style="font-size:1vw;"><b>OEE</b></p><br/>
+                <p><b>OEE</b></p><br/>
                 </td>
                 <td>
                 {{ availability }}%<br/>

@@ -90,7 +90,8 @@
         </thead>
         <tbody>
              <tr>{% for pareto_item in downtimes_list %}
-                 <td>{{ pareto_item.code }} - {{ pareto_item.description }}</td>
+                 <td><a href="{% url 'gemba_app:downtime-pareto-details' pareto_id=pareto_list.id down_id=pareto_item.down_id job=pareto_item.job %}">
+                     {{ pareto_item.code }} - {{ pareto_item.description }}</a></td>
                  <td>{{ pareto_item.minutes }}</td>
                  <td>{{ pareto_item.frequency }}</td>
                  <td>{{ pareto_item.job }}</td>
@@ -120,7 +121,8 @@
         </thead>
         <tbody>
              <tr>{% for pareto_item in scraps_list %}
-                 <td>{{ pareto_item.code }} - {{ pareto_item.description }}</td>
+                 <td><a href="{% url 'gemba_app:scrap-pareto-details' pareto_id=pareto_list.id scrap_id=pareto_item.scrap_id job=pareto_item.job %}">
+                     {{ pareto_item.code }} - {{ pareto_item.description }}</a></td>
                  <td>{{ pareto_item.qty }}</td>
                  <td>{{ pareto_item.frequency }}</td>
                  <td>{{ pareto_item.job }}</td>

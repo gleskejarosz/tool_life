@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>{{ downtime.code }} - {{ downtime.description }} ({{ job }})</h4>
+
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Created</th>
+            <th scope="col">Minutes</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in items %}
+            <tr>
+                <td>{{ object.created|date:'d/m/Y H:i'}}</td>
+                <td>{{ object.minutes }} min</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

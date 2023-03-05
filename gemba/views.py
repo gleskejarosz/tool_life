@@ -1332,6 +1332,8 @@ def close_pareto(request):
     pareto = Pareto.objects.get(user=request.user, completed=False)
     line = pareto.line
     pareto_date = pareto.pareto_date
+    hours = pareto.hours
+    available_time = int(hours) * 60
 
     calculation = final_oee_calculation(pareto)
     calculation_by_job = final_oee_calculation_by_job(pareto)
@@ -1351,10 +1353,28 @@ def close_pareto(request):
     for item in scrap_items:
         item.save()
 
+    calculation_by_job_len = len(calculation_by_job)
+    if calculation_by_job_len == 1:
+        calculation_by_job[0]["availability"] = availability
+        calculation_by_job[0]["performance"] = performance
+        calculation_by_job[0]["quality"] = quality
+        calculation_by_job[0]["oee"] = oee
+
+    start_shift = str(pareto.time_stamp)
+    year = int(str(pareto_date)[:4])
+    month = int(str(pareto_date)[5:7])
+    day = int(str(pareto_date)[9:])
+    hour = int(start_shift[:2])
+    minute = int(start_shift[3:5])
+
+    start = datetime(year, month, day, hour, minute)
+    shift_end = start + timedelta(minutes=available_time)
+
     details_item = pareto.jobs.all()
     details_item.update(completed=True)
-    for detail_item in calculation_by_job:
+    for idx, detail_item in enumerate(calculation_by_job):
         job = detail_item["job"]
+        item_available_time = detail_item["available_time"]
         item_availability = detail_item["availability"]
         item_performance = detail_item["performance"]
         item_quality = detail_item["quality"]
@@ -1362,10 +1382,13 @@ def close_pareto(request):
         for item in details_item:
             item_job = item.job
             if item_job == job:
+                item.available_time = item_available_time
                 item.availability = item_availability
                 item.performance = item_performance
                 item.quality = item_quality
                 item.oee = item_oee
+                if idx == calculation_by_job_len - 1:
+                    item.finished = shift_end
                 item.save()
 
     pareto.availability = availability
@@ -2388,4 +2411,36 @@ def create_quarantined_scrap(request, pk):
         request,
         template_name="form.html",
         context={"form": form}
+    )
+
+
+def downtime_pareto_details(request, pareto_id, down_id, job):
+    downtime = DowntimeModel.objects.get(id=down_id)
+
+    items = DowntimeDetail.objects.filter(pareto_id=pareto_id, downtime=down_id, job__name=job).order_by("-minutes")
+
+    return render(
+        request,
+        template_name="gemba/downtime_pareto_details.html",
+        context={
+            "items": items,
+            "downtime": downtime,
+            "job": job,
+        }
+    )
+
+
+def scrap_pareto_details(request, pareto_id, scrap_id, job):
+    scrap = ScrapModel.objects.get(id=scrap_id)
+
+    items = ScrapDetail.objects.filter(pareto_id=pareto_id, scrap=scrap_id, job__name=job).order_by("-qty")
+
+    return render(
+        request,
+        template_name="gemba/scrap_pareto_details.html",
+        context={
+            "items": items,
+            "scrap": scrap,
+            "job": job,
+        }
     )

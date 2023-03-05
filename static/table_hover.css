@@ -77,9 +77,8 @@ body:not(.nohover) .mytable tbody tr:hover {
 .border-start-secondary {
     border-left-color: #BDE696;
 }
-
-.border-end-blue {
-    border-right-color: #17A2B8;
+.border-start-blue {
+    border-left-color: #17A2B8;
 }
 .border-start-success {
     border-left-color: #00ac69;

@@ -85,6 +85,7 @@ class ParetoDetail(models.Model):
     start_meter = models.PositiveIntegerField(default=0)
     takt_time = models.DecimalField(max_digits=10, decimal_places=5, default=0)
     line = models.ForeignKey("Line", on_delete=models.CASCADE, related_name="lines3", blank=True, null=True)
+    available_time = models.IntegerField(default=0)
     availability = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     performance = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     quality = models.DecimalField(max_digits=10, decimal_places=2, default=0)

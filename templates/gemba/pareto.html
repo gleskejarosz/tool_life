@@ -19,11 +19,23 @@
     </style>
 </head>
 
-<div>{% if pareto_status == "Not exist" %}
+<div>
+    <div class = "row">
+    <div class = "col">
+    {% if pareto_status == "Not exist" %}
     <a href="{% url 'gemba_app:pareto-start-new' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Start new Pareto
     </button></a>
     {% else %}
+    <a href="{% url 'gemba_app:pareto-update-view' pk=pareto_list.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update Pareto
+    </button></a>
+    <a href="{% url 'gemba_app:job-user-view' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Select job
+    </button></a>
+    <a href="{% url 'gemba_app:before-close-pareto' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
+    </button></a></br></br>
     <a href="{% url 'gemba_app:pareto-details-create-view' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>+ Pareto line
     </button></a>
@@ -33,18 +45,13 @@
     <a href="{% url 'gemba_app:scrap-user-view' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>+ Scrap
     </button></a>
-    <a href="{% url 'gemba_app:pareto-update-view' pk=pareto_list.pk %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update Pareto
-    </button></a>
-    <a href="{% url 'gemba_app:job-user-view' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Select job
-    </button></a>
-    <a href="{% url 'gemba_app:before-close-pareto' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Close Pareto
-    </button></a>
     {% endif %}
-    <span style="float:right; font-size:1.5vw; font-weight: bold; text-decoration: underline">{{ pareto_list.line }}</span>
     </div>
+    <div class = "col">
+    <p style="text-align: right; font-size:1.5vw; font-weight: bold; text-decoration: underline">{{ pareto_list.line }}</p>
+    <p style="text-align:right"><b>Overall OEE: A - {{ availability }}% / P - {{ performance }}% / Q - {{ quality }}% / OEE - {{ oee }}%</b></p>
+    </div>
+</div>
     <br/>
     {% if message_status == "Display" %}
     <div class="alert alert-primary">
@@ -95,7 +102,7 @@
         <tbody>
         {% if pareto_list.jobs.all|length == 0 %}
               <tr>
-                <td colspan='8'>No records</td>
+                <td colspan='16'>No records</td>
               </tr>
         {% endif %}
         {% for pareto_item in pareto_details_list %}
@@ -135,39 +142,11 @@
             <td class="central_pos"> <b>{{ total_scrap_cal }}</b> </td>
             <td> </td>
             <td> </td>
-            <td> </td>
+            <td colspan='7'> </td>
         </tr>
         </tbody>
         </table>
         <p>{% if start_meter > 0 %} Start meter = {{ start_meter }}{% endif %}</p>
-    </div>
-
-    <div class = "col">
-        <table class="table">
-            <thead>
-            <tr>
-                 <th scope="col" style="text-align:right;">OEE</th>
-                <th scope="col">Results</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td style="text-align:right;">Availability<br/>
-                Performance<br/>
-                Quality<br/>
-                    <br/>
-                <p><b>OEE</b></p><br/>
-                </td>
-                <td>
-                {{ availability }}%<br/>
-                {{ performance }}%<br/>
-                {{ quality }}%<br/>
-                    <br/>
-                <p><b>{{ oee }}%</b></p>
-                </td>
-            </tr>
-            </tbody>
-        </table>
     </div>
     </div>
 </div>

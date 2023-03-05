@@ -64,7 +64,8 @@
                     </table>
         </div>
 <div class="container">
-        <div class="row">
+    <div class="row">
+        <div class="col-4" >
             <div class="card h-100 border-start-lg border-start-primary">
                 <div class="card-body">
                     <div class="h6"><img src="{% static 'pics/done.png' %}" alt="Done" width="23" height="23">
@@ -99,7 +100,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="col-4">
             <div class="card h-100 border-start-lg border-start-secondary">
                 <div class="card-body">
                     <div class="h6"><img src="{% static 'pics/stop.png' %}" alt="Stop" width="23" height="23">
@@ -130,7 +131,7 @@
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div class="col-4">
             <div class="card h-100 border-start-lg border-start-success">
                 <div class="card-body">
                    <div class="h6"><img src="{% static 'pics/bin.png' %}" alt="Bin" width="18" height="23"> Latest reasons for scrapping</div>
@@ -160,8 +161,11 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="card h-100 border-end-lg border-end-blue">
+    </div>
+    </br>
+    <div class="row">
+        <div class="col-4">
+            <div class="card h-100 border-start-lg border-start-blue">
                 <div class="card-body">
                     <div class="h6"><img src="{% static 'pics/winner.png' %}" alt="Winner" width="18" height="25">
                         Yesterday's 5 best results ({{ yesterday|date:'d-m' }})</div>
@@ -196,5 +200,7 @@
                         Display more produced &#11166;</a>
                 </div>
             </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

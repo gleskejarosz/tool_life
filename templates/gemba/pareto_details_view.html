@@ -16,12 +16,13 @@
                 <th scope="col">Good</th>
                 <th scope="col">Rework Good</th>
                 <th scope="col">Scrap</th>
+                <th scope="col">A Time</th>
                 <th scope="col">A</th>
                 <th scope="col">P</th>
                 <th scope="col">Q</th>
                 <th scope="col">OEE</th>
                 <th scope="col">Takt time</th>
-                <th scope="col">Operators</th>
+                <th scope="col">Ops</th>
                 <th scope="col">Pareto ID</th>
                 <th scope="col">Pareto Date</th>
             </tr>
@@ -36,6 +37,7 @@
                 <td>{{ object.good }}</td>
                 <td>{{ object.rework }}</td>
                 <td>{{ object.scrap }}</td>
+                <td>{{ object.available_time }}</td>
                 <td>{{ object.availability }}%</td>
                 <td>{{ object.performance }}%</td>
                 <td>{{ object.quality }}%</td>
