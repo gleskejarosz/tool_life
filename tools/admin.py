@@ -1,9 +1,10 @@
 from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
 
 from tools.models import ToolStationModel, OperationModel, StationModel, ToolJobModel
 
 
-class ToolStationModelAdmin(admin.ModelAdmin):
+class ToolStationModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("tool",)
     list_display = ("tool", "station", "machine", "tool_type", "tool_status", )
     list_display_links = ("tool",)
@@ -17,7 +18,7 @@ class ToolStationModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class StationModelAdmin(admin.ModelAdmin):
+class StationModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("name",)
     list_display = ("id", "name",)
     list_display_links = ("id",)
@@ -30,7 +31,7 @@ class StationModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
-class OperationModelAdmin(admin.ModelAdmin):
+class OperationModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("-start_date",)
     list_display = ("tool", "machine", "station", "start_date", "tool_type", "finish_date", "status", "minutes",)
     list_display_links = ("tool",)
@@ -44,7 +45,7 @@ class OperationModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "machine", "station"]
 
 
-class ToolJobStationModelAdmin(admin.ModelAdmin):
+class ToolJobStationModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("tool",)
     list_display = ("job", "tool", "status", )
     list_display_links = ("job",)

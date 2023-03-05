@@ -120,7 +120,6 @@ urlpatterns = [
     path("export_daily_oee_report/", views_export.export_daily_oee_report_xls, name="export_daily_oee_report"),
     path("export_to_gemba/", views_export.gemba_export2, name="export-to-gemba"),
     path("tableau/<pk>/", views_export.tableau_export, name="tableau"),
-    path("export_pareto_to_pdf/<pk>/", views_export.export_pareto_to_pdf, name="export-pareto-to-pdf"),
     path("export_job_model_csv/", views_export.export_job_model_csv, name="export-job-model-csv"),
     path("export_job_model_xls/", views_export.export_job_model_xls, name="export-job-model-xls"),
     path("update_database/", views_export.update_database_many_to_many_field, name="update-database"),

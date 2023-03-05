@@ -3,13 +3,15 @@ import csv
 import xlwt
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from xlwt import XFStyle, Font
 
 from gemba.models import Pareto, AM, PM, NS, ScrapUser, ScrapModel, ScrapDetail, DowntimeUser, DowntimeModel,\
     DowntimeDetail, ParetoDetail
-from gemba.views import get_details_to_display, oee_calculation, count_downtimes, count_scraps
+from gemba.views import get_details_to_display
 
+from .resources import JobModelResource
 
 @staff_member_required
 def tableau_export(request, pk):
@@ -420,30 +422,6 @@ def export_downtimes_xls(request):
 
     return response
 
-import io
-from django.http import FileResponse
-from reportlab.pdfgen import canvas
-
-
-@staff_member_required
-def export_pareto_to_pdf(request, pk):
-    pareto = Pareto.objects.get(pk=pk)
-
-    report_list = oee_calculation(pareto)
-    downtimes_list = count_downtimes(pareto)
-    scraps_list = count_scraps(pareto)
-
-    buffer = io.BytesIO()
-    p = canvas.Canvas(buffer)
-    p.drawString(100, 100, "Hello word.")
-    p.showPage()
-    p.save()
-    buffer.seek(0)
-    return FileResponse(buffer, as_attachment=True, filename="hello.pdf")
-
-
-from django.http import HttpResponse
-from .resources import JobModelResource
 
 @staff_member_required
 def export_job_model_csv(request):
