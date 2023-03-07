@@ -493,7 +493,7 @@ def display_downtime_in_a_week(request, line_id, base_day, week_no, down_id, dow
     monday = start_sunday + timedelta(days=1)
 
     down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
-                                            line=line_id).filter(downtime=down_id).order_by("-minutes")
+        line=line_id).filter(downtime=down_id).order_by("-minutes")
 
     report = []
     total_minutes = 0
@@ -553,7 +553,7 @@ def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id, scrap
     monday = start_sunday + timedelta(days=1)
 
     scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
-                                          line=line_id).filter(scrap=scrap_id).order_by("-qty")
+        line=line_id).filter(scrap=scrap_id).order_by("-qty")
 
     report = []
     total_qty = 0
@@ -910,20 +910,26 @@ def calculation_downtime_rate(line_id, day_object, idx_diff):
         this_sunday = day_object - timedelta(days=day_object.weekday()) - timedelta(days=1)
         start_sunday = this_sunday - timedelta(days=(idx + idx_diff) * 7)
         key_monday = "start_monday_" + str(week_num)
-        totals[key_monday] = start_sunday + timedelta(days=1)
+        start_monday = start_sunday + timedelta(days=1)
+        totals[key_monday] = start_monday
         end_sunday = start_sunday + timedelta(days=7)
 
-        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_monday,
                                                                      pareto_date__lt=end_sunday)
-        down_sun_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
-        for down_elem in down_sun_qs:
-            pareto_id = down_elem.pareto_id
-            pareto = Pareto.objects.get(id=pareto_id)
-            shift = pareto.shift
-            if shift == NS:
-                down_sun_qs.difference(down_elem)
 
-        down_qs.difference(down_sun_qs)
+        pareto_sun_qs = Pareto.objects.filter(pareto_date=start_sunday, line=line_id, shift=NS)
+        if pareto_sun_qs.exists():
+            pareto_sun_id = pareto_sun_qs[0].id
+
+            down_qs_sun = DowntimeDetail.objects.filter(line=line_id).filter(pareto_id=pareto_sun_id)
+            down_qs.union(down_qs_sun)
+
+        pareto_next_sun_qs = Pareto.objects.filter(pareto_date=end_sunday, line=line_id).exclude(shift=NS)
+        if pareto_next_sun_qs.exists():
+            pareto_next_sun_id = pareto_next_sun_qs[0].id
+
+            down_qs_next_sun = DowntimeDetail.objects.filter(line=line_id).filter(pareto_id=pareto_next_sun_id)
+            down_qs.difference(down_qs_next_sun)
 
         # counting available time
         paretos_id = set()
@@ -1113,4 +1119,3 @@ def next_scrap_rate_report_by_week(request, line_id, base_day):
             "base_day": base_day,
         },
     )
-
