@@ -492,13 +492,21 @@ def display_downtime_in_a_week(request, line_id, base_day, week_no, down_id, dow
     end_sunday = start_sunday + timedelta(days=7)
     monday = start_sunday + timedelta(days=1)
 
+    pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
+
     down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
         line=line_id).filter(downtime=down_id).order_by("-minutes")
+
+    weekly_down_qs = []
+    for down_obj in down_qs:
+        pareto_id = down_obj.pareto_id
+        if pareto_id not in pareto_ids:
+            weekly_down_qs.append(down_obj)
 
     report = []
     total_minutes = 0
 
-    for down_elem in down_qs:
+    for down_elem in weekly_down_qs:
         minutes = down_elem.minutes
         total_minutes += minutes
         job = down_elem.job
@@ -552,13 +560,31 @@ def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id, scrap
     end_sunday = start_sunday + timedelta(days=7)
     monday = start_sunday + timedelta(days=1)
 
+    pareto_sun_qs = Pareto.objects.filter(pareto_date=start_sunday, line=line_id).exclude(shift=NS)
+    pareto_next_sun_qs = Pareto.objects.filter(pareto_date=end_sunday, line=line_id, shift=NS)
+
+    pareto_ids = []
+    for pareto in pareto_sun_qs:
+        pareto_id = pareto.id
+        pareto_ids.append(pareto_id)
+
+    for pareto in pareto_next_sun_qs:
+        pareto_id = pareto.id
+        pareto_ids.append(pareto_id)
+
     scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
         line=line_id).filter(scrap=scrap_id).order_by("-qty")
+
+    weekly_scrap_qs = []
+    for scrap_obj in scrap_qs:
+        pareto_id = scrap_obj.pareto_id
+        if pareto_id not in pareto_ids:
+            weekly_scrap_qs.append(scrap_obj)
 
     report = []
     total_qty = 0
 
-    for scrap_elem in scrap_qs:
+    for scrap_elem in weekly_scrap_qs:
         qty = scrap_elem.qty
         total_qty += qty
         job = scrap_elem.job
@@ -794,6 +820,22 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
             "totals": totals}
 
 
+def adjust_weekly_qs(start_sunday, line_id, end_sunday):
+    pareto_sun_qs = Pareto.objects.filter(pareto_date=start_sunday, line=line_id).exclude(shift=NS)
+    pareto_next_sun_qs = Pareto.objects.filter(pareto_date=end_sunday, line=line_id, shift=NS)
+
+    pareto_ids = []
+    for pareto in pareto_sun_qs:
+        pareto_id = pareto.id
+        pareto_ids.append(pareto_id)
+
+    for pareto in pareto_next_sun_qs:
+        pareto_id = pareto.id
+        pareto_ids.append(pareto_id)
+
+    return pareto_ids
+
+
 def calculation_downtime_rate(line_id, day_object, idx_diff):
     report = []
     down_list = []
@@ -914,27 +956,20 @@ def calculation_downtime_rate(line_id, day_object, idx_diff):
         totals[key_monday] = start_monday
         end_sunday = start_sunday + timedelta(days=7)
 
-        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_monday,
+        pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
+
+        down_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
                                                                      pareto_date__lt=end_sunday)
-
-        pareto_sun_qs = Pareto.objects.filter(pareto_date=start_sunday, line=line_id, shift=NS)
-        if pareto_sun_qs.exists():
-            pareto_sun_id = pareto_sun_qs[0].id
-
-            down_qs_sun = DowntimeDetail.objects.filter(line=line_id).filter(pareto_id=pareto_sun_id)
-            down_qs.union(down_qs_sun)
-
-        pareto_next_sun_qs = Pareto.objects.filter(pareto_date=end_sunday, line=line_id).exclude(shift=NS)
-        if pareto_next_sun_qs.exists():
-            pareto_next_sun_id = pareto_next_sun_qs[0].id
-
-            down_qs_next_sun = DowntimeDetail.objects.filter(line=line_id).filter(pareto_id=pareto_next_sun_id)
-            down_qs.difference(down_qs_next_sun)
+        weekly_down_qs = []
+        for down_obj in down_qs:
+            pareto_id = down_obj.pareto_id
+            if pareto_id not in pareto_ids:
+                weekly_down_qs.append(down_obj)
 
         # counting available time
         paretos_id = set()
         total_available_time = 0
-        for obj in down_qs:
+        for obj in weekly_down_qs:
             pareto_id = obj.pareto_id
             paretos_id.add(pareto_id)
 
@@ -947,7 +982,7 @@ def calculation_downtime_rate(line_id, day_object, idx_diff):
         key_qty = "qty_" + str(week_num)
 
         # total downtime per reason, for week, period summary total, row sum up
-        for obj in down_qs:
+        for obj in weekly_down_qs:
             obj_name = obj.downtime.description
             if obj_name in down_list:
                 pos = down_list.index(obj_name)
