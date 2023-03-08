@@ -560,17 +560,7 @@ def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id, scrap
     end_sunday = start_sunday + timedelta(days=7)
     monday = start_sunday + timedelta(days=1)
 
-    pareto_sun_qs = Pareto.objects.filter(pareto_date=start_sunday, line=line_id).exclude(shift=NS)
-    pareto_next_sun_qs = Pareto.objects.filter(pareto_date=end_sunday, line=line_id, shift=NS)
-
-    pareto_ids = []
-    for pareto in pareto_sun_qs:
-        pareto_id = pareto.id
-        pareto_ids.append(pareto_id)
-
-    for pareto in pareto_next_sun_qs:
-        pareto_id = pareto.id
-        pareto_ids.append(pareto_id)
+    pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
 
     scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
         line=line_id).filter(scrap=scrap_id).order_by("-qty")
@@ -722,17 +712,16 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
         totals[key_monday] = start_sunday + timedelta(days=1)
         end_sunday = start_sunday + timedelta(days=7)
 
+        pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
+
         scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
                                                                    pareto_date__lt=end_sunday)
-        scrap_sun_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
-        for scrap_elem in scrap_sun_qs:
-            pareto_id = scrap_elem.pareto_id
-            pareto = Pareto.objects.get(id=pareto_id)
-            shift = pareto.shift
-            if shift == NS:
-                scrap_sun_qs.difference(scrap_elem)
 
-        scrap_qs.difference(scrap_sun_qs)
+        weekly_scrap_qs = []
+        for scrap_obj in scrap_qs:
+            pareto_id = scrap_obj.pareto_id
+            if pareto_id not in pareto_ids:
+                weekly_scrap_qs.append(scrap_obj)
 
         total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
                                                                            pareto_date__lt=end_sunday)
@@ -750,7 +739,7 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
         key_qty = "qty_" + str(week_num)
 
         # total scrap per reason, for week, period summary total, row sum up
-        for obj in scrap_qs:
+        for obj in weekly_scrap_qs:
             obj_name = obj.scrap.description
             if obj_name in scrap_list:
                 pos = scrap_list.index(obj_name)
