@@ -71,19 +71,20 @@ def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
     next_sunday = week_sunday + timedelta(days=7)
 
     this_week_sunday = week_sunday
+
     pareto_qs = Pareto.objects.filter(pareto_date__gte=week_sunday,
-                                      pareto_date__lt=next_sunday).filter(line=line_id).order_by("id")
-    pareto_sun_qs = Pareto.objects.filter(pareto_date=week_sunday).exclude(shift=NS)
-    pareto_qs.difference(pareto_sun_qs)
+                                      pareto_date__lte=next_sunday).filter(line=line_id).order_by("id")
 
-    pareto_shift_qs = []
+    pareto_ids = adjust_weekly_qs(start_sunday=week_sunday, line_id=line_id, end_sunday=next_sunday)
+
+    weekly_pareto_qs = []
     for pareto_obj in pareto_qs:
+        pareto_id = pareto_obj.id
         shift_obj = pareto_obj.shift
-        if shift == shift_obj:
-            pareto_shift_qs.append(pareto_obj)
+        if pareto_id not in pareto_ids and shift_obj == shift:
+            weekly_pareto_qs.append(pareto_obj)
 
-    report = []
-    report.append({
+    report = [{
         "col0": "Date",
         "col1": "",
         "col2": "",
@@ -92,7 +93,7 @@ def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
         "col5": "",
         "col6": "",
         "col7": "",
-    })
+    }]
 
     if shift == NS:
         display_date = week_sunday
@@ -123,7 +124,7 @@ def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
     report[4]["col0"] = "Quality"
     report[5]["col0"] = "OEE"
 
-    for obj in pareto_shift_qs:
+    for obj in weekly_pareto_qs:
         idx = obj.pareto_date.weekday() + 1
         if shift == NS:
             if idx == 7:
@@ -144,7 +145,7 @@ def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
 
     indexes = [0, 0, 0, 0, 0, 0, 0, 0]
     max_index = 0
-    for obj in pareto_shift_qs:
+    for obj in weekly_pareto_qs:
         for pos, pareto_detail in enumerate(obj.jobs.all()):
             idx = obj.pareto_date.weekday() + 1
             if shift == NS:
@@ -204,7 +205,7 @@ def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
         downtimes_sum.append(0)
 
     row = 5 + 5 * max_index + 1
-    for obj in pareto_shift_qs:
+    for obj in weekly_pareto_qs:
         idx = obj.pareto_date.weekday() + 1
         if shift == NS:
             if idx == 7:
@@ -246,7 +247,7 @@ def calculation_weekly_report(line_id, base_sunday, shift, idx_diff):
         scraps_list.append(scrap)
         scraps_sum.append(0)
 
-    for obj in pareto_shift_qs:
+    for obj in weekly_pareto_qs:
         idx = obj.pareto_date.weekday() + 1
         if shift == NS:
             if idx == 7:
