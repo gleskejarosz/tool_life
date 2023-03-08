@@ -715,7 +715,7 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
         pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
 
         scrap_qs = ScrapDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
-                                                                   pareto_date__lt=end_sunday)
+                                                                   pareto_date__lte=end_sunday)
 
         weekly_scrap_qs = []
         for scrap_obj in scrap_qs:
@@ -945,7 +945,7 @@ def calculation_downtime_rate(line_id, day_object, idx_diff):
         pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
 
         down_qs = DowntimeDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
-                                                                     pareto_date__lt=end_sunday)
+                                                                     pareto_date__lte=end_sunday)
         weekly_down_qs = []
         for down_obj in down_qs:
             pareto_id = down_obj.pareto_id
