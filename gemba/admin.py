@@ -49,7 +49,8 @@ class ParetoDetailAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     fieldsets = [
         ("General", {
             "fields": ["id", "line", "pareto_id", "pareto_date", "created", "modified", "finished", "job", "output",
-                       "good", "scrap", "ops", "takt_time", "user", "completed"],
+                       "good", "scrap", "ops", "takt_time", "available_time", "availability", "performance", "quality",
+                       "oee", "user", "completed"],
         }),
     ]
     readonly_fields = ["id", "user", "created", "modified"]
