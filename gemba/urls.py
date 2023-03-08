@@ -126,6 +126,7 @@ urlpatterns = [
     path("export_job_model_csv/", views_export.export_job_model_csv, name="export-job-model-csv"),
     path("export_job_model_xls/", views_export.export_job_model_xls, name="export-job-model-xls"),
     path("update_database/", views_export.update_database_many_to_many_field, name="update-database"),
+    path("select_pareto_id/", views_export.select_pareto_id, name="select-pareto_id"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
     ]

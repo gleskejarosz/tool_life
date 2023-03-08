@@ -15,6 +15,6 @@
         {% if user.is_superuser %}
         <p><a href="{% url 'gemba_app:export-job-model-csv' %}">Export Job Model to csv</a></p>
         <p><a href="{% url 'gemba_app:export-job-model-xls' %}">Export Job Model to xls</a></p>
-        <p><a href="{% url 'gemba_app:update-database' %}">Update Many to Many field</a></p>
+        <p><a href="{% url 'gemba_app:select-pareto_id' %}">Update Many to Many field</a></p>
         {% endif %}
 {% endblock %}

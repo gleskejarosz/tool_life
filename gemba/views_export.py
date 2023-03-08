@@ -4,7 +4,7 @@ import xlwt
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from xlwt import XFStyle, Font
 
 from gemba.models import Pareto, AM, PM, NS, ScrapUser, ScrapModel, ScrapDetail, DowntimeUser, DowntimeModel,\
@@ -441,9 +441,18 @@ def export_job_model_xls(request):
     return response
 
 
+def select_pareto_id(request):
+    return render(
+        request,
+        template_name="gemba/update_database.html",
+        )
+
+
 @staff_member_required
 def update_database_many_to_many_field(request):
-    pareto_qs = Pareto.objects.all()
+    first_pareto_id = request.GET.get("pareto_id")
+
+    pareto_qs = Pareto.objects.filter(id__gte=first_pareto_id)
 
     for pareto in pareto_qs:
         pareto_id = pareto.id
