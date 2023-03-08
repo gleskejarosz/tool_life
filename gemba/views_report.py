@@ -494,7 +494,7 @@ def display_downtime_in_a_week(request, line_id, base_day, week_no, down_id, dow
 
     pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
 
-    down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
+    down_qs = DowntimeDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lte=end_sunday).filter(
         line=line_id).filter(downtime=down_id).order_by("-minutes")
 
     weekly_down_qs = []
@@ -562,7 +562,7 @@ def display_scrap_in_a_week(request, line_id, base_day, week_no, scrap_id, scrap
 
     pareto_ids = adjust_weekly_qs(start_sunday=start_sunday, line_id=line_id, end_sunday=end_sunday)
 
-    scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lt=end_sunday).filter(
+    scrap_qs = ScrapDetail.objects.filter(pareto_date__gte=start_sunday, pareto_date__lte=end_sunday).filter(
         line=line_id).filter(scrap=scrap_id).order_by("-qty")
 
     weekly_scrap_qs = []
