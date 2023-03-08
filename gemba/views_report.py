@@ -723,17 +723,17 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
             if pareto_id not in pareto_ids:
                 weekly_scrap_qs.append(scrap_obj)
 
-        total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
-                                                                           pareto_date__lt=end_sunday)
-        total_output_sun_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
-        for pareto_detail_elem in total_output_sun_qs:
-            pareto_id = pareto_detail_elem.pareto_id
-            pareto = Pareto.objects.get(id=pareto_id)
-            shift = pareto.shift
-            if shift == NS:
-                total_output_sun_qs.difference(pareto_detail_elem)
-
-        total_output_qs.difference(total_output_sun_qs)
+        # total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
+        #                                                                    pareto_date__lt=end_sunday)
+        # total_output_sun_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date=start_sunday)
+        # for pareto_detail_elem in total_output_sun_qs:
+        #     pareto_id = pareto_detail_elem.pareto_id
+        #     pareto = Pareto.objects.get(id=pareto_id)
+        #     shift = pareto.shift
+        #     if shift == NS:
+        #         total_output_sun_qs.difference(pareto_detail_elem)
+        #
+        # total_output_qs.difference(total_output_sun_qs)
 
         total_weekly = 0
         key_qty = "qty_" + str(week_num)
