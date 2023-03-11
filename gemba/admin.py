@@ -194,7 +194,7 @@ class TimerModelAdmin(admin.ModelAdmin):
     readonly_fields = ["id", "user", "start", "end", "completed"]
 
 
-class MonthlyResultsAdmin(admin.ModelAdmin):
+class MonthlyResultsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("-id",)
     list_display = ("year", "month", "line", "total_output", "total_good", "total_scrap", "total_rework")
     list_display_links = ("line",)

@@ -725,7 +725,7 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
                 weekly_scrap_qs.append(scrap_obj)
 
         total_output_qs = ParetoDetail.objects.filter(line=line_id).filter(pareto_date__gte=start_sunday,
-                                                                           pareto_date__lt=end_sunday)
+                                                                           pareto_date__lte=end_sunday)
 
         weekly_details_qs = []
         for detail_obj in total_output_qs:
@@ -751,7 +751,7 @@ def calculation_scrap_rate(line_id, day_object, idx_diff):
         key_total = "total_weekly_" + str(week_num)
         totals[key_total] = total_weekly
 
-        # counting output per week
+        # counting total made per week
         total_output = 0
         for obj in weekly_details_qs:
             output_obj = obj.output
