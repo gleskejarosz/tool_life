@@ -130,7 +130,7 @@ def paretos_view(request):
     date_to_ = datetime.strptime(str(date_to), "%Y-%m-%d")
 
     paretos = Pareto.objects.filter(line=line_id, completed=True).filter(
-        Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "id")[:100]
+        Q(pareto_date__gte=date_from) & Q(pareto_date__lte=date_to)).order_by("-pareto_date", "-id")[:100]
 
     paginator = Paginator(paretos, 30)
 

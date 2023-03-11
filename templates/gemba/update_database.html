@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+ <form action="{% url 'gemba_app:update-database' %}" method="get">
+    </br>
+     <h4>Select first pareto id:</h4>
+     <input name="pareto_id" type="text">
+     </br>
+     </br>
+     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Search
+    </button>
+ </form>
+{% endblock %}
