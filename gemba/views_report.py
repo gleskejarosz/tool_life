@@ -2,12 +2,15 @@ from datetime import datetime, timedelta
 
 import pytz
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Avg, Q
+from django.db.models.functions import Cast
+from django.forms import DateField
 from django.shortcuts import render
 
 from gemba.filters import MonthlyResultFilter
 from gemba.models import MonthlyResults, Pareto, Line, PRODUCTIVE, AM, PM, NS, ParetoDetail, DowntimeUser, ScrapUser, \
     DowntimeDetail, ScrapDetail, DowntimeModel, ScrapModel
-from gemba.views import mobile_browser_check
+from gemba.views import mobile_browser_check, get_details_to_display
 
 
 @staff_member_required
@@ -21,6 +24,51 @@ def dashboard(request):
     monthly_records_qs = MonthlyResults.objects.filter(year=year).order_by("-id", "line")
     items_filter = MonthlyResultFilter(request.GET, queryset=monthly_records_qs)
 
+    totals = {}
+    total_output = 0
+    total_good = 0
+    total_scrap = 0
+    total_rework = 0
+    total_available_time = 0
+    total_availability = 0
+    total_performance = 0
+    total_quality = 0
+    total_oee = 0
+    counter = 0
+    for item in items_filter.qs:
+        total_output += item.total_output
+        total_good += item.total_good
+        total_scrap += item.total_scrap
+        total_rework += item.total_rework
+        total_available_time += item.total_available_time
+        total_availability += item.total_availability
+        total_performance += item.total_performance
+        total_quality += item.total_quality
+        total_oee += item.total_oee
+        counter += item.counter
+
+    totals["total_output"] = total_output
+    totals["total_good"] = total_good
+    totals["total_scrap"] = total_scrap
+    totals["total_rework"] = total_rework
+    totals["total_available_time"] = total_available_time
+    if total_availability > 0:
+        totals["total_availability"] = round(total_availability / counter, 2)
+    else:
+        totals["total_availability"] = 0.00
+    if total_performance > 0:
+        totals["total_performance"] = round(total_performance / counter, 2)
+    else:
+        totals["total_performance"] = 0.00
+    if total_quality > 0:
+        totals["total_quality"] = round(total_quality / counter, 2)
+    else:
+        totals["total_quality"] = 0.00
+    if total_oee > 0:
+        totals["total_oee"] = round(total_oee / counter, 2)
+    else:
+        totals["total_oee"] = 0.00
+
     # the best oee result from the day before
     paretos = Pareto.objects.filter(pareto_date=yesterday).order_by("-oee")[:5]
 
@@ -30,6 +78,7 @@ def dashboard(request):
 
     context = {
         "filter": items_filter,
+        "totals": totals,
         "produced": produced,
         "downtimes": downtimes_qs,
         "scraps": scrap_qs,
@@ -49,6 +98,45 @@ def dashboard(request):
             template_name='dashboard_mobile.html',
             context=context,
         )
+
+
+MONTH = {
+        "January": "01",
+        "February": "02",
+        "March": "03",
+        "April": "04",
+        "May": "05",
+        "June": "06",
+        "July": "07",
+        "August": "08",
+        "September": "09",
+        "October": "10",
+        "November": "11",
+        "December": "12",
+}
+
+
+@staff_member_required
+def monthly_pareto_list(request, line, month):
+    month_num = MONTH[month]
+    line_id = Line.objects.get(name=line)
+
+    # report_list = Pareto.objects.filter(
+    #     Q(pareto_date__gte=pareto_month_start, pareto_date__lte=pareto_month_end)
+    # ).filter(line=line_id).order_by("pareto_date")
+
+    report_list = Pareto.objects.filter(
+        Q(pareto_date__month=month_num)
+    ).filter(line=line_id).order_by("pareto_date")
+
+    object_list = get_details_to_display(object_list=report_list)
+
+    return render(request,
+                  template_name="gemba/monthly_pareto_summary.html",
+                  context={
+                      "object_list": object_list,
+                  },
+                  )
 
 
 @staff_member_required

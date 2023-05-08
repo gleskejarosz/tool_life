@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block content %}
+{% load mathfilters %}
+
+<h4>Monthly Pareto Summary - {{ pareto_date|date:"d-m-Y" }}</h4>
+<p><a href="{% url 'gemba_app:pareto-view' %}">Go back</a></p>
+
+<table class="table table-hover">
+        <thead>
+        <tr>
+            <th scope="col">Pareto Id</th>
+            <th scope="col">Line</th>
+            <th scope="col">Shift</th>
+            <th scope="col">Job OTG/End</th>
+            <th scope="col">OPs OTG/End</th>
+            <th scope="col">Availability</th>
+            <th scope="col">Performance</th>
+            <th scope="col">Quality</th>
+            <th scope="col">OEE</th>
+            <th scope="col">Target</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in object_list|slice:":-1" %}
+        <tr>
+            <th><a href="{% url 'gemba_app:pareto-detail-view' pk=item.id %}">{{ item.id }}</a></th>
+            <td>{{ item.line }}</td>
+            <td>{{ item.shift }}</td>
+            <td>{% if item.job_otg is None %} ----- {% else %} {{ item.job_otg }} {% endif %}</td>
+            <td>{{ item.ops }}</td>
+            <td>{{ item.availability }}%</td>
+            <td>{{ item.performance }}%</td>
+            <td>{{ item.quality }}%</td>
+            <td>{{ item.oee }}%</td>
+            <td>{% if item.target < item.oee %}&uarr;{% elif item.target|sub:5 > item.oee %}&darr;
+                {% else %}&#8275;{% endif %}{{ item.target }}%</td>
+        </tr>
+        {% endfor %}
+        <tr>
+        {% with object_list|last as last %}
+            <td colspan="3"><b>Average Daily OEE Elements</b></td>
+            <td></td>
+            <td><b>{{ last.sum_ops }}</b></td>
+            <td><b>{{ last.avg_availability }}%</b></td>
+            <td><b>{{ last.avg_performance }}%</b></td>
+            <td><b>{{ last.avg_quality }}%</b></td>
+            <td><b>{{ last.avg_oee }}%</b></td>
+            <td></td>
+        {% endwith %}
+        </tr>
+        </tbody>
+</table>
+{% endblock %}

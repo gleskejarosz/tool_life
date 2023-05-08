@@ -43,7 +43,7 @@
                         <tbody>
                         {% for object in filter.qs %}
                                 <tr>
-                                    <td>{{ object.month }}</td>
+                                    <td><a href="{% url 'gemba_app:monthly-pareto-list' line=object.line month=object.month %}">{{ object.month }}</a></td>
                                     <td>{{ object.line }}</td>
                                     <td>{{ object.total_output }}</td>
                                     <td>{{ object.total_good }}</td>
@@ -60,9 +60,24 @@
                                      </td>
                                 </tr>
                         {% endfor %}
+                                <tr>
+                                    <td><b>Total</b></td>
+                                    <td></td>
+                                    <td><b>{{ totals.total_output }}</b></td>
+                                    <td><b>{{ totals.total_good }}</b></td>
+                                    <td><b>{{ totals.total_scrap }}</b></td>
+                                    <td><b>{{ totals.total_rework}}</b></td>
+                                    <td><b>{{ totals.total_available_time }} min</b></td>
+                                    <td><b>{{ totals.total_availability }}%</b></td>
+                                    <td><b>{{ totals.total_performance }}%</b></td>
+                                    <td><b>{{ totals.total_quality }}%</b></td>
+                                    <td><b>{{ totals.total_oee }}%</b></td>
+                                    <td></td>
+                                </tr>
                         </tbody>
                     </table>
         </div>
+</br>
 <div class="container">
     <div class="row">
         <div class="col-4" >

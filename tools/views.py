@@ -62,7 +62,8 @@ def change_tool(request, tool_id):
 
 @staff_member_required
 def select_tool(request):
-    tools_qs = ToolStationModel.objects.filter(machine__line_status=PRODUCTIVE).order_by("machine__name", "station__name")
+    tools_qs = ToolStationModel.objects.filter(machine__line_status=PRODUCTIVE).order_by("machine__name",
+                                                                                         "station__name")
     tools_filter = ToolFilter(request.GET, queryset=tools_qs)
 
     return render(request,

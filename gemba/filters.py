@@ -1,6 +1,6 @@
 import django_filters
 from django.forms import DateInput
-from gemba.models import Pareto, MonthlyResults, SHIFT_CHOICES
+from gemba.models import Pareto, MonthlyResults, SHIFT_CHOICES, Line, PRODUCTIVE
 
 
 class DailyParetoFilter(django_filters.FilterSet):
@@ -75,6 +75,7 @@ class MonthlyResultFilter(django_filters.FilterSet):
         (DECEMBER, "December"),
     )
     month = django_filters.ChoiceFilter(choices=MONTH_CHOICES, label="Month")
+    line = django_filters.ModelChoiceFilter(queryset=Line.objects.filter(line_status=PRODUCTIVE).order_by("name"))
 
     class Meta:
         model = MonthlyResults

@@ -129,4 +129,5 @@ urlpatterns = [
     path("select_pareto_id/", views_export.select_pareto_id, name="select-pareto_id"),
     # dashboard
     path("dashboard/", views_report.dashboard, name="dashboard"),
+    path("monthly_pareto_list/<line>/<month>/", views_report.monthly_pareto_list, name="monthly-pareto-list"),
     ]

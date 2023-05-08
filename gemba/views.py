@@ -720,20 +720,20 @@ class ParetoSummary(LoginRequiredMixin, View):
                     total_rework += rework
                     start_meter = pareto_detail.start_meter
                     pareto_details_list.append({
-                            "id": id,
-                            "job": job,
-                            "output": output,
-                            "good": good,
-                            "rework": rework,
-                            "scrap": scrap,
-                            "takt_time": takt_time,
-                            "ops": ops,
-                            "finished": finished,
-                            "availability": 0.00,
-                            "performace": 0.00,
-                            "quality": 0.00,
-                            "oee": 0.00,
-                        }
+                        "id": id,
+                        "job": job,
+                        "output": output,
+                        "good": good,
+                        "rework": rework,
+                        "scrap": scrap,
+                        "takt_time": takt_time,
+                        "ops": ops,
+                        "finished": finished,
+                        "availability": 0.00,
+                        "performace": 0.00,
+                        "quality": 0.00,
+                        "oee": 0.00,
+                    }
                     )
 
             total_scrap_cal = total_output - total_good
@@ -869,27 +869,35 @@ class ParetoSummary(LoginRequiredMixin, View):
                           )
 
 
+def estimated_available_time(hours, time_stamp, not_scheduled_to_run, used_available_time):
+    now = datetime.now(tz=pytz.UTC)
+    sec_now = int(now.strftime('%S'))
+    sec_now += int(now.strftime('%M')) * 60
+    sec_now += int(now.strftime('%H')) * 60 * 60
+
+    sec_start = int(time_stamp.strftime('%S'))
+    sec_start += int(time_stamp.strftime('%M')) * 60
+    sec_start += int(time_stamp.strftime('%H')) * 60 * 60
+
+    available_time = round((sec_now - sec_start) / 60.0)
+
+    max_available_time = int(hours) * 60 - not_scheduled_to_run
+
+    if available_time + used_available_time > max_available_time:
+        available_time = max_available_time - used_available_time
+    elif available_time < 0:
+        available_time = max_available_time
+
+    return available_time
+
+
 def available_time_cal(status, hours, time_stamp, not_scheduled_to_run):
     if status is True:
         available_time = int(hours) * 60 - not_scheduled_to_run
     else:
-        now = datetime.now()
-        sec_now = int(now.strftime('%S'))
-        sec_now += int(now.strftime('%M')) * 60
-        sec_now += int(now.strftime('%H')) * 60 * 60
-
-        sec_start = int(time_stamp.strftime('%S'))
-        sec_start += int(time_stamp.strftime('%M')) * 60
-        sec_start += int(time_stamp.strftime('%H')) * 60 * 60
-
-        available_time = round((sec_now - sec_start) / 60.0)
-
-        max_available_time = int(hours) * 60 - not_scheduled_to_run
-
-        if available_time > max_available_time:
-            available_time = max_available_time
-        elif available_time < 0:
-            available_time = max_available_time
+        available_time = estimated_available_time(hours=hours, time_stamp=time_stamp,
+                                                  not_scheduled_to_run=not_scheduled_to_run,
+                                                  used_available_time=0)
 
     return available_time
 
@@ -1212,7 +1220,10 @@ def final_oee_calculation_by_job(pareto):
         sec_start += int(prev_finished.strftime('%H')) * 60 * 60
         print(sec_start)
         if idx == len_pareto_details_qs - 1:
-            available_time = total_available_time - used_available_time
+            recent_available_time = estimated_available_time(hours=hours, time_stamp=time_stamp,
+                                                             not_scheduled_to_run=not_scheduled_to_run,
+                                                             used_available_time=used_available_time)
+            available_time = recent_available_time - used_available_time
             print(f"last {available_time}")
         elif sec_end < sec_start:
             available_time = round((sec_end + (86400 - sec_start)) / 60.0)

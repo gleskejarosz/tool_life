@@ -1,7 +1,8 @@
 import django_filters
 from django.forms import DateInput
 
-from tools.models import OperationModel, ToolStationModel
+from gemba.models import Line, PRODUCTIVE
+from tools.models import OperationModel, ToolStationModel, StationModel
 
 
 class OperationFilter(django_filters.FilterSet):
@@ -34,8 +35,9 @@ class OperationFilter(django_filters.FilterSet):
 
 
 class ToolFilter(django_filters.FilterSet):
-    machine = django_filters.CharFilter(field_name='machine_id__name', label="Machine", lookup_expr="contains")
-    station = django_filters.CharFilter(field_name='station_id__name', label="Station", lookup_expr="contains")
+    machine = django_filters.ModelChoiceFilter(queryset=Line.objects.filter(line_status=PRODUCTIVE).order_by("name"))
+    station = django_filters.ModelChoiceFilter(queryset=StationModel.objects.all().order_by("name"))
+    # station = django_filters.CharFilter(field_name='station_id__name', label="Station", lookup_expr="contains")
     tool = django_filters.CharFilter(field_name='tool', label="Tool", lookup_expr="contains")
 
     class Meta:

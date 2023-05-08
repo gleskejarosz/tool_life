@@ -6,7 +6,7 @@ from tools.models import ToolStationModel, OperationModel, StationModel, ToolJob
 
 class ToolStationModelAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     ordering = ("tool",)
-    list_display = ("tool", "station", "machine", "tool_type", "tool_status", )
+    list_display = ("tool", "id", "station", "machine", "tool_type", "tool_status", )
     list_display_links = ("tool",)
     list_per_page = 20
     list_filter = ("machine", "station")
