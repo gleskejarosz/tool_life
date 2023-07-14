@@ -18,6 +18,6 @@ class TableCreateForm(forms.ModelForm):
                 attrs={"type": "date", "placeholder": "dd.mm.yyyy", "class": "form-control"}
             ),
             "desc": forms.Textarea(
-                attrs={'cols': 50, 'rows': 5}
+                attrs={'cols': 30, 'rows': 5}
             )
         }
