@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load widget_tweaks %}
-<h4>COSTS
+<h4>NASZA HANZA
 {% if request.user.is_staff %}
     <a href="{% url 'costs_app:create-cost-detail' %}">
-    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add item
     </button></a>
  </h4>
 <form method="get">
@@ -35,6 +35,7 @@ Total cost: {{ sum_cost }} zł
                 <th>Date</th>
                 <th>Description</th>
                 <th>Amount</th>
+                <th>Room</th>
             </tr>
             </thead>
             <tbody>
@@ -44,6 +45,7 @@ Total cost: {{ sum_cost }} zł
                 <td>{{ cost.cost_date|date:"d.m.Y" }}</td>
                 <td>{{ cost.desc }}</td>
                 <td>{{ cost.amount }} zł</td>
+                <td>{{ cost.room }}</td>
             </tr>
             {% endfor %}
             </tbody>
