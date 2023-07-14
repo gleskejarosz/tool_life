@@ -3,6 +3,7 @@
 {% if user.is_authenticated %}
         <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
         {% if user.is_staff %}
+        <p><a href="{% url 'costs_app:index' %}">Cost app</a></p>
         <p><a href="{% url 'gemba_app:index' %}">Gemba app</a></p>
         <p><a href="{% url 'tools_app:index' %}">Tool app</a></p>
         <a href="{% url 'homepage' %}"></a>

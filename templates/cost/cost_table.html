@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+<h4>COSTS
+{% if request.user.is_staff %}
+    <a href="{% url 'costs_app:create-cost-detail' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add
+    </button></a>
+ </h4>
+<form method="get">
+                <div class="well">
+                  <p><a href="{% url 'costs_app:index' %}">Clear filters</a></p>
+                  <div class="row">
+                    <div class="form-group col-sm-4 col-md-3">
+                      {{ filter.form.cost_date.label_tag }}
+                      {% render_field filter.form.cost_date class="form-control" %}
+                    </div>
+                    <div class="form-group col-sm-4 col-md-3">
+                      {{ filter.form.room.label_tag }}
+                      {% render_field filter.form.room class="form-control" %}
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary">
+                    <span class="glyphicon glyphicon-search"></span> Search
+                  </button>
+                </div>
+</form>
+Total cost: {{ sum_cost }} zł
+  {% endif %}
+    <div>
+        <table id="table" class="table table-hover">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cost in filter.qs %}
+            <tr>
+                <td><a href="{% url 'costs_app:cost-detail-view' pk=cost.id %}">{{ cost.id }}</a></td>
+                <td>{{ cost.cost_date|date:"d.m.Y" }}</td>
+                <td>{{ cost.desc }}</td>
+                <td>{{ cost.amount }} zł</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

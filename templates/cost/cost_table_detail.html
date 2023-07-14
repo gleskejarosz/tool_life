@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<h4>COST</h4>
+    <div>
+        <table id="table" class="table table-hover">
+            <thead>
+            <tr>
+                <th>Id</th>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ object.id }}</td>
+                <td>{{ object.cost_date|date:"d.m.Y" }}</td>
+                <td>{{ object.desc }}</td>
+                <td>{{ object.amount }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+{% if request.user.is_staff %}
+    <div><a href="{% url 'costs_app:cost-update-detail' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Update
+    </button></a>
+    <a href="{% url 'costs_app:delete-cost-detail' pk=object.pk %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Delete
+    </button></a>
+    </div>
+  {% endif %}
+{% endblock %}
