@@ -16,5 +16,8 @@ class TableCreateForm(forms.ModelForm):
         widgets = {
             "cost_date": forms.DateInput(
                 attrs={"type": "date", "placeholder": "dd.mm.yyyy", "class": "form-control"}
+            ),
+            "desc": forms.Textarea(
+                attrs={'cols': 50, 'rows': 5}
             )
         }
