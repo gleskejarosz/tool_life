@@ -6,7 +6,7 @@ from cost.models import Table
 class TableUpdateForm(forms.ModelForm):
     class Meta:
         model = Table
-        fields = ["cost_date", "desc", "amount", "room"]
+        fields = ["cost_date", "desc", "amount", "cat"]
         widgets = {
             "cost_date": forms.DateInput(
                 attrs={"type": "date", "placeholder": "dd.mm.yyyy", "class": "form-control"}
@@ -20,7 +20,7 @@ class TableUpdateForm(forms.ModelForm):
 class TableCreateForm(forms.ModelForm):
     class Meta:
         model = Table
-        fields = ["cost_date", "desc", "amount", "room"]
+        fields = ["cost_date", "desc", "amount", "cat"]
         widgets = {
             "cost_date": forms.DateInput(
                 attrs={"type": "date", "placeholder": "dd.mm.yyyy", "class": "form-control"}

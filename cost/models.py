@@ -1,20 +1,26 @@
 from django.db import models
 
 
-LI = "Pokoj dzienny"
+LI = "Salon"
+KU = "Kuchnia"
 BA = "Łazienka"
-TO = "Toaleta"
+TO = "WC"
 CO = "Korytarz"
 BE = "Sypialnia"
 R2 = "Mały pokój"
+TR = "Transport"
+OT = "Rożne"
 
 ROOM_CHOICES = (
-    (LI, "Pokój dzienny"),
+    (LI, "Salon"),
+    (KU, "Kuchnia"),
     (BA, "Łazienka"),
-    (TO, "Toaleta"),
+    (TO, "WC"),
     (CO, "Korytarz"),
     (BE, "Sypialnia"),
-    (R2, "Mały pokój")
+    (R2, "Mały pokój"),
+    (TR, "Transport"),
+    (OT, "Rożne"),
 )
 
 
@@ -22,7 +28,7 @@ class Table(models.Model):
     cost_date = models.DateField("cost_date")
     desc = models.CharField(max_length=256)
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    room = models.CharField(max_length=32, choices=ROOM_CHOICES, default="Pokój dzienny")
+    cat = models.CharField(max_length=32, choices=ROOM_CHOICES, default="Salon")
 
     def __str__(self):
         return f"{self.desc}"

@@ -16,8 +16,8 @@
                       {% render_field filter.form.cost_date class="form-control" %}
                     </div>
                     <div class="form-group col-sm-4 col-md-3">
-                      {{ filter.form.room.label_tag }}
-                      {% render_field filter.form.room class="form-control" %}
+                      {{ filter.form.cat.label_tag }}
+                      {% render_field filter.form.cat class="form-control" %}
                     </div>
                   </div>
                   <button type="submit" class="btn btn-primary">
@@ -35,7 +35,7 @@ Total cost: {{ sum_cost }} zł
                 <th>Date</th>
                 <th>Description</th>
                 <th>Amount</th>
-                <th>Room</th>
+                <th>Category</th>
             </tr>
             </thead>
             <tbody>
@@ -45,7 +45,7 @@ Total cost: {{ sum_cost }} zł
                 <td>{{ cost.cost_date|date:"d.m.Y" }}</td>
                 <td>{{ cost.desc }}</td>
                 <td>{{ cost.amount }} zł</td>
-                <td>{{ cost.room }}</td>
+                <td>{{ cost.cat }}</td>
             </tr>
             {% endfor %}
             </tbody>
