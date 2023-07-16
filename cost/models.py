@@ -33,6 +33,9 @@ class Table(models.Model):
     def __str__(self):
         return f"{self.desc}"
 
+    class Meta:
+        verbose_name = "Cost"
+
 
 class Contents(models.Model):
     num = models.IntegerField()
@@ -41,3 +44,7 @@ class Contents(models.Model):
 
     def __str__(self):
         return f"{self.desc}"
+
+    class Meta:
+        verbose_name = "Content"
+

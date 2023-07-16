@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 
-from cost.models import Table
+from cost.models import Table, Contents
 
 
 class CostTableAdmin(ImportExportModelAdmin, admin.ModelAdmin):
@@ -18,4 +18,18 @@ class CostTableAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     readonly_fields = ["id"]
 
 
+class ContentsTableAdmin(ImportExportModelAdmin, admin.ModelAdmin):
+    ordering = ("-num",)
+    list_display = ("num", "desc", "weight", )
+    list_display_links = ("num",)
+    list_per_page = 20
+    fieldsets = [
+        ("General", {
+            "fields": ["num", "desc", "weight"],
+        }),
+    ]
+    readonly_fields = ["id"]
+
+
+admin.site.register(Contents, ContentsTableAdmin)
 admin.site.register(Table, CostTableAdmin)
