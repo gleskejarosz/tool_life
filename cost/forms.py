@@ -1,6 +1,6 @@
 from django import forms
 
-from cost.models import Table
+from cost.models import Table, Contents
 
 
 class TableUpdateForm(forms.ModelForm):
@@ -12,7 +12,7 @@ class TableUpdateForm(forms.ModelForm):
                 attrs={"type": "date", "placeholder": "dd.mm.yyyy", "class": "form-control"}
             ),
             "desc": forms.Textarea(
-                attrs={'rows': 5, "placeholder": "Opis zakupionej rzeczy", "class": "form-control"}
+                attrs={'rows': 5, "class": "form-control"}
             )
         }
 
@@ -27,5 +27,27 @@ class TableCreateForm(forms.ModelForm):
             ),
             "desc": forms.Textarea(
                 attrs={'rows': 5, "placeholder": "Opis zakupionej rzeczy", "class": "form-control"}
+            )
+        }
+
+
+class ContentsUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Contents
+        fields = "__all__"
+        widgets = {
+            "desc": forms.Textarea(
+                attrs={'rows': 5, "class": "form-control"}
+            )
+        }
+
+
+class ContentsCreateForm(forms.ModelForm):
+    class Meta:
+        model = Contents
+        fields = "__all__"
+        widgets = {
+            "desc": forms.Textarea(
+                attrs={'rows': 5, "placeholder": "Zawartość pudełka", "class": "form-control"}
             )
         }

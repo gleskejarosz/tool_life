@@ -13,3 +13,4 @@ class DailyResultFilter(django_filters.FilterSet):
     class Meta:
         model = Table
         fields = ("cost_date", "cat", )
+

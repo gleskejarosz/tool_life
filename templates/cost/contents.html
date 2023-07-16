@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load widget_tweaks %}
+<h4>NASZA HANZA
+{% if request.user.is_staff %}
+    <a href="{% url 'costs_app:create-content-detail' %}">
+    <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add item
+    </button></a>
+ </h4>
+Total weight: {{ sum_weight}} zł
+  {% endif %}
+    <div>
+        <table id="table" class="table table-hover">
+            <thead>
+            <tr>
+                <th>Num</th>
+                <th>Description</th>
+                <th>Weight</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in contents_table %}
+            <tr>
+                <td><a href="{% url 'costs_app:contents-detail-view' pk=object.id %}">{{ object.num }}</a></td>
+                <td>{{ object.desc }}</td>
+                <td>{{ object.weight }} kg</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}
