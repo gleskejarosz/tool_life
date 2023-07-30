@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load widget_tweaks %}
-<h4>NASZA HANZA
+<h4>Items
 {% if request.user.is_staff %}
     <a href="{% url 'costs_app:create-content-detail' %}">
     <button type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>Add item
