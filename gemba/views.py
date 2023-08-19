@@ -672,7 +672,7 @@ class ParetoSummary(LoginRequiredMixin, View):
         user = self.request.user
         pareto_qs = Pareto.objects.filter(user=user, completed=False)
         start_meter = 0
-        calculation_by_job = []
+        # calculation_by_job = []
 
         if pareto_qs.exists():
             pareto = pareto_qs[0]
@@ -710,7 +710,7 @@ class ParetoSummary(LoginRequiredMixin, View):
                     jobs.append(job)
                     output = pareto_detail.output
                     rework = pareto_detail.rework
-                    finished = pareto_detail.finished
+                    created = pareto_detail.created
                     total_output += output
                     good = pareto_detail.good
                     scrap = pareto_detail.scrap
@@ -728,11 +728,11 @@ class ParetoSummary(LoginRequiredMixin, View):
                         "scrap": scrap,
                         "takt_time": takt_time,
                         "ops": ops,
-                        "finished": finished,
-                        "availability": 0.00,
-                        "performace": 0.00,
-                        "quality": 0.00,
-                        "oee": 0.00,
+                        "created": created,
+                        # "availability": 0.00,
+                        # "performace": 0.00,
+                        # "quality": 0.00,
+                        # "oee": 0.00,
                     }
                     )
 
@@ -778,31 +778,31 @@ class ParetoSummary(LoginRequiredMixin, View):
 
             oee = oee_cal(availability=availability, performance=performance, quality=quality)
 
-            calculation_by_job = final_oee_calculation_by_job(pareto)
+            # calculation_by_job = final_oee_calculation_by_job(pareto)
 
-            if len(calculation_by_job) == 1:
-                pareto_details_list[0]["available_time"] = available_time
-                pareto_details_list[0]["downtime"] = total_down
-                pareto_details_list[0]["availability"] = availability
-                pareto_details_list[0]["performance"] = performance
-                pareto_details_list[0]["quality"] = quality
-                pareto_details_list[0]["oee"] = oee
-            else:
-                for cal in calculation_by_job:
-                    job_elem = cal["job"]
-                    idx = jobs.index(job_elem)
-                    available_time_elem = cal["available_time"]
-                    downtime_elem = cal["downtime"]
-                    availability_elem = cal["availability"]
-                    performance_elem = cal["performance"]
-                    quality_elem = cal["quality"]
-                    oee_elem = cal["oee"]
-                    pareto_details_list[idx]["available_time"] = available_time_elem
-                    pareto_details_list[idx]["downtime"] = downtime_elem
-                    pareto_details_list[idx]["availability"] = availability_elem
-                    pareto_details_list[idx]["performance"] = performance_elem
-                    pareto_details_list[idx]["quality"] = quality_elem
-                    pareto_details_list[idx]["oee"] = oee_elem
+            # if len(calculation_by_job) == 1:
+            #     pareto_details_list[0]["available_time"] = available_time
+            #     pareto_details_list[0]["downtime"] = total_down
+            #     pareto_details_list[0]["availability"] = availability
+            #     pareto_details_list[0]["performance"] = performance
+            #     pareto_details_list[0]["quality"] = quality
+            #     pareto_details_list[0]["oee"] = oee
+            # else:
+            #     for cal in calculation_by_job:
+            #         job_elem = cal["job"]
+            #         idx = jobs.index(job_elem)
+            #         available_time_elem = cal["available_time"]
+            #         downtime_elem = cal["downtime"]
+            #         availability_elem = cal["availability"]
+            #         performance_elem = cal["performance"]
+            #         quality_elem = cal["quality"]
+            #         oee_elem = cal["oee"]
+            #         pareto_details_list[idx]["available_time"] = available_time_elem
+            #         pareto_details_list[idx]["downtime"] = downtime_elem
+            #         pareto_details_list[idx]["availability"] = availability_elem
+            #         pareto_details_list[idx]["performance"] = performance_elem
+            #         pareto_details_list[idx]["quality"] = quality_elem
+            #         pareto_details_list[idx]["oee"] = oee_elem
 
             return render(self.request,
                           template_name='gemba/pareto.html',
@@ -1171,94 +1171,94 @@ def final_oee_calculation(pareto):
     return calculation
 
 
-def final_oee_calculation_by_job(pareto):
-    hours = pareto.hours
-    not_scheduled_to_run = pareto.not_scheduled_to_run
-    total_available_time = int(hours) * 60 - not_scheduled_to_run
-    time_stamp = pareto.time_stamp
-    pareto_id = pareto.id
-    pareto_date = pareto.pareto_date
-
-    calculation = []
-
-    pareto_details_qs = ParetoDetail.objects.filter(completed=False, pareto_id=pareto_id,
-                                                    pareto_date=pareto_date).order_by("id")
-
-    len_pareto_details_qs = len(pareto_details_qs)
-    if len_pareto_details_qs == 1:
-        job = pareto_details_qs[0].job
-        calculation.append({
-            "job": job,
-            "available_time": 0,
-            "downtime": 0,
-            "availability": 0.00,
-            "performance": 0.00,
-            "quality": 0.00,
-            "oee": 0.00,
-        })
-        return calculation
-
-    prev_finished = time_stamp
-    used_available_time = 0
-    for idx, detail in enumerate(pareto_details_qs):
-        job = detail.job
-        print(job)
-        output = detail.output
-        good = detail.good
-        finished = detail.finished
-        print(finished)
-        if finished == "":
-            finished = detail.modified
-        performance_numerator = (detail.output * detail.takt_time)
-
-        sec_end = int(finished.strftime('%S'))
-        sec_end += int(finished.strftime('%M')) * 60
-        sec_end += int(finished.strftime('%H')) * 60 * 60
-        print(sec_end)
-        sec_start = int(prev_finished.strftime('%S'))
-        sec_start += int(prev_finished.strftime('%M')) * 60
-        sec_start += int(prev_finished.strftime('%H')) * 60 * 60
-        print(sec_start)
-        if idx == len_pareto_details_qs - 1:
-            recent_available_time = estimated_available_time(hours=hours, time_stamp=time_stamp,
-                                                             not_scheduled_to_run=not_scheduled_to_run,
-                                                             used_available_time=used_available_time)
-            available_time = recent_available_time - used_available_time
-            print(f"last {available_time}")
-        elif sec_end < sec_start:
-            available_time = round((sec_end + (86400 - sec_start)) / 60.0)
-            print(available_time)
-        else:
-            available_time = round((sec_end - sec_start) / 60.0)
-            print(available_time)
-
-        used_available_time += abs(available_time)
-        prev_finished = finished
-
-        down_qs = DowntimeDetail.objects.filter(completed=False, pareto_id=pareto_id, pareto_date=pareto_date, job=job)
-
-        downtime = 0
-        for down_elem in down_qs:
-            minutes = down_elem.minutes
-            downtime += minutes
-        print(f" Downtime {downtime}")
-        quality = quality_cal(good=good, output=output)
-        performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
-                                      downtime=downtime)
-        availability = availability_cal(available_time=available_time, downtime=downtime)
-        oee = oee_cal(availability=availability, performance=performance, quality=quality)
-
-        calculation.append({
-            "job": job,
-            "available_time": available_time,
-            "downtime": downtime,
-            "availability": availability,
-            "performance": performance,
-            "quality": quality,
-            "oee": oee,
-        })
-
-    return calculation
+# def final_oee_calculation_by_job(pareto):
+#     hours = pareto.hours
+#     not_scheduled_to_run = pareto.not_scheduled_to_run
+#     total_available_time = int(hours) * 60 - not_scheduled_to_run
+#     time_stamp = pareto.time_stamp
+#     pareto_id = pareto.id
+#     pareto_date = pareto.pareto_date
+#
+#     calculation = []
+#
+#     pareto_details_qs = ParetoDetail.objects.filter(completed=False, pareto_id=pareto_id,
+#                                                     pareto_date=pareto_date).order_by("id")
+#
+#     len_pareto_details_qs = len(pareto_details_qs)
+#     if len_pareto_details_qs == 1:
+#         job = pareto_details_qs[0].job
+#         calculation.append({
+#             "job": job,
+#             "available_time": 0,
+#             "downtime": 0,
+#             "availability": 0.00,
+#             "performance": 0.00,
+#             "quality": 0.00,
+#             "oee": 0.00,
+#         })
+#         return calculation
+#
+#     prev_finished = time_stamp
+#     used_available_time = 0
+#     for idx, detail in enumerate(pareto_details_qs):
+#         job = detail.job
+#         print(job)
+#         output = detail.output
+#         good = detail.good
+#         finished = detail.finished
+#         print(finished)
+#         if finished == "":
+#             finished = detail.modified
+#         performance_numerator = (detail.output * detail.takt_time)
+#
+#         sec_end = int(finished.strftime('%S'))
+#         sec_end += int(finished.strftime('%M')) * 60
+#         sec_end += int(finished.strftime('%H')) * 60 * 60
+#         print(sec_end)
+#         sec_start = int(prev_finished.strftime('%S'))
+#         sec_start += int(prev_finished.strftime('%M')) * 60
+#         sec_start += int(prev_finished.strftime('%H')) * 60 * 60
+#         print(sec_start)
+#         if idx == len_pareto_details_qs - 1:
+#             recent_available_time = estimated_available_time(hours=hours, time_stamp=time_stamp,
+#                                                              not_scheduled_to_run=not_scheduled_to_run,
+#                                                              used_available_time=used_available_time)
+#             available_time = recent_available_time - used_available_time
+#             print(f"last {available_time}")
+#         elif sec_end < sec_start:
+#             available_time = round((sec_end + (86400 - sec_start)) / 60.0)
+#             print(available_time)
+#         else:
+#             available_time = round((sec_end - sec_start) / 60.0)
+#             print(available_time)
+#
+#         used_available_time += abs(available_time)
+#         prev_finished = finished
+#
+#         down_qs = DowntimeDetail.objects.filter(completed=False, pareto_id=pareto_id, pareto_date=pareto_date, job=job)
+#
+#         downtime = 0
+#         for down_elem in down_qs:
+#             minutes = down_elem.minutes
+#             downtime += minutes
+#         print(f" Downtime {downtime}")
+#         quality = quality_cal(good=good, output=output)
+#         performance = performance_cal(performance_numerator=performance_numerator, available_time=available_time,
+#                                       downtime=downtime)
+#         availability = availability_cal(available_time=available_time, downtime=downtime)
+#         oee = oee_cal(availability=availability, performance=performance, quality=quality)
+#
+#         calculation.append({
+#             "job": job,
+#             "available_time": available_time,
+#             "downtime": downtime,
+#             "availability": availability,
+#             "performance": performance,
+#             "quality": quality,
+#             "oee": oee,
+#         })
+#
+#     return calculation
 
 
 @staff_member_required
@@ -1292,7 +1292,7 @@ def before_close_pareto(request):
             last_detail.save()
 
     calculation = final_oee_calculation(pareto)
-    calculation_by_job = final_oee_calculation_by_job(pareto)
+    # calculation_by_job = final_oee_calculation_by_job(pareto)
 
     available_time = calculation["available_time"]
     output = calculation["output"]
@@ -1306,17 +1306,17 @@ def before_close_pareto(request):
     rework = calculation["rework"]
     scrap_compare = output - good - scrap
 
-    if len(calculation_by_job) == 1:
-        calculation_by_job[0]["availability"] = availability
-        calculation_by_job[0]["performance"] = performance
-        calculation_by_job[0]["quality"] = quality
-        calculation_by_job[0]["oee"] = oee
+    # if len(calculation_by_job) == 1:
+    #     calculation_by_job[0]["availability"] = availability
+    #     calculation_by_job[0]["performance"] = performance
+    #     calculation_by_job[0]["quality"] = quality
+    #     calculation_by_job[0]["oee"] = oee
 
     return render(request,
                   template_name='gemba/pareto_before_close.html',
                   context={
                       "pareto_list": pareto,
-                      "calculation_by_job": calculation_by_job,
+                      # "calculation_by_job": calculation_by_job,
                       "available_time": available_time,
                       "output": output,
                       "good": good,
@@ -1347,7 +1347,7 @@ def close_pareto(request):
     available_time = int(hours) * 60
 
     calculation = final_oee_calculation(pareto)
-    calculation_by_job = final_oee_calculation_by_job(pareto)
+    # calculation_by_job = final_oee_calculation_by_job(pareto)
 
     availability = calculation["availability"]
     quality = calculation["quality"]
@@ -1364,12 +1364,12 @@ def close_pareto(request):
     for item in scrap_items:
         item.save()
 
-    calculation_by_job_len = len(calculation_by_job)
-    if calculation_by_job_len == 1:
-        calculation_by_job[0]["availability"] = availability
-        calculation_by_job[0]["performance"] = performance
-        calculation_by_job[0]["quality"] = quality
-        calculation_by_job[0]["oee"] = oee
+    # calculation_by_job_len = len(calculation_by_job)
+    # if calculation_by_job_len == 1:
+    #     calculation_by_job[0]["availability"] = availability
+    #     calculation_by_job[0]["performance"] = performance
+    #     calculation_by_job[0]["quality"] = quality
+    #     calculation_by_job[0]["oee"] = oee
 
     start_shift = str(pareto.time_stamp)
     year = int(str(pareto_date)[:4])
@@ -1383,24 +1383,24 @@ def close_pareto(request):
 
     details_item = pareto.jobs.all()
     details_item.update(completed=True)
-    for idx, detail_item in enumerate(calculation_by_job):
-        job = detail_item["job"]
-        item_available_time = detail_item["available_time"]
-        item_availability = detail_item["availability"]
-        item_performance = detail_item["performance"]
-        item_quality = detail_item["quality"]
-        item_oee = detail_item["oee"]
-        for item in details_item:
-            item_job = item.job
-            if item_job == job:
-                item.available_time = item_available_time
-                item.availability = item_availability
-                item.performance = item_performance
-                item.quality = item_quality
-                item.oee = item_oee
-                if idx == calculation_by_job_len - 1:
-                    item.finished = shift_end
-                item.save()
+    # for idx, detail_item in enumerate(calculation_by_job):
+    #     job = detail_item["job"]
+    #     item_available_time = detail_item["available_time"]
+    #     item_availability = detail_item["availability"]
+    #     item_performance = detail_item["performance"]
+    #     item_quality = detail_item["quality"]
+    #     item_oee = detail_item["oee"]
+    #     for item in details_item:
+    #         item_job = item.job
+    #         if item_job == job:
+    #             item.available_time = item_available_time
+    #             item.availability = item_availability
+    #             item.performance = item_performance
+    #             item.quality = item_quality
+    #             item.oee = item_oee
+    #             if idx == calculation_by_job_len - 1:
+    #                 item.finished = shift_end
+    #             item.save()
 
     pareto.availability = availability
     pareto.performance = performance

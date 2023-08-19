@@ -84,30 +84,6 @@
         </tr>
         </tbody>
         </table>
-        <table class="table table">
-        <thead>
-        <tr>
-            <th scope="col">Job</th>
-            <th scope="col">A</th>
-            <th scope="col">P</th>
-            <th scope="col">Q</th>
-            <th scope="col">OEE</th>
-        </tr>
-        </thead>
-        <tbody>
-        </br>
-        <b>OEE by job:</b>
-        {% for job in calculation_by_job %}
-        <tr>
-            <td>{{ job.job }}</td>
-            <td>{{ job.availability }}%</td>
-            <td>{{ job.performance }}%</td>
-            <td>{{ job.quality }}%</td>
-            <td>{{ job.oee }}%</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-        </table>
     </div>
 
     <div class = "col">
